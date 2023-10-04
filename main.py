@@ -147,7 +147,6 @@ def bullet_cd(player): #cooldown de balas de jugador
     last_shot_time = current_time #le hace update al ultimo shot reseteando el cooldown
 
 
-
 #define los "game states"
 state = "title" #deja el state como la primera pantalla, esta siendo los idiomas
 #gameloop
