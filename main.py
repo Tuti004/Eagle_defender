@@ -148,7 +148,6 @@ def bullet_cd(player): #cooldown de balas de jugador
 
 
 
-
 #define los "game states"
 state = "title" #deja el state como la primera pantalla, esta siendo los idiomas
 #gameloop
