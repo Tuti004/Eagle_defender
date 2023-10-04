@@ -21,6 +21,8 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 RED = (255,0,0)
 YELLOW = (250,250,51)
+GREEN = (180, 212, 181)
+
 
 clock = pygame.time.Clock() #objeto que mide el tiempo dentro del programa
 screen_x = 800
@@ -28,16 +30,13 @@ screen_y = 500
 screen = pygame.display.set_mode((screen_x, screen_y)) #resolucion de pantalla
 pygame.display.set_caption("Eagle Defender") #nombre de pestana de juego
 #background
-fondo_principal = pygame.image.load('assets/fondo1.png') #fondo principal del juego
 #fonts
 fontprincipal = pygame.font.Font('assets/DePixelHalbfett.otf', 25) #import de font principal
 fontsmaller = pygame.font.Font('assets/DePixelHalbfett.otf', 15)
 
 #todos los textos del espanol e ingles
-#idioma text
-english = fontprincipal.render('English-e', True, WHITE)
 #title name
-Eagle_Defender = fontprincipal.render('Eagle Defender', True, YELLOW)
+Eagle_Defender = fontprincipal.render('Eagle Defender', True, BLACK)
 #UI elements
 hearts = pygame.image.load("assets/corazon.png")
 
@@ -63,8 +62,6 @@ esc_text = fontsmaller.render('Press "esc" to go to title', True, WHITE)
 
 
 #player class
-health_cd = 300
-jugador_speed = 5
 class Player(pygame.sprite.Sprite):
     def __init__(self): #empieza clase Player
         super().__init__() #parent class
@@ -77,26 +74,28 @@ class Player(pygame.sprite.Sprite):
         self.x_change = 0
         self.y_change = 0
         self.hearts = 6
+        self.speed = 5
 
     def player_imput(self): #esta funcion permite el moviento con wasd del jugador
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
-            self.y_change = -jugador_speed
+            self.y_change = -self.speed
         if keys[pygame.K_w] == False:
             self.y_change = 0
 
         if keys[pygame.K_a]:
-            self.x_change = -jugador_speed
+            self.x_change = -self.speed
         if keys[pygame.K_a] == False:
             self.x_change = 0
 
         if keys[pygame.K_s]:
-            self.y_change = +jugador_speed
+            self.y_change = +self.speed
         
         if keys[pygame.K_d]:
-            self.x_change = +jugador_speed
+            self.x_change = +self.speed
         if keys[pygame.K_SPACE]:
-            bullet_cd(self)    
+            bullet_cd(self) 
+            bullet_limit   
         
     def apply_border(self): #esta funcion causa que el jugador no se pueda salir de los bordes
         if self.x <= 30:
@@ -120,7 +119,8 @@ class Player(pygame.sprite.Sprite):
 player = pygame.sprite.Group() #spritegroup player
 player.add(Player()) #agrega a player al sprite group
 
-
+bullets = pygame.sprite.Group()
+last_shot_time = 0
 class PlayerBullet(pygame.sprite.Sprite):
     def __init__(self, x, y): #el x y y aqui permite que cuando se agrege a bullets a su grupo de balas se ponga en las x y y del player
         super().__init__()
@@ -129,14 +129,14 @@ class PlayerBullet(pygame.sprite.Sprite):
         self.image = self.sprite_path
         self.rect = self.image.get_rect()
         self.rect.midbottom = (x, y)
-        self.speed = 12
+        self.speed = 10
 
     def update(self):
         self.rect.move_ip(self.speed, 0)
-        if self.rect.left > 800:
+        global last_shot_time
+        current_time = pygame.time.get_ticks()
+        if current_time - last_shot_time > 400:
             self.kill()
-bullets = pygame.sprite.Group()
-last_shot_time = 0
 
 def bullet_cd(player): #cooldown de balas de jugador
     global last_shot_time
@@ -147,7 +147,9 @@ def bullet_cd(player): #cooldown de balas de jugador
     bullets.add(new_bullet)
     last_shot_time = current_time #le hace update al ultimo shot reseteando el cooldown
 
-
+def bullet_limit():
+    bullet_amount = 5
+#meter bullet limit maximo 5
 
 
 #define los "game states"
@@ -201,11 +203,8 @@ while game:
     clock.tick(60) #fps
     current_time = pygame.time.get_ticks() #current time
     #assets
-    screen.blit(fondo_principal, (0,0))#pone fondo principal en pantalla
+    screen.fill(GREEN)
 #los blits son de texto o imagenes
-    if state == "idioma": 
-        screen.blit(english, (300, 90))
-
     if state == "title": #dibuja el texto en title
         screen.blit(Eagle_Defender, (400, screen_y/2-25))
         screen.blit(start, (40, 90))
