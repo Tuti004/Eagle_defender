@@ -62,8 +62,6 @@ esc_text = fontsmaller.render('Press "esc" to go to title', True, WHITE)
 
 
 #player class
-health_cd = 300
-jugador_speed = 5
 class Player(pygame.sprite.Sprite):
     def __init__(self): #empieza clase Player
         super().__init__() #parent class
@@ -76,26 +74,28 @@ class Player(pygame.sprite.Sprite):
         self.x_change = 0
         self.y_change = 0
         self.hearts = 6
+        self.speed = 5
 
     def player_imput(self): #esta funcion permite el moviento con wasd del jugador
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
-            self.y_change = -jugador_speed
+            self.y_change = -self.speed
         if keys[pygame.K_w] == False:
             self.y_change = 0
 
         if keys[pygame.K_a]:
-            self.x_change = -jugador_speed
+            self.x_change = -self.speed
         if keys[pygame.K_a] == False:
             self.x_change = 0
 
         if keys[pygame.K_s]:
-            self.y_change = +jugador_speed
+            self.y_change = +self.speed
         
         if keys[pygame.K_d]:
-            self.x_change = +jugador_speed
+            self.x_change = +self.speed
         if keys[pygame.K_SPACE]:
-            bullet_cd(self)    
+            bullet_cd(self) 
+            bullet_limit   
         
     def apply_border(self): #esta funcion causa que el jugador no se pueda salir de los bordes
         if self.x <= 30:
@@ -119,7 +119,8 @@ class Player(pygame.sprite.Sprite):
 player = pygame.sprite.Group() #spritegroup player
 player.add(Player()) #agrega a player al sprite group
 
-
+bullets = pygame.sprite.Group()
+last_shot_time = 0
 class PlayerBullet(pygame.sprite.Sprite):
     def __init__(self, x, y): #el x y y aqui permite que cuando se agrege a bullets a su grupo de balas se ponga en las x y y del player
         super().__init__()
@@ -128,14 +129,14 @@ class PlayerBullet(pygame.sprite.Sprite):
         self.image = self.sprite_path
         self.rect = self.image.get_rect()
         self.rect.midbottom = (x, y)
-        self.speed = 12
+        self.speed = 10
 
     def update(self):
         self.rect.move_ip(self.speed, 0)
-        if self.rect.left > 800:
+        global last_shot_time
+        current_time = pygame.time.get_ticks()
+        if current_time - last_shot_time > 400:
             self.kill()
-bullets = pygame.sprite.Group()
-last_shot_time = 0
 
 def bullet_cd(player): #cooldown de balas de jugador
     global last_shot_time
@@ -145,6 +146,10 @@ def bullet_cd(player): #cooldown de balas de jugador
     new_bullet = PlayerBullet(player.rect.centerx, player.rect.centery+15) #cada vez que termina el cooldown agrega la clase bala a su grupo. o sea dispara
     bullets.add(new_bullet)
     last_shot_time = current_time #le hace update al ultimo shot reseteando el cooldown
+
+def bullet_limit():
+    bullet_amount = 5
+#meter bullet limit maximo 5
 
 
 #define los "game states"
