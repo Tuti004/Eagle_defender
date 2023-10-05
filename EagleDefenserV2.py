@@ -82,7 +82,8 @@ class LogIn_Screen(customtkinter.CTk):
 
             if user:
                 print("Inicio de sesión exitoso")
-                self.play()  # puedes redirigir al juego después de iniciar sesión con éxito
+                self.destroy()
+                start_game()
             else:
                 print("Error en las credenciales")
 
@@ -98,70 +99,149 @@ class register_Screen(customtkinter.CTk):
         super().__init__()
         self.geometry("800x600")
 
+        self.uploaded_files = []
+
         # Label de Registro
         self.label_register = customtkinter.CTkLabel(self, text="Registro")
-        self.label_register.place(relx=0.5, rely=0.2, anchor="center")
+        self.label_register.place(relx=0.5, rely=0.1, anchor="center")
 
         # Nombre
         self.label_nombre = customtkinter.CTkLabel(self, text="Nombre: ")
-        self.label_nombre.place(relx=0.4, rely=0.3, anchor="center")
+        self.label_nombre.place(relx=0.4, rely=0.2, anchor="center")
         self.entry_nombre = customtkinter.CTkEntry(self)
-        self.entry_nombre.place(relx=0.6, rely=0.3, anchor="center")
+        self.entry_nombre.place(relx=0.6, rely=0.2, anchor="center")
 
         # Nickname
         self.label_nickname = customtkinter.CTkLabel(self, text="Nickname: ")
-        self.label_nickname.place(relx=0.4, rely=0.4, anchor="center")
+        self.label_nickname.place(relx=0.4, rely=0.3, anchor="center")
         self.entry_nickname = customtkinter.CTkEntry(self)
-        self.entry_nickname.place(relx=0.6, rely=0.4, anchor="center")
+        self.entry_nickname.place(relx=0.6, rely=0.3, anchor="center")
 
         # Contraseña
         self.label_password = customtkinter.CTkLabel(self, text="Contraseña: ")
-        self.label_password.place(relx=0.4, rely=0.5, anchor="center")
+        self.label_password.place(relx=0.4, rely=0.4, anchor="center")
         self.entry_password = customtkinter.CTkEntry(self)
-        self.entry_password.place(relx=0.6, rely=0.5, anchor="center")
+        self.entry_password.place(relx=0.6, rely=0.4, anchor="center")
 
         # Correo
         self.label_correo = customtkinter.CTkLabel(self, text="Correo: ")
-        self.label_correo.place(relx=0.4, rely=0.6, anchor="center")
+        self.label_correo.place(relx=0.4, rely=0.5, anchor="center")
         self.entry_correo = customtkinter.CTkEntry(self)
-        self.entry_correo.place(relx=0.6, rely=0.6, anchor="center")
+        self.entry_correo.place(relx=0.6, rely=0.5, anchor="center")
 
         # Edad
         self.label_edad = customtkinter.CTkLabel(self, text="Edad: ")
-        self.label_edad.place(relx=0.4, rely=0.7, anchor="center")
+        self.label_edad.place(relx=0.4, rely=0.6, anchor="center")
         self.entry_edad = customtkinter.CTkEntry(self)
-        self.entry_edad.place(relx=0.6, rely=0.7, anchor="center")
+        self.entry_edad.place(relx=0.6, rely=0.6, anchor="center")
 
         # Red Social
         self.label_red_social = customtkinter.CTkLabel(self, text="Red Social: ")
-        self.label_red_social.place(relx=0.4, rely=0.8, anchor="center")
+        self.label_red_social.place(relx=0.4, rely=0.7, anchor="center")
         self.entry_red_social = customtkinter.CTkEntry(self)
-        self.entry_red_social.place(relx=0.6, rely=0.8, anchor="center")
+        self.entry_red_social.place(relx=0.6, rely=0.7, anchor="center")
 
-        # Foto
-        self.label_foto = customtkinter.CTkLabel(self, text="Foto (ruta): ")
-        self.label_foto.place(relx=0.2, rely=0.9, anchor="center")
-        # Arrastar y subir foto
-        self.entry_foto = customtkinter.CTkEntry(self) 
-        self.entry_foto.place(relx=0.4, rely=0.9, anchor="center")
+        #Foto
+        self.entry_foto = customtkinter.CTkEntry(self)
+        self.button_upload_photo = customtkinter.CTkButton(self, text="Subir Foto", command=self.upload_photo)
+        self.button_upload_photo.place(relx=0.4, rely=0.8, anchor="center")
 
-        # Canción Favorita
-        self.label_cancion = customtkinter.CTkLabel(self, text="Canción Favorita: ")
-        self.label_cancion.place(relx=0.6, rely=0.9, anchor="center")
+        #Canción favorita
         self.entry_cancion = customtkinter.CTkEntry(self)
-        self.entry_cancion.place(relx=0.8, rely=0.9, anchor="center")
+        self.button_upload_song = customtkinter.CTkButton(self, text="Subir Canción Favorita", command=self.upload_song)
+        self.button_upload_song.place(relx=0.6, rely=0.8, anchor="center")
 
         # Botón Registrarse
         self.button_register = customtkinter.CTkButton(self, text="Registrarse", command=self.register)
-        self.button_register.place(relx=0.4, rely=0.10, anchor="center")
+        self.button_register.place(relx=0.5, rely=0.9, anchor="center")
 
         # Botón Volver
         self.button_back = customtkinter.CTkButton(self, text="Volver", command=self.back)
-        self.button_back.place(relx=0.6, rely=0.10, anchor="center")
+        self.button_back.place(relx=0.9, rely=0.1, anchor="center")
+    
+    def add_user_file(self, folder_name):
+        if folder_name == "Photos":
+            filetypes = [('JPEG files', '*.jpeg'), ('JPG files', '*.jpg'), ('PNG files', '*.png')]
+        else:
+            filetypes = [('MP3 files', '*.mp3')]
+        file_path = filedialog.askopenfilename(filetypes=filetypes)
+
+        if file_path:
+            destination_folder = os.path.join("User_Data", folder_name)
+            if not os.path.exists(destination_folder):
+                os.makedirs(destination_folder)
+            
+            destination_path = os.path.join(destination_folder, os.path.basename(file_path))
+            self.uploaded_files.append(destination_path)  # Agrega la ruta al archivo
+            
+            if file_path.endswith(('.jpg', '.jpeg', '.png')):
+                shutil.copy2(file_path, destination_path)
+            elif file_path.endswith('.mp3'):
+                song = AudioSegment.from_mp3(file_path)
+                if len(song) > 90000:  # 1:30 minutes in milliseconds
+                    song = song[:90000]
+                    song.export(destination_path, format="mp3")
+                else:
+                    shutil.copy2(file_path, destination_path)
+            return destination_path
+        return None
+    
+    def upload_photo(self):
+        photo_path = self.add_user_file("Photos")
+        if photo_path:
+            self.entry_foto.delete(0, "end")
+            self.entry_foto.insert(0, photo_path)
+    
+    def upload_song(self):
+        song_path = self.add_user_file("Fav_Songs")
+        if song_path:
+            self.entry_cancion.delete(0, "end")
+            self.entry_cancion.insert(0, song_path)
+
+    def cleanup_uploaded_files(self):
+        for file_path in self.uploaded_files:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        self.uploaded_files = []  # Reset the list
     
     def register(self):
         connection = sqlite3.connect("users.db")
         cursor = connection.cursor()
+
+        # Validar password
+        password = self.entry_password.get()
+        if (len(password) < 8):
+            print("La contrasena debe tener al menos 8 caracteres")
+            connection.close()
+            return
+        
+        #Validar que el correo tenga un formato adecuado
+        correo = self.entry_correo.get()
+        if (correo.find("@") == -1 and correo.find(".") == -1):
+            print("El correo debe tener un formato adecuado")
+            connection.close()
+            return
+        
+        #Validad edad
+        try:
+            edad = int(self.entry_edad.get())
+        except ValueError:
+            print("La edad debe ser un número entero")
+            connection.close()
+            return
+
+        #Validar que el nickname y correo no estén en la base de datos
+        cursor.execute("SELECT * FROM users WHERE nickname=?", (self.entry_nickname.get(),))
+        if cursor.fetchone():
+            print("El nickname ya está en uso")
+            connection.close()
+            return
+        
+        cursor.execute("SELECT * FROM users WHERE correo=?", (self.entry_correo.get(),))
+        if cursor.fetchone():
+            print("El correo ya está en uso")
+            connection.close()
+            return
 
         try:
             cursor.execute('''
@@ -179,12 +259,14 @@ class register_Screen(customtkinter.CTk):
             ))
             connection.commit()
             print("Usuario registrado con éxito")
+            self.uploaded_files = []  # Reset the list after successful registration
         except sqlite3.IntegrityError:
             print("El nickname ya está en uso")
 
         connection.close()
     
     def back(self):
+        self.cleanup_uploaded_files()  # Limpia los archivos subidos
         self.destroy()
         app = LogIn_Screen()
         app.title("Eagle Defender")
