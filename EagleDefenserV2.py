@@ -1,99 +1,7 @@
 import customtkinter
 import pygame
 import sqlite3
-
-#colors
-BLACK = (0,0,0)
-WHITE = (255,255,255)
-RED = (255,0,0)
-YELLOW = (250,250,51)
-GREEN = (180, 212, 181)
-
-
-#player class
-class Player(pygame.sprite.Sprite):
-    def __init__(self): #empieza clase Player
-        super().__init__() #parent class
-        self.sprite_path = pygame.image.load('assets/cohete_jugador.png')
-        self.rect = self.sprite_path.get_rect()
-        self.image = self.sprite_path
-        self.rect = self.image.get_rect()
-        self.x = 40
-        self.y = 600/2
-        self.x_change = 0
-        self.y_change = 0
-        self.hearts = 6
-        self.speed = 5
-
-    def player_imput(self): #esta funcion permite el moviento con wasd del jugador
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_w]:
-            self.y_change = -self.speed
-        if keys[pygame.K_w] == False:
-            self.y_change = 0
-
-        if keys[pygame.K_a]:
-            self.x_change = -self.speed
-        if keys[pygame.K_a] == False:
-            self.x_change = 0
-
-        if keys[pygame.K_s]:
-            self.y_change = +self.speed
-        
-        if keys[pygame.K_d]:
-            self.x_change = +self.speed
-        if keys[pygame.K_SPACE]:
-            bullet_cd(self)  
-        
-    def apply_border(self): #esta funcion causa que el jugador no se pueda salir de los bordes
-        if self.x <= 30:
-            self.x = 30
-        if self.x >= 800:
-            self.x = 800
-        if self.y <= 100:
-            self.y = 100
-        if self.y >= 500:
-            self.y = 500
-
-    def update(self):  #update cada frame a cada uno de los atributos del jugador
-        self.player_imput()
-        self.apply_border()
-        self.x += self.x_change
-        self.y += self.y_change
-        self.rect.midbottom = (self.x, self.y)
-        #if pygame.sprite.spritecollide(self, aliens, False):
-#            self.hearts = self.hearts-1
-
-player = pygame.sprite.Group() #spritegroup player
-player.add(Player()) #agrega a player al sprite group
-
-bullets = pygame.sprite.Group()
-last_shot_time = 0
-class PlayerBullet(pygame.sprite.Sprite):
-    def __init__(self, x, y): #el x y y aqui permite que cuando se agrege a bullets a su grupo de balas se ponga en las x y y del player
-        super().__init__()
-        self.sprite_path = pygame.image.load('assets/bala_jugador.png')        
-        self.rect = self.sprite_path.get_rect()
-        self.image = self.sprite_path
-        self.rect = self.image.get_rect()
-        self.rect.midbottom = (x, y)
-        self.speed = 10
-
-    def update(self):
-        self.rect.move_ip(self.speed, 0)
-        global last_shot_time
-        current_time = pygame.time.get_ticks()
-        if current_time - last_shot_time > 400:
-            self.kill()
-
-def bullet_cd(player): #cooldown de balas de jugador
-    global last_shot_time
-    current_time = pygame.time.get_ticks()
-    if current_time - last_shot_time < 600: #cooldown
-        return
-    new_bullet = PlayerBullet(player.rect.centerx, player.rect.centery+15) #cada vez que termina el cooldown agrega la clase bala a su grupo. o sea dispara
-    bullets.add(new_bullet)
-    last_shot_time = current_time #le hace update al ultimo shot reseteando el cooldown
+import sys
 
 class main_Screen(customtkinter.CTk):
     def __init__(self):
@@ -286,33 +194,89 @@ class Admin_Screen(customtkinter.CTk):
 
 
 def start_game():
-    pygame.init()
-    game_Screen = pygame.display.set_mode((800, 600))
-    pygame.display.set_caption("Eagle Defender")
+    class Block:
+        def __init__(self, row, col, cell_size):
+            self.row = row
+            self.col = col
+            self.cell_size = cell_size
+            self.color = (255, 148, 212)
 
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type==pygame.KEYDOWN:
-                if event.key==pygame.K_ESCAPE:
-                    running=False
-                    global window
-                    pygame.quit()
-                    app = main_Screen()
-                    app.title("Eagle Defender")
-                    app.minsize(800, 600)
-                    app.mainloop()
+        def draw(self, screen):
+            x = self.col * self.cell_size
+            y = self.row * self.cell_size
+            pygame.draw.rect(screen, self.color, (x, y, self.cell_size, self.cell_size))
 
-        pygame.display.flip()
-        game_Screen.fill((GREEN))
-        player.update() 
-        player.draw(game_Screen)   
-        bullets.update()
-        bullets.draw(game_Screen)   
+    class BlockScreen:
+        def __init__(self):
+            pygame.init()
+            window_width = 800
+            window_height = 600
+            self.screen = pygame.display.set_mode((window_width, window_height))
+            pygame.display.set_caption("Eagle Defender")
 
+            # Define the grid cell size and dimensions
+            cell_size = 50
+            rows = 12  # Number of rows
+            cols = 16  # Number of columns
 
+            # Create a 2D grid to represent the blocks
+            self.grid = [[None for _ in range(cols)] for _ in range(rows)]
+
+            # Main loop
+            placing_block = False
+            running = True
+            while running:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                    elif event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:  # Left mouse button
+                            x, y = event.pos
+                            col = x // cell_size
+                            row = y // cell_size
+                            if 0 <= row < rows and 0 <= col < cols:
+                                self.grid[row][col] = Block(row, col, cell_size)
+                                placing_block = True
+                    elif event.type == pygame.MOUSEMOTION:
+                        if placing_block:
+                            x, y = event.pos
+                            col = x // cell_size
+                            row = y // cell_size
+                            if 0 <= row < rows and 0 <= col < cols:
+                                self.grid[row][col] = Block(row, col, cell_size)
+                    elif event.type == pygame.MOUSEBUTTONUP:
+                        if event.button == 1:  # Left mouse button
+                            placing_block = False
+
+                self.screen.fill((255, 255, 255))  # Fill the screen with white
+
+                # Calculate the size of the grid area
+                grid_width = cols * cell_size - 100
+                grid_height = rows * cell_size - 100
+                grid_x = (window_width - grid_width) // 2
+                grid_y = (window_height - grid_height) // 2
+
+                # Draw the grid
+                for i in range(rows + 1):
+                    y = grid_y + i * cell_size
+                    pygame.draw.line(self.screen, (0, 0, 0), (grid_x, y), (grid_x + grid_width, y), 1)
+                for i in range(cols + 1):
+                    x = grid_x + i * cell_size
+                    pygame.draw.line(self.screen, (0, 0, 0), (x, grid_y), (x, grid_y + grid_height), 1)
+
+                # Draw the blocks on the grid
+                for row in range(rows):
+                    for col in range(cols):
+                        if self.grid[row][col] is not None:
+                            self.grid[row][col].draw(self.screen)   
+
+                pygame.display.flip()
+
+            pygame.quit()
+            sys.exit()
+
+    if __name__ == "__main__":
+        main_Screen = BlockScreen()
 
 def setup_database():
     # Conectar a la base de datos
