@@ -2,6 +2,10 @@ import customtkinter
 import pygame
 import sqlite3
 import sys
+import threading
+
+# Variable global para rastrear si hay una partida en curso
+game_in_progress = False
 
 class main_Screen(customtkinter.CTk):
     def __init__(self):
@@ -21,9 +25,14 @@ class main_Screen(customtkinter.CTk):
         app.minsize(800, 600)
         app.mainloop()
 
-    def play(self):
-        self.destroy()
-        start_game()
+    def play(self): #Restricción de una Partida a la vez
+        global game_in_progress
+        if not game_in_progress:
+            game_in_progress = True
+            self.destroy()
+            start_game()
+        else:
+            print("Ya hay una partida en curso")
 
 class LogIn_Screen(customtkinter.CTk):
     def __init__(self):
