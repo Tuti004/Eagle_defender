@@ -16,13 +16,13 @@ class main_Screen(customtkinter.CTk):
     def login(self):
         self.destroy()
         app = LogIn_Screen()
+        app.title("Eagle Defender")
+        app.minsize(800, 600)
         app.mainloop()
 
     def play(self):
         self.destroy()
         start_game()
-
-
 
 class LogIn_Screen(customtkinter.CTk):
     def __init__(self):
@@ -47,36 +47,44 @@ class LogIn_Screen(customtkinter.CTk):
 
         self.button_back = customtkinter.CTkButton(self, text="Back", command=self.back)
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
-    
-    def play(self):
-        self.destroy()
-        app.destroy()
 
     def register(self):
         self.destroy()
         app = register_Screen()
+        app.title("Eagle Defender")
+        app.minsize(800, 600)
         app.mainloop()
 
     def login(self):
-        connection = sqlite3.connect("users.db")
-        cursor = connection.cursor()
-
-        cursor.execute('''
-        SELECT * FROM users WHERE nickname=? AND password=?
-        ''', (self.entry_username.get(), self.entry_password.get()))
-
-        user = cursor.fetchone()
-        connection.close()
-
-        if user:
-            print("Inicio de sesión exitoso")
-            self.play()  # puedes redirigir al juego después de iniciar sesión con éxito
+        if self.entry_username.get() == "admin" and self.entry_password.get() == "123":
+            self.destroy()
+            app = Admin_Screen()
+            app.title("Eagle Defender")
+            app.minsize(800, 600)
+            app.mainloop()
+        
         else:
-            print("Error en las credenciales")
+            connection = sqlite3.connect("users.db")
+            cursor = connection.cursor()
+
+            cursor.execute('''
+            SELECT * FROM users WHERE nickname=? AND password=?
+            ''', (self.entry_username.get(), self.entry_password.get()))
+
+            user = cursor.fetchone()
+            connection.close()
+
+            if user:
+                print("Inicio de sesión exitoso")
+                self.play()  # puedes redirigir al juego después de iniciar sesión con éxito
+            else:
+                print("Error en las credenciales")
 
     def back(self):
         self.destroy()
         app = main_Screen()
+        app.title("Eagle Defender")
+        app.minsize(800, 600)
         app.mainloop()
 
 class register_Screen(customtkinter.CTk):
@@ -173,7 +181,15 @@ class register_Screen(customtkinter.CTk):
     def back(self):
         self.destroy()
         app = LogIn_Screen()
+        app.title("Eagle Defender")
+        app.minsize(800, 600)
         app.mainloop()
+
+class Admin_Screen(customtkinter.CTk):
+    def __init__(self):
+        super().__init__()
+        self.geometry("800x600")
+
 
 
 def start_game():
@@ -221,6 +237,7 @@ def setup_database():
     
     connection.commit()
     connection.close()
+    
 setup_database()
 
 app = main_Screen()
