@@ -2,6 +2,99 @@ import customtkinter
 import pygame
 import sqlite3
 
+#colors
+BLACK = (0,0,0)
+WHITE = (255,255,255)
+RED = (255,0,0)
+YELLOW = (250,250,51)
+GREEN = (180, 212, 181)
+
+
+#player class
+class Player(pygame.sprite.Sprite):
+    def __init__(self): #empieza clase Player
+        super().__init__() #parent class
+        self.sprite_path = pygame.image.load('assets/cohete_jugador.png')
+        self.rect = self.sprite_path.get_rect()
+        self.image = self.sprite_path
+        self.rect = self.image.get_rect()
+        self.x = 40
+        self.y = 600/2
+        self.x_change = 0
+        self.y_change = 0
+        self.hearts = 6
+        self.speed = 5
+
+    def player_imput(self): #esta funcion permite el moviento con wasd del jugador
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_w]:
+            self.y_change = -self.speed
+        if keys[pygame.K_w] == False:
+            self.y_change = 0
+
+        if keys[pygame.K_a]:
+            self.x_change = -self.speed
+        if keys[pygame.K_a] == False:
+            self.x_change = 0
+
+        if keys[pygame.K_s]:
+            self.y_change = +self.speed
+        
+        if keys[pygame.K_d]:
+            self.x_change = +self.speed
+        if keys[pygame.K_SPACE]:
+            bullet_cd(self)  
+        
+    def apply_border(self): #esta funcion causa que el jugador no se pueda salir de los bordes
+        if self.x <= 30:
+            self.x = 30
+        if self.x >= 800:
+            self.x = 800
+        if self.y <= 100:
+            self.y = 100
+        if self.y >= 500:
+            self.y = 500
+
+    def update(self):  #update cada frame a cada uno de los atributos del jugador
+        self.player_imput()
+        self.apply_border()
+        self.x += self.x_change
+        self.y += self.y_change
+        self.rect.midbottom = (self.x, self.y)
+        #if pygame.sprite.spritecollide(self, aliens, False):
+#            self.hearts = self.hearts-1
+
+player = pygame.sprite.Group() #spritegroup player
+player.add(Player()) #agrega a player al sprite group
+
+bullets = pygame.sprite.Group()
+last_shot_time = 0
+class PlayerBullet(pygame.sprite.Sprite):
+    def __init__(self, x, y): #el x y y aqui permite que cuando se agrege a bullets a su grupo de balas se ponga en las x y y del player
+        super().__init__()
+        self.sprite_path = pygame.image.load('assets/bala_jugador.png')        
+        self.rect = self.sprite_path.get_rect()
+        self.image = self.sprite_path
+        self.rect = self.image.get_rect()
+        self.rect.midbottom = (x, y)
+        self.speed = 10
+
+    def update(self):
+        self.rect.move_ip(self.speed, 0)
+        global last_shot_time
+        current_time = pygame.time.get_ticks()
+        if current_time - last_shot_time > 400:
+            self.kill()
+
+def bullet_cd(player): #cooldown de balas de jugador
+    global last_shot_time
+    current_time = pygame.time.get_ticks()
+    if current_time - last_shot_time < 600: #cooldown
+        return
+    new_bullet = PlayerBullet(player.rect.centerx, player.rect.centery+15) #cada vez que termina el cooldown agrega la clase bala a su grupo. o sea dispara
+    bullets.add(new_bullet)
+    last_shot_time = current_time #le hace update al ultimo shot reseteando el cooldown
+
 class main_Screen(customtkinter.CTk):
     def __init__(self):
         super().__init__()
@@ -212,8 +305,14 @@ def start_game():
                     app.minsize(800, 600)
                     app.mainloop()
 
-        game_Screen.fill((0, 0, 0))
         pygame.display.flip()
+        game_Screen.fill((GREEN))
+        player.update() 
+        player.draw(game_Screen)   
+        bullets.update()
+        bullets.draw(game_Screen)   
+
+
 
 def setup_database():
     # Conectar a la base de datos
