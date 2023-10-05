@@ -34,7 +34,7 @@ pygame.display.set_caption("Eagle Defender") #nombre de pestana de juego
 fontprincipal = pygame.font.Font('assets/DePixelHalbfett.otf', 25) #import de font principal
 fontsmaller = pygame.font.Font('assets/DePixelHalbfett.otf', 15)
 
-#todos los textos del espanol e ingles
+#todos los textos del espanol
 #title name
 Eagle_Defender = fontprincipal.render('Eagle Defender', True, BLACK)
 #UI elements
@@ -94,8 +94,7 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_d]:
             self.x_change = +self.speed
         if keys[pygame.K_SPACE]:
-            bullet_cd(self) 
-            bullet_limit   
+            bullet_cd(self)  
         
     def apply_border(self): #esta funcion causa que el jugador no se pueda salir de los bordes
         if self.x <= 30:
@@ -146,10 +145,6 @@ def bullet_cd(player): #cooldown de balas de jugador
     new_bullet = PlayerBullet(player.rect.centerx, player.rect.centery+15) #cada vez que termina el cooldown agrega la clase bala a su grupo. o sea dispara
     bullets.add(new_bullet)
     last_shot_time = current_time #le hace update al ultimo shot reseteando el cooldown
-
-def bullet_limit():
-    bullet_amount = 5
-#meter bullet limit maximo 5
 
 
 #define los "game states"
@@ -275,10 +270,6 @@ while game:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_f:
                 score_list.append(score)
-
-    elif state == "points":
-        screen.blit(asdpoints, (30, 90))
-        screen.blit(esc_text, (30, 470))
 
 
 
