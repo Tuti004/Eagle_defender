@@ -1,6 +1,7 @@
 import customtkinter
 import pygame
 import sqlite3
+from pygame.locals import *
 import sys
 from tkinter import filedialog
 import yt_dlp as youtube_dl
@@ -29,7 +30,7 @@ class main_Screen(customtkinter.CTk):
         self.destroy()
         app = LogIn_Screen()
         app.title("Eagle Defender")
-        app.minsize(800, 600)
+        app.minsize(900, 600)
         app.mainloop()
 
     def play(self): # Restricción de una Partida a la vez
@@ -420,10 +421,17 @@ class BlockScreen:
         # Crea una instancia del inventario del defensor
         self.inventory_defender = Inventory_Defender()
 
+        # Carga la imagen del águila
+        self.eagle_image = pygame.image.load("Eagle_defender/aguila3.png")  
+        self.eagle_rect = self.eagle_image.get_rect()
+
     def main_loop(self):
         running = True
         selected_block = None
         message_timer = 0
+        eagle_x = 400  # Coordenada X inicial del águila
+        eagle_y = 300  # Coordenada Y inicial del águila
+        eagle_speed = 50  # Velocidad de movimiento del águila
 
         while running:
             for event in pygame.event.get():
@@ -447,12 +455,20 @@ class BlockScreen:
                             else:
                                 print("La celda ya está ocupada por un bloque")
                 elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        eagle_y -= eagle_speed
+                    elif event.key == pygame.K_DOWN:
+                        eagle_y += eagle_speed
                     if event.key == pygame.K_1:
                         selected_block = "concreto"
                     elif event.key == pygame.K_2:
                         selected_block = "madera"
                     elif event.key == pygame.K_3:
                         selected_block = "acero"
+                    if event.key == pygame.K_LEFT:
+                         eagle_x -= eagle_speed
+                    elif event.key == pygame.K_RIGHT:
+                         eagle_x += eagle_speed
 
             self.screen.fill((255, 255, 255))  # Llena la pantalla de blanco
 
@@ -476,6 +492,9 @@ class BlockScreen:
                 for col in range(self.cols):
                     if self.grid[row][col] is not None:
                         self.grid[row][col].draw(self.screen)
+
+            # Dibuja el águila en la posición deseada
+            self.screen.blit(self.eagle_image, (eagle_x, eagle_y))  
 
             # Dibuja el inventario del defensor
             inventory_x = 20
