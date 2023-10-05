@@ -422,7 +422,7 @@ class BlockScreen:
         self.inventory_defender = Inventory_Defender()
 
         # Carga la imagen del águila
-        self.eagle_image = pygame.image.load("Eagle_defender/aguila3.png")  
+        self.eagle_image = pygame.image.load("aguila3.png")  
         self.eagle_rect = self.eagle_image.get_rect()
 
     def main_loop(self):
