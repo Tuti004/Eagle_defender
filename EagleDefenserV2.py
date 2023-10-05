@@ -215,9 +215,9 @@ def start_game():
             pygame.display.set_caption("Eagle Defender")
 
             # Define the grid cell size and dimensions
-            cell_size = 50
-            rows = 12  # Number of rows
-            cols = 16  # Number of columns
+            cell_size = 40 # Size of each cell
+            rows = window_height // cell_size # number of rows
+            cols = window_width // cell_size # number of columns
 
             # Create a 2D grid to represent the blocks
             self.grid = [[None for _ in range(cols)] for _ in range(rows)]
@@ -230,7 +230,7 @@ def start_game():
                     if event.type == pygame.QUIT:
                         running = False
                     elif event.type == pygame.MOUSEBUTTONDOWN:
-                        if event.button == 1:  # Left mouse button
+                        if event.button == 1:  # Left click
                             x, y = event.pos
                             col = x // cell_size
                             row = y // cell_size
@@ -245,30 +245,34 @@ def start_game():
                             if 0 <= row < rows and 0 <= col < cols:
                                 self.grid[row][col] = Block(row, col, cell_size)
                     elif event.type == pygame.MOUSEBUTTONUP:
-                        if event.button == 1:  # Left mouse button
+                        if event.button == 1:  # Left click
                             placing_block = False
 
                 self.screen.fill((255, 255, 255))  # Fill the screen with white
 
                 # Calculate the size of the grid area
-                grid_width = cols * cell_size - 100
-                grid_height = rows * cell_size - 100
-                grid_x = (window_width - grid_width) // 2
-                grid_y = (window_height - grid_height) // 2
+                grid_width = cols * cell_size
+                grid_height = rows * cell_size
+                grid_x = (window_width - grid_width) // 2  # Center the grid horizontally
+                grid_y = (window_height - grid_height) // 2  # Center the grid vertically
 
-                # Draw the grid
+
+                # Draw the grid lines
                 for i in range(rows + 1):
-                    y = grid_y + i * cell_size
+                    y = round(grid_y + i * cell_size)
                     pygame.draw.line(self.screen, (0, 0, 0), (grid_x, y), (grid_x + grid_width, y), 1)
                 for i in range(cols + 1):
-                    x = grid_x + i * cell_size
+                    x = round(grid_x + i * cell_size)
                     pygame.draw.line(self.screen, (0, 0, 0), (x, grid_y), (x, grid_y + grid_height), 1)
 
                 # Draw the blocks on the grid
                 for row in range(rows):
                     for col in range(cols):
                         if self.grid[row][col] is not None:
-                            self.grid[row][col].draw(self.screen)   
+                            x = round(col * cell_size)
+                            y = round(row * cell_size)
+                            self.grid[row][col].draw(self.screen)
+
 
                 pygame.display.flip()
 
