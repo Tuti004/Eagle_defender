@@ -206,7 +206,7 @@ def start_game():
             y = self.row * self.cell_size
             pygame.draw.rect(screen, self.color, (x, y, self.cell_size, self.cell_size))
 
-    class BlockScreen:
+    class GameScreen:
         def __init__(self):
             pygame.init()
             window_width = 800
@@ -276,7 +276,7 @@ def start_game():
             sys.exit()
 
     if __name__ == "__main__":
-        main_Screen = BlockScreen()
+        main_Screen = GameScreen()
 
 def setup_database():
     # Conectar a la base de datos
