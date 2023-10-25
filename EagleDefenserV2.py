@@ -8,6 +8,10 @@ import yt_dlp as youtube_dl
 import os
 import shutil
 from pydub import AudioSegment
+from CTkWidgets import song_list
+import random
+import time
+import threading
 
 # Variable global para rastrear si hay una partida en curso
 game_in_progress = False
@@ -26,6 +30,31 @@ class main_Screen(customtkinter.CTk):
         self.button_play = customtkinter.CTkButton(self, text="Jugar", command=self.play)
         self.button_play.place(relx=0.5, rely=0.6, anchor="center")
         
+        self.song_directory = "Songs/Menu"  # Carpeta donde se encuentran las canciones
+        self.song_list = []  # Lista de canciones en la carpeta
+
+        # Inicializar pygame para la reproducción de música
+        pygame.mixer.init()
+        self.volume = 0.5  # Volumen inicial
+        pygame.mixer.music.set_volume(self.volume)  # Ajusta el volumen según tus preferencias
+
+        # Llena la lista de canciones
+        for root, dirs, files in os.walk(self.song_directory):
+            for file in files:
+                if file.endswith(".mp3"):
+                    self.song_list.append(os.path.join(root, file))
+        print(self.song_list)
+        
+        random.shuffle(self.song_list)
+        self.current_song_index = 0
+        self.play_next_song()
+
+        # Slider de volumen
+        self.volume_slider = customtkinter.CTkSlider(self, from_=0, to=1, number_of_steps=100, orientation="horizontal")
+        self.volume_slider.set(self.volume)
+        self.volume_slider.place(relx=0.5, rely=0.8, anchor="center")
+        self.volume_slider.bind("<Motion>", self.update_volume)
+
     def login(self):
         self.destroy()
         app = LogIn_Screen()
@@ -42,6 +71,23 @@ class main_Screen(customtkinter.CTk):
         else:
             print("Ya hay una partida en curso")
 
+    def play_next_song(self):
+        """Reproduce la siguiente canción y establece un callback para cuando termine."""
+        pygame.mixer.music.load(self.song_list[self.current_song_index])
+        pygame.mixer.music.play()
+        pygame.mixer.music.set_endevent(pygame.USEREVENT + 1)  # Establece un evento para el final de la canción
+        
+        song_length_ms = pygame.mixer.Sound(self.song_list[self.current_song_index]).get_length() * 1000  # Duración de la canción en milisegundos
+        self.after(int(song_length_ms), self.play_next_song)  # Programa el callback para cuando termine la canción
+
+        self.current_song_index = (self.current_song_index + 1) % len(self.song_list)  # Ajusta el índice de la canción
+
+    def update_volume(self, event):
+        # Actualiza el volumen según el valor del slider
+        self.volume = self.volume_slider.get()
+        pygame.mixer.music.set_volume(self.volume)
+
+
 class LogIn_Screen(customtkinter.CTk):
     def __init__(self):
         super().__init__()
@@ -54,8 +100,8 @@ class LogIn_Screen(customtkinter.CTk):
 
         self.label_password = customtkinter.CTkLabel(self, text="Contraseña:")
         self.label_password.place(relx=0.4, rely=0.5, anchor="center")
-        self.entry_password = customtkinter.CTkEntry(self)
-        self.entry_password.place(relx=0.6, rely=0.5, anchor="center")
+        self.entry_password = customtkinter.CTkEntry(self, show="*")
+        self.entry_password.place(relx=0.6, rely=0.5,anchor="center")
 
         self.button_login = customtkinter.CTkButton(self, text="Iniciar sesión", command=self.login)
         self.button_login.place(relx=0.5, rely=0.6, anchor="center")
@@ -75,6 +121,7 @@ class LogIn_Screen(customtkinter.CTk):
 
     def login(self):
         if self.entry_username.get() == "admin" and self.entry_password.get() == "123":
+            pygame.mixer.music.stop()
             self.destroy()
             app = Admin_Screen()
             app.title("Eagle Defender")
@@ -174,7 +221,7 @@ class register_Screen(customtkinter.CTk):
     def add_user_file(self, folder_name):
         if folder_name == "Photos":
             filetypes = [('JPEG files', '*.jpeg'), ('JPG files', '*.jpg'), ('PNG files', '*.png')]
-        else:
+        elif folder_name == "Fav_Songs":
             filetypes = [('MP3 files', '*.mp3')]
         file_path = filedialog.askopenfilename(filetypes=filetypes)
 
@@ -276,6 +323,8 @@ class register_Screen(customtkinter.CTk):
             print("El nickname ya está en uso")
 
         connection.close()
+
+        self.back()
     
     def back(self):
         self.cleanup_uploaded_files()  # Limpia los archivos subidos
@@ -290,91 +339,143 @@ class Admin_Screen(customtkinter.CTk):
         super().__init__()
         self.geometry("800x600")
 
+        self.songs_frames = {}
+        self.players = {}
+        pygame.mixer.init()
+        self.current_song = None  # Almacena el nombre de la canción actual
+        self.song_paused = False  # Indica si la canción está pausada o no
+
         # Label de Admin
         self.label_Admin = customtkinter.CTkLabel(self, text="Admin de canciones")
-        self.label_Admin.place(relx=0.5, rely=0.1, anchor="center")
-
-         # create tabview
-        self.tabview = customtkinter.CTkTabview(self, width=500, height=400)
+        self.label_Admin.place(relx=0.5, rely=0.05, anchor="center")
+        
+        # create tabview
+        self.tabview = customtkinter.CTkTabview(self, width=600, height=500)
         self.tabview.place(relx=0.5, rely=0.5, anchor="center")
-        self.tabview.add("Menu")
-        self.tabview.add("Defensor")
-        self.tabview.add("Atacante")
-        self.tabview.add("Especial")
-        self.tabview.tab("Menu").grid_columnconfigure(0, weight=1)  # configure grid of individual tabs
-        self.tabview.tab("Defensor").grid_columnconfigure(0, weight=1)
-        self.tabview.tab("Atacante").grid_columnconfigure(0, weight=1)
-        self.tabview.tab("Especial").grid_columnconfigure(0, weight=1)
-
+        self.tab_names = ["Menu", "Defensor", "Atacante", "Especial"]
+        for tab_name in self.tab_names:
+            self.tabview.add(tab_name)
+            self.tabview.tab(tab_name).grid_columnconfigure(0, weight=1)
+            self.add_scrollable_frame_to_tab(tab_name)
+        
         # Label de Menu
         self.label_link = customtkinter.CTkLabel(self.tabview.tab("Menu"), text="Link: ")
-        self.label_link.place(relx=0.1, rely=0.3, anchor="center")
+        self.label_link.place(relx=0.1, rely=0.1, anchor="center")
         self.entry_link_menu = customtkinter.CTkEntry(self.tabview.tab("Menu"), width=200)
-        self.entry_link_menu.place(relx=0.4, rely=0.3, anchor="center")
+        self.entry_link_menu.place(relx=0.3, rely=0.1, anchor="center")
 
         self.button_add_menu = customtkinter.CTkButton(self.tabview.tab("Menu"), text="Agregar", command=lambda: self.add_youtube("Menu", self.entry_link_menu.get()))
-        self.button_add_menu.place(relx=0.8, rely=0.3, anchor="center")
+        self.button_add_menu.place(relx=0.6, rely=0.1, relwidth=0.15, anchor="center")
 
         # Label de Defensor
         self.label_link = customtkinter.CTkLabel(self.tabview.tab("Defensor"), text="Link: ")
-        self.label_link.place(relx=0.1, rely=0.3, anchor="center")
+        self.label_link.place(relx=0.1, rely=0.1, anchor="center")
         self.entry_link_defender = customtkinter.CTkEntry(self.tabview.tab("Defensor"), width=200)
-        self.entry_link_defender.place(relx=0.4, rely=0.3, anchor="center")
+        self.entry_link_defender.place(relx=0.3, rely=0.1, anchor="center")
 
         self.button_add_menu = customtkinter.CTkButton(self.tabview.tab("Defensor"), text="Agregar", command=lambda: self.add_youtube("Defensor", self.entry_link_defender.get()))
-        self.button_add_menu.place(relx=0.8, rely=0.3, anchor="center")
+        self.button_add_menu.place(relx=0.6, rely=0.1, relwidth=0.15, anchor="center")
 
         # Label de Atacante
         self.label_link = customtkinter.CTkLabel(self.tabview.tab("Atacante"), text="Link: ")
-        self.label_link.place(relx=0.1, rely=0.3, anchor="center")
+        self.label_link.place(relx=0.1, rely=0.1, anchor="center")
         self.entry_link_attacker = customtkinter.CTkEntry(self.tabview.tab("Atacante"), width=200)
-        self.entry_link_attacker.place(relx=0.4, rely=0.3, anchor="center")
+        self.entry_link_attacker.place(relx=0.3, rely=0.1, anchor="center")
 
         self.button_add_menu = customtkinter.CTkButton(self.tabview.tab("Atacante"), text="Agregar", command=lambda: self.add_youtube("Atacante", self.entry_link_attacker.get()))
-        self.button_add_menu.place(relx=0.8, rely=0.3, anchor="center")
+        self.button_add_menu.place(relx=0.6, rely=0.1, relwidth=0.15, anchor="center")
 
         # Label de Especial
         self.label_link = customtkinter.CTkLabel(self.tabview.tab("Especial"), text="Link: ")
-        self.label_link.place(relx=0.1, rely=0.3, anchor="center")
+        self.label_link.place(relx=0.1, rely=0.1, anchor="center")
         self.entry_link_special = customtkinter.CTkEntry(self.tabview.tab("Especial"), width=200)
-        self.entry_link_special.place(relx=0.4, rely=0.3, anchor="center")
+        self.entry_link_special.place(relx=0.3, rely=0.1, anchor="center")
 
         self.button_add_menu = customtkinter.CTkButton(self.tabview.tab("Especial"), text="Agregar", command=lambda: self.add_youtube("Especial", self.entry_link_special.get()))
-        self.button_add_menu.place(relx=0.8, rely=0.3, anchor="center")
+        self.button_add_menu.place(relx=0.6, rely=0.1, relwidth=0.15, anchor="center")
 
         
         # Botón para agregar canciones por archivo en cada tab
         self.button_add_file_menu = customtkinter.CTkButton(self.tabview.tab("Menu"), text="Agregar desde sistema", command=lambda: self.add_file("Menu"))
-        self.button_add_file_menu.place(relx=0.5, rely=0.5, anchor="center")
+        self.button_add_file_menu.place(relx=0.85, rely=0.1, anchor="center")
 
         self.button_add_file_defensor = customtkinter.CTkButton(self.tabview.tab("Defensor"), text="Agregar desde sistema", command=lambda: self.add_file("Defensor"))
-        self.button_add_file_defensor.place(relx=0.5, rely=0.5, anchor="center")
+        self.button_add_file_defensor.place(relx=0.85, rely=0.1, anchor="center")
 
         self.button_add_file_atacante = customtkinter.CTkButton(self.tabview.tab("Atacante"), text="Agregar desde sistema", command=lambda: self.add_file("Atacante"))
-        self.button_add_file_atacante.place(relx=0.5, rely=0.5, anchor="center")
+        self.button_add_file_atacante.place(relx=0.85, rely=0.1, anchor="center")
 
         self.button_add_file_especial = customtkinter.CTkButton(self.tabview.tab("Especial"), text="Agregar desde sistema", command=lambda: self.add_file("Especial"))
-        self.button_add_file_especial.place(relx=0.5, rely=0.5, anchor="center")
+        self.button_add_file_especial.place(relx=0.85, rely=0.1, anchor="center")
 
         # Variable para almacenar el estado de la subida y los posibles errores
         self.upload_status = customtkinter.StringVar(value="Estado: Esperando archivo o link...")
 
         # Agregar el label de estado en cada tabview
-        self.label_status_menu = customtkinter.CTkLabel(self.tabview.tab("Menu"), textvariable=self.upload_status)
-        self.label_status_menu.place(relx=0.5, rely=0.9, anchor="center")
-
-        self.label_status_defensor = customtkinter.CTkLabel(self.tabview.tab("Defensor"), textvariable=self.upload_status)
-        self.label_status_defensor.place(relx=0.5, rely=0.9, anchor="center")
-
-        self.label_status_atacante = customtkinter.CTkLabel(self.tabview.tab("Atacante"), textvariable=self.upload_status)
-        self.label_status_atacante.place(relx=0.5, rely=0.9, anchor="center")
-
-        self.label_status_especial = customtkinter.CTkLabel(self.tabview.tab("Especial"), textvariable=self.upload_status)
-        self.label_status_especial.place(relx=0.5, rely=0.9, anchor="center")
+        self.upload_status = customtkinter.StringVar(value="Estado: Esperando archivo o link...")
+        for tab_name in self.tab_names:
+            label_status = customtkinter.CTkLabel(self.tabview.tab(tab_name), textvariable=self.upload_status)
+            label_status.place(relx=0.5, rely=0.9, anchor="center")
 
         # Botón Volver
         self.button_back = customtkinter.CTkButton(self, text="Volver", command=self.back)
-        self.button_back.place(relx=0.5, rely=0.9, anchor="center")
+        self.button_back.place(relx=0.9, rely=0.05, anchor="center")
+
+    def add_scrollable_frame_to_tab(self, tab_name):
+        songs = self.load_songs_from_folder(tab_name)
+        frame = song_list(self.tabview.tab(tab_name),
+                                           command1=lambda song_name, tn=tab_name: self.play_song(tn, song_name),
+                                           command2=lambda song_name, tn=tab_name: self.delete_song(tn, song_name))
+        frame.place(relx=0.5, rely=0.5, relwidth=0.9, relheight=0.5, anchor="center")
+        self.songs_frames[tab_name] = frame
+        for song in songs:
+            frame.add_item(song)
+
+    def load_songs_from_folder(self, playlist):
+        folder_path = os.path.join("Songs", playlist)
+        songs = [f for f in os.listdir(folder_path) if f.endswith('.mp3')]
+        return songs
+    
+    def play_song(self, tab_name, song_name):
+        # Comprueba si una canción ya está en reproducción
+        if pygame.mixer.music.get_busy():
+            if song_name == self.current_song:  # Si es la misma canción que ya está en reproducción
+                if self.song_paused:
+                    pygame.mixer.music.unpause()  # Si está pausada, reanudar la canción
+                    self.song_paused = False
+                else:
+                    pygame.mixer.music.pause()   # Si está en reproducción, pausar la canción
+                    self.song_paused = True
+            else:  # Si es una canción diferente, detener la canción actual y comenzar a reproducir la nueva
+                pygame.mixer.music.stop()
+                self.load_and_play(tab_name, song_name)
+        else:  # Si no hay ninguna canción en reproducción, comenzar a reproducir la canción seleccionada
+            self.load_and_play(tab_name, song_name)
+
+    def load_and_play(self, tab_name, song_name):
+        song_path = os.path.join("Songs", tab_name, song_name)
+        pygame.mixer.music.load(song_path)
+        pygame.mixer.music.play()
+        self.current_song = song_name
+        self.song_paused = False
+
+    def delete_song(self, tab_name, song_name):
+        # Stop the song if it's currently playing
+        if tab_name in self.players and self.players[tab_name].get_busy():
+            self.players[tab_name].stop()
+            del self.players[tab_name]
+
+        # Delete the song from the storage (disk)
+        song_path = os.path.join("Songs", tab_name, song_name)
+        if os.path.exists(song_path):
+            os.remove(song_path)
+
+        # Update the UI
+        self.songs_frames[tab_name].remove_item(song_name)
+
+
+    def update_song_buttons(self, playlist):
+        pass  # Update song control buttons (e.g., disable if no song is selected)
     
     def add_file(self, playlist_name):
         try:
@@ -398,6 +499,8 @@ class Admin_Screen(customtkinter.CTk):
                     shutil.copy2(file_path, destination_path)
             self.upload_status.set(f"Estado: La canción ha sido agregado a {playlist_name} correctamente.")
             self.after(5000, self.reset_status)
+            shutil.copy2(file_path, destination_path)
+            self.songs_frames[playlist_name].add_item(os.path.basename(file_path))  # Update the song list in the UI
         except Exception as e:
             self.upload_status.set(f"Error: {str(e)}")
             self.after(5000, self.reset_status)
@@ -435,9 +538,11 @@ class Admin_Screen(customtkinter.CTk):
             }
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                 try:
+                    print("Descarga y conversión finalizadas con éxito!")
                     info = ydl.extract_info(youtube_link, download=True)
                     file_name = ydl.prepare_filename(info)
-                    print("Descarga y conversión finalizadas con éxito!")
+                    file_name_without_ext = os.path.splitext(os.path.basename(file_name))[0]
+                    self.songs_frames[playlist_name].add_item(file_name_without_ext + ".mp3")
                     self.upload_status.set(f"Estado: Canción de YouTube agregada a {playlist_name} correctamente.")
                     self.after(5000, self.reset_status)
                 except Exception as e:
@@ -448,14 +553,13 @@ class Admin_Screen(customtkinter.CTk):
 
     def reset_status(self):
         self.upload_status.set("Estado: Esperando archivo o link...")
-    
+
     def back(self):
         self.destroy()
         app = main_Screen()
         app.title("Eagle Defender")
         app.minsize(800, 600)
         app.mainloop()
-
 
 class Block:
     def __init__(self, row, col, cell_size):
