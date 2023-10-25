@@ -65,18 +65,18 @@ esc_text = fontsmaller.render('Press "esc" to go to title', True, WHITE)
 class Player(pygame.sprite.Sprite):
     def __init__(self): #empieza clase Player
         super().__init__() #parent class
-        self.sprite_path = pygame.image.load('assets/cohete_jugador.png')
+        self.sprite_path = pygame.image.load('assets/tank.png')
         self.rect = self.sprite_path.get_rect()
         self.image = self.sprite_path
         self.rect = self.image.get_rect()
-        self.x = 40
-        self.y = screen_y/2
+        self.x = 200
+        self.y = 200
         self.x_change = 0
         self.y_change = 0
         self.hearts = 6
         self.speed = 5
 
-    def player_imput(self): #esta funcion permite el moviento con wasd del jugador
+    def player_input(self): #esta funcion permite el moviento con wasd del jugador
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
             self.y_change = -self.speed
@@ -107,7 +107,7 @@ class Player(pygame.sprite.Sprite):
             self.y = 500
 
     def update(self):  #update cada frame a cada uno de los atributos del jugador
-        self.player_imput()
+        self.player_input()
         self.apply_border()
         self.x += self.x_change
         self.y += self.y_change
@@ -128,7 +128,7 @@ class PlayerBullet(pygame.sprite.Sprite):
         self.image = self.sprite_path
         self.rect = self.image.get_rect()
         self.rect.midbottom = (x, y)
-        self.speed = 10
+        self.speed = -10
 
     def update(self):
         self.rect.move_ip(self.speed, 0)

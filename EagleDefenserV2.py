@@ -20,10 +20,10 @@ class main_Screen(customtkinter.CTk):
         super().__init__()
         self.geometry("800x600")
 
-        self.button_login = customtkinter.CTkButton(self, text="Iniciar sesión", command=self.login)
+        self.button_login = customtkinter.CTkButton(self, text="Iniciar sesión", command=self.login,fg_color="transparent")
         self.button_login.place(relx=0.5, rely=0.5, anchor="center")
 
-        self.button_play = customtkinter.CTkButton(self, text="Jugar", command=self.play)
+        self.button_play = customtkinter.CTkButton(self, text="Jugar", command=self.play, fg_color="transparent")
         self.button_play.place(relx=0.5, rely=0.6, anchor="center")
         
     def login(self):
@@ -483,7 +483,92 @@ class Inventory_Defender:
             return True
         else:
             return False 
+
+#player class
+class Player(pygame.sprite.Sprite):
+    def __init__(self): #empieza clase Player
+        super().__init__() #parent class
+        self.sprite_path = pygame.image.load('assets/tank.png')
+        self.rect = self.sprite_path.get_rect()
+        self.image = self.sprite_path
+        self.rect = self.image.get_rect()
+        self.x = 200
+        self.y = 200
+        self.x_change = 0
+        self.y_change = 0
+        self.hearts = 6
+        self.speed = 1
+
+    def player_input(self): #esta funcion permite el moviento con wasd del jugador
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_w]:
+            self.y_change = -self.speed
+        if keys[pygame.K_w] == False:
+            self.y_change = 0
+
+        if keys[pygame.K_a]:
+            self.x_change = -self.speed
+        if keys[pygame.K_a] == False:
+            self.x_change = 0
+
+        if keys[pygame.K_s]:
+            self.y_change = +self.speed
         
+        if keys[pygame.K_d]:
+            self.x_change = +self.speed
+        if keys[pygame.K_SPACE]:
+            bullet_cd(self)  
+        
+    def apply_border(self): #esta funcion causa que el jugador no se pueda salir de los bordes
+        if self.x <= 30:
+            self.x = 30
+        if self.x >= 775:
+            self.x = 775
+        if self.y <= 50:
+            self.y = 50
+        if self.y >= 617:
+            self.y = 617
+
+    def update(self):  #update cada frame a cada uno de los atributos del jugador
+        self.player_input()
+        self.apply_border()
+        self.x += self.x_change
+        self.y += self.y_change
+        self.rect.midbottom = (self.x, self.y)
+        #if pygame.sprite.spritecollide(self, aliens, False):
+#            self.hearts = self.hearts-1
+
+player = pygame.sprite.Group() #spritegroup player
+player.add(Player()) #agrega a player al sprite group
+
+bullets = pygame.sprite.Group()
+last_shot_time = 0
+class PlayerBullet(pygame.sprite.Sprite):
+    def __init__(self, x, y): #el x y y aqui permite que cuando se agrege a bullets a su grupo de balas se ponga en las x y y del player
+        super().__init__()
+        self.sprite_path = pygame.image.load('assets/bala_jugador.png')        
+        self.rect = self.sprite_path.get_rect()
+        self.image = self.sprite_path
+        self.rect = self.image.get_rect()
+        self.rect.midbottom = (x, y)
+        self.speed = -4
+
+    def update(self):
+        self.rect.move_ip(self.speed, 0)
+        global last_shot_time
+        current_time = pygame.time.get_ticks()
+        if current_time - last_shot_time > 320:
+            self.kill()
+
+def bullet_cd(player): #cooldown de balas de jugador
+    global last_shot_time
+    current_time = pygame.time.get_ticks()
+    if current_time - last_shot_time < 600: #cooldown
+        return
+    new_bullet = PlayerBullet(player.rect.centerx-32, player.rect.centery+15) #cada vez que termina el cooldown agrega la clase bala a su grupo. o sea dispara
+    bullets.add(new_bullet)
+    last_shot_time = current_time #le hace update al ultimo shot reseteando el cooldown
+
 class BlockScreen:
     def __init__(self):
         pygame.init()
@@ -507,6 +592,12 @@ class BlockScreen:
         self.eagle_image = pygame.image.load("aguila3.png")  
         self.eagle_rect = self.eagle_image.get_rect()
 
+        # timer
+        self.timer_duration = 90 * 1000  # 90 segundos
+        self.timer_start = pygame.time.get_ticks()
+        self.turn_timer_expired = False
+        self.confirmation_received = False
+
     def main_loop(self):
         running = True
         selected_block = None
@@ -519,40 +610,58 @@ class BlockScreen:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:  # Botón izquierdo del ratón
-                        x, y = event.pos
-                        col = (x - grid_x) // self.cell_size
-                        row = (y - grid_y) // self.cell_size
-                        if 0 <= row < self.rows and 0 <= col < self.cols:
-                            # Comprueba si hay un bloque seleccionado en el inventario
-                            if self.grid[row][col] is None:
-                                if selected_block:
-                                    if self.inventory_defender.use_block(selected_block):
-                                        self.grid[row][col] = Block(row, col, self.cell_size)
+                elif self.turn_timer_expired == False:
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:  # Botón izquierdo del ratón
+                            x, y = event.pos
+                            col = (x - grid_x) // self.cell_size
+                            row = (y - grid_y) // self.cell_size
+                            if 0 <= row < self.rows and 0 <= col < self.cols:
+                                # Comprueba si hay un bloque seleccionado en el inventario
+                                if self.grid[row][col] is None:
+                                    if selected_block:
+                                        if self.inventory_defender.use_block(selected_block):
+                                            self.grid[row][col] = Block(row, col, self.cell_size)
+                                        else:
+                                            message_timer = 100  # Mostrar mensaje durante 100 ciclos
                                     else:
-                                        message_timer = 100  # Mostrar mensaje durante 100 ciclos
+                                        print("Selecciona un tipo de bloque del inventario primero")
                                 else:
-                                    print("Selecciona un tipo de bloque del inventario primero")
-                            else:
-                                print("La celda ya está ocupada por un bloque")
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_UP:
-                        eagle_y -= eagle_speed
-                    elif event.key == pygame.K_DOWN:
-                        eagle_y += eagle_speed
-                    if event.key == pygame.K_1:
-                        selected_block = "concreto"
-                    elif event.key == pygame.K_2:
-                        selected_block = "madera"
-                    elif event.key == pygame.K_3:
-                        selected_block = "acero"
-                    if event.key == pygame.K_LEFT:
-                         eagle_x -= eagle_speed
-                    elif event.key == pygame.K_RIGHT:
-                         eagle_x += eagle_speed
+                                    print("La celda ya está ocupada por un bloque")
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_UP:
+                            eagle_y -= eagle_speed
+                        elif event.key == pygame.K_DOWN:
+                            eagle_y += eagle_speed
+                        if event.key == pygame.K_1:
+                            selected_block = "concreto"
+                        elif event.key == pygame.K_2:
+                            selected_block = "madera"
+                        elif event.key == pygame.K_3:
+                            selected_block = "acero"
+                        if event.key == pygame.K_LEFT:
+                            eagle_x -= eagle_speed
+                        elif event.key == pygame.K_RIGHT:
+                            eagle_x += eagle_speed
+                elif self.turn_timer_expired == True:
+                    pass    
 
             self.screen.fill((255, 255, 255))  # Llena la pantalla de blanco
+            current_time = pygame.time.get_ticks()
+            elapsed_time = current_time - self.timer_start
+            remaining_time = max(0, self.timer_duration - elapsed_time)
+            minutes, seconds = divmod(remaining_time // 1000, 60)
+
+            # Render and display the timer on the screen
+            font = pygame.font.Font(None, 36)
+            timer_text = font.render(f"Time: {minutes:02}:{seconds:02}", True, (0, 0, 0))
+            timer_rect = timer_text.get_rect(center=(self.screen.get_width() // 2, 30))
+            self.screen.blit(timer_text, timer_rect)
+
+            if remaining_time == 0 and not self.turn_timer_expired:
+                self.show_confirmation_screen()
+                self.turn_timer_expired = True
+
 
 
             # Calcula el tamaño del área de la cuadrícula
@@ -594,10 +703,30 @@ class BlockScreen:
                 self.screen.blit(text, text_rect)
                 message_timer -= 1
 
+            if self.confirmation_received == True:
+                player.update() 
+                player.draw(self.screen)   
+                bullets.update()
+                bullets.draw(self.screen)      
+
             pygame.display.flip()
 
         pygame.quit()
         sys.exit()
+
+
+    def show_confirmation_screen(self):
+        confirmation_font = pygame.font.Font(None, 40)
+        confirmation_text = confirmation_font.render("Turno completado. ¿Listo para el siguiente jugador?", True, (0, 0, 0))
+        confirmation_rect = confirmation_text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2))
+        self.screen.blit(confirmation_text, confirmation_rect)
+
+        pygame.display.flip()
+
+        while not self.confirmation_received:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                    self.confirmation_received = True
 
     def draw_inventory_block(self, x, y, block_type, count):
         block_color = (255, 255, 255)
