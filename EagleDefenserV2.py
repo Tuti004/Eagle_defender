@@ -288,6 +288,12 @@ class register_Screen(customtkinter.CTk):
             print("La edad debe ser un número entero")
             connection.close()
             return
+        
+        # Verificar que se haya subido tanto una foto como una canción favorita
+        if not self.entry_foto.get() or not self.entry_cancion.get():
+            print("Debes subir tanto una foto como una canción favorita.")
+            connection.close()
+            return
 
         #Validar que el nickname y correo no estén en la base de datos
         cursor.execute("SELECT * FROM users WHERE nickname=?", (self.entry_nickname.get(),))
@@ -561,17 +567,6 @@ class Admin_Screen(customtkinter.CTk):
         app.minsize(800, 600)
         app.mainloop()
 
-class Block:
-    def __init__(self, row, col, cell_size):
-        self.row = row
-        self.col = col
-        self.cell_size = cell_size
-        self.color = (255, 148, 212)
-
-    def draw(self, screen):
-        x = self.col * self.cell_size
-        y = self.row * self.cell_size
-        pygame.draw.rect(screen, self.color, (x, y, self.cell_size, self.cell_size))
 
 class Inventory_Defender:
     def __init__(self):
@@ -587,6 +582,8 @@ class Inventory_Defender:
             return True
         else:
             return False 
+    def return_block(self, block_type):
+        self.blocks[block_type] += 1
 
 #player class
 class Player(pygame.sprite.Sprite):
@@ -681,19 +678,42 @@ class BlockScreen:
         self.screen = pygame.display.set_mode((window_width, window_height))
         pygame.display.set_caption("Eagle Defender")
 
-        # Define el tamaño de la celda y las dimensiones de la cuadrícula
-        self.cell_size = 50
-        self.rows = 12
-        self.cols = 16
+        # Dimensiones del marco interno
+        self.ANCHO_MARCO = window_width - 100
+        self.ALTO_MARCO = window_height - 150
+        self.POS_X_MARCO = (window_width - self.ANCHO_MARCO) // 2
+        self.POS_Y_MARCO = (window_height - self.ALTO_MARCO) // 2
 
-        # Crea una cuadrícula de bloques inicialmente vacía
-        self.grid = [[None for _ in range(self.cols)] for _ in range(self.rows)]
+
+        self.NUM_CELDAS = 17
+        self.CELDA = self.ANCHO_MARCO // self.NUM_CELDAS
+
+
+        # Colores
+        self.BLANCO = (255, 255, 255)
+        self.GRIS = (200, 200, 200)
+
+        # Carga de imágenes
+        self.imagen_concreto = pygame.image.load("blocks/concreto.png")
+        self.imagen_madera = pygame.image.load("blocks/madera.jpeg")
+        self.imagen_acero = pygame.image.load("blocks/acero.png")
+
+        # Ajustar el tamaño de las imágenes
+        self.imagen_concreto = pygame.transform.scale(self.imagen_concreto, (self.CELDA, self.CELDA))
+        self.imagen_madera = pygame.transform.scale(self.imagen_madera, (self.CELDA, self.CELDA))
+        self.imagen_acero = pygame.transform.scale(self.imagen_acero, (self.CELDA, self.CELDA))
+
+        self.matriz_celdas = [[False for _ in range(self.NUM_CELDAS)] for _ in range(self.NUM_CELDAS)]
+        self.selected_block = "madera"
 
         # Crea una instancia del inventario del defensor
         self.inventory_defender = Inventory_Defender()
 
         # Carga la imagen del águila
         self.eagle_image = pygame.image.load("aguila3.png")  
+
+        # Por si quiere que el àguila sea del mismo tamaño que las celdas
+        #self.eagle_image = pygame.transform.scale(self.eagle_image, (self.CELDA, self.CELDA))
         self.eagle_rect = self.eagle_image.get_rect()
 
         # timer
@@ -715,6 +735,33 @@ class BlockScreen:
         self.confirmation_button_font = pygame.font.Font(None, 25)
         self.confirmation_button_text = "Confirmar Turno"
 
+    def dibujar_cuadricula(self):
+        for x in range(self.POS_X_MARCO, self.ANCHO_MARCO + self.POS_X_MARCO, self.CELDA):
+            pygame.draw.line(self.screen, self.GRIS, (x, self.POS_Y_MARCO), (x, self.ALTO_MARCO + self.POS_Y_MARCO))
+        for y in range(self.POS_Y_MARCO, self.ALTO_MARCO + self.POS_Y_MARCO, self.CELDA):
+            pygame.draw.line(self.screen, self.GRIS, (self.POS_X_MARCO, y), (self.ANCHO_MARCO + self.POS_X_MARCO, y))
+    
+    def dibujar_imagenes(self):
+        for x in range(self.NUM_CELDAS):
+            for y in range(self.NUM_CELDAS):
+                if self.matriz_celdas[x][y]:
+                    if self.matriz_celdas[x][y] == "concreto":
+                        self.screen.blit(self.imagen_concreto, (x * self.CELDA + self.POS_X_MARCO, y * self.CELDA + self.POS_Y_MARCO))
+                    elif self.matriz_celdas[x][y] == "madera":
+                        self.screen.blit(self.imagen_madera, (x * self.CELDA + self.POS_X_MARCO, y * self.CELDA + self.POS_Y_MARCO))
+                    elif self.matriz_celdas[x][y] == "acero":
+                        self.screen.blit(self.imagen_acero, (x * self.CELDA + self.POS_X_MARCO, y * self.CELDA + self.POS_Y_MARCO))
+    def es_dentro_del_marco(self, x, y):
+        if (self.POS_X_MARCO <= x < self.POS_X_MARCO + self.ANCHO_MARCO and
+            self.POS_Y_MARCO <= y < self.POS_Y_MARCO + self.ALTO_MARCO):
+            return True
+        return False
+    
+    def cuadro_ocupado(self, fila, columna):
+        if 0 <= fila < self.NUM_CELDAS and 0 <= columna < self.NUM_CELDAS:
+            return bool(self.matriz_celdas[fila][columna])
+        return False
+
     def draw_confirmation_button(self):
         pygame.draw.rect(self.screen, self.confirmation_button_color, self.confirmation_button_rect)
         text_surf = self.confirmation_button_font.render(self.confirmation_button_text, True, (0, 0, 0))
@@ -726,47 +773,64 @@ class BlockScreen:
         running = True
         selected_block = None
         message_timer = 0
-        eagle_x = 400  # Coordenada X inicial del águila
-        eagle_y = 300  # Coordenada Y inicial del águila
-        eagle_speed = 50  # Velocidad de movimiento del águila
+        eagle_row = 5  # Coordenada X inicial del águila
+        eagle_col = 2  # Coordenada Y inicial del águila
 
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
-                elif self.turn_timer_expired == False:
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        if event.button == 1:  # Botón izquierdo del ratón
-                            x, y = event.pos
-                            col = (x - grid_x) // self.cell_size
-                            row = (y - grid_y) // self.cell_size
-                            if 0 <= row < self.rows and 0 <= col < self.cols:
-                                # Comprueba si hay un bloque seleccionado en el inventario
-                                if self.grid[row][col] is None:
-                                    if selected_block:
-                                        if self.inventory_defender.use_block(selected_block):
-                                            self.grid[row][col] = Block(row, col, self.cell_size)
-                                        else:
-                                            message_timer = 100  # Mostrar mensaje durante 100 ciclos
-                                    else:
-                                        print("Selecciona un tipo de bloque del inventario primero")
-                                else:
-                                    print("La celda ya está ocupada por un bloque")
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    x, y = event.pos
+                    fila = (x - self.POS_X_MARCO) // self.CELDA
+                    columna = (y - self.POS_Y_MARCO) // self.CELDA
+                    
+                    # Obtenga las coordenadas absolutas del bloque
+                    bloque_x = fila * self.CELDA + self.POS_X_MARCO
+                    bloque_y = columna * self.CELDA + self.POS_Y_MARCO
+
+                    # Verifique si el bloque estará dentro del marco
+                    if not self.es_dentro_del_marco(bloque_x, bloque_y):
+                        continue
+
+                    # Comprueba si las coordenadas están dentro del rango
+                    if 0 <= fila < self.NUM_CELDAS and 0 <= columna < self.NUM_CELDAS:
+                        if self.matriz_celdas[fila][columna]:  # Si hay un bloque, lo quitamos
+                            self.inventory_defender.return_block(self.matriz_celdas[fila][columna])
+                            self.matriz_celdas[fila][columna] = None
+                        else:  # Intentamos agregar un nuevo bloque
+                            if selected_block and self.inventory_defender.use_block(selected_block):
+                                self.matriz_celdas[fila][columna] = selected_block
+                            else:
+                                message_timer = 100
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_1:
+                        selected_block = "concreto"
+                    elif event.key == pygame.K_2:
+                        selected_block = "madera"
+                    elif event.key == pygame.K_3:
+                        selected_block = "acero"
                     elif event.type == pygame.KEYDOWN:
+                        new_row = eagle_row
+                        new_col = eagle_col
                         if event.key == pygame.K_UP:
-                            eagle_y -= eagle_speed
+                            new_row -= 1
                         elif event.key == pygame.K_DOWN:
-                            eagle_y += eagle_speed
-                        if event.key == pygame.K_1:
-                            selected_block = "concreto"
-                        elif event.key == pygame.K_2:
-                            selected_block = "madera"
-                        elif event.key == pygame.K_3:
-                            selected_block = "acero"
-                        if event.key == pygame.K_LEFT:
-                            eagle_x -= eagle_speed
+                            new_row += 1
+                        elif event.key == pygame.K_LEFT:
+                            new_col -= 1
                         elif event.key == pygame.K_RIGHT:
-                            eagle_x += eagle_speed
+                            new_col += 1
+                        # Comprueba si el nuevo cuadro está vacío antes de mover el águila
+                    if (0 <= new_row < self.NUM_CELDAS and 
+                        0 <= new_col < self.NUM_CELDAS and 
+                        not self.cuadro_ocupado(new_row, new_col) and 
+                        self.es_dentro_del_marco(self.POS_X_MARCO + new_col * self.CELDA, 
+                                                self.POS_Y_MARCO + new_row * self.CELDA)):
+                        eagle_row = new_row
+                        eagle_col = new_col
                         if event.key == pygame.K_RETURN:
                             self.show_confirmation_screen()
                             self.turn_timer_expired = True
@@ -779,6 +843,9 @@ class BlockScreen:
             remaining_time = max(0, self.timer_duration - elapsed_time)
             minutes, seconds = divmod(remaining_time // 1000, 60)
 
+            self.dibujar_cuadricula()
+            self.dibujar_imagenes()
+
             # Render and display the timer on the screen
             font = pygame.font.Font(None, 36)
             timer_text = font.render(f"Time: {minutes:02}:{seconds:02}", True, (0, 0, 0))
@@ -789,30 +856,10 @@ class BlockScreen:
                 self.show_confirmation_screen()
                 self.turn_timer_expired = True
 
-
-
-            # Calcula el tamaño del área de la cuadrícula
-            grid_width = self.cols * self.cell_size
-            grid_height = self.rows * self.cell_size
-            grid_x = (800 - grid_width) // 2
-            grid_y = (600 - grid_height) // 2
-
-            # Dibuja la cuadrícula
-            for i in range(self.rows + 1):
-                y = grid_y + i * self.cell_size
-                pygame.draw.line(self.screen, (0, 0, 0), (grid_x, y), (grid_x + grid_width, y), 1)
-            for i in range(self.cols + 1):
-                x = grid_x + i * self.cell_size
-                pygame.draw.line(self.screen, (0, 0, 0), (x, grid_y), (x, grid_y + grid_height), 1)
-
-            # Dibuja los bloques en la cuadrícula
-            for row in range(self.rows):
-                for col in range(self.cols):
-                    if self.grid[row][col] is not None:
-                        self.grid[row][col].draw(self.screen)
-
-            # Dibuja el águila en la posición deseada
-            self.screen.blit(self.eagle_image, (eagle_x, eagle_y))  
+            # Dibuja el águila en la posición deseada basada en las coordenadas de la cuadrícula
+            eagle_x = self.POS_X_MARCO + eagle_col * self.CELDA
+            eagle_y = self.POS_Y_MARCO + eagle_row * self.CELDA
+            self.screen.blit(self.eagle_image, (eagle_x, eagle_y)) 
 
             # Dibuja el inventario del defensor
             inventory_x = 20
