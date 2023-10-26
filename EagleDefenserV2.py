@@ -27,7 +27,7 @@ class main_Screen(customtkinter.CTk):
         self.button_login = customtkinter.CTkButton(self, text="Iniciar sesión", command=self.login,fg_color="transparent")
         self.button_login.place(relx=0.5, rely=0.5, anchor="center")
 
-        self.button_play = customtkinter.CTkButton(self, text="Jugar", command=self.play, fg_color="transparent")
+        self.button_play = customtkinter.CTkButton(self, text="Jugar", command=self.register, fg_color="transparent")
         self.button_play.place(relx=0.5, rely=0.6, anchor="center")
         
         self.song_directory = "Songs/Menu"  # Carpeta donde se encuentran las canciones
@@ -62,14 +62,19 @@ class main_Screen(customtkinter.CTk):
         app.minsize(900, 600)
         app.mainloop()
 
-    def play(self): # Restricción de una Partida a la vez
-        global game_in_progress
-        if not game_in_progress:
-            game_in_progress = True
-            self.destroy()
-            start_game()
-        else:
-            print("Ya hay una partida en curso")
+    def register(self): # Restricción de una Partida a la vez
+        #global game_in_progress
+        #if not game_in_progress:
+        #    game_in_progress = True
+        self.destroy()
+        app = LogIn_Screen_2()
+        app.title("Eagle Defender")
+        app.minsize(900, 600)
+        app.mainloop()
+        #    start_game()
+            
+        #else:
+        #    print("Ya hay una partida en curso")
 
     def play_next_song(self):
         """Reproduce la siguiente canción y establece un callback para cuando termine."""
@@ -146,6 +151,83 @@ class LogIn_Screen(customtkinter.CTk):
             else:
                 print("Error en las credenciales")
 
+    def back(self):
+        self.destroy()
+        app = main_Screen()
+        app.title("Eagle Defender")
+        app.minsize(800, 600)
+        app.mainloop()
+
+class LogIn_Screen_2(customtkinter.CTk):
+    def __init__(self):
+        super().__init__()
+        self.geometry("800x600")
+
+        self.label_username = customtkinter.CTkLabel(self, text="Nombre de usuario:")
+        self.label_username.place(relx=0.4, rely=0.4, anchor="center")
+        self.entry_username = customtkinter.CTkEntry(self)
+        self.entry_username.place(relx=0.6, rely=0.4, anchor="center")
+
+        self.label_password = customtkinter.CTkLabel(self, text="Contraseña:")
+        self.label_password.place(relx=0.4, rely=0.5, anchor="center")
+        self.entry_password = customtkinter.CTkEntry(self, show="*")
+        self.entry_password.place(relx=0.6, rely=0.5,anchor="center")
+
+        self.button_login = customtkinter.CTkButton(self, text="Iniciar sesión", command=self.login)
+        self.button_login.place(relx=0.5, rely=0.6, anchor="center")
+
+        self.button_register = customtkinter.CTkButton(self, text="Registrarse", command=self.register)
+        self.button_register.place(relx=0.5, rely=0.7, anchor="center")
+        
+        self.button_play = customtkinter.CTkButton(self, text="Play",command=self.play)
+        self.button_play.place(relx=0.5, rely=0.8, anchor="center")
+
+        self.button_back = customtkinter.CTkButton(self, text="Back", command=self.back)
+        self.button_back.place(relx=0.5, rely=0.9, anchor="center")
+
+    def register(self):
+        self.destroy()
+        app = register_Screen()
+        app.title("Eagle Defender")
+        app.minsize(800, 600)
+        app.mainloop()
+
+    def login(self):
+        if self.entry_username.get() == "admin" and self.entry_password.get() == "123":
+            pygame.mixer.music.stop()
+            self.destroy()
+            app = Admin_Screen()
+            app.title("Eagle Defender")
+            app.minsize(800, 600)
+            app.mainloop()
+        
+        else:
+            connection = sqlite3.connect("users.db")
+            cursor = connection.cursor()
+
+            cursor.execute('''
+            SELECT * FROM users WHERE nickname=? AND password=?
+            ''', (self.entry_username.get(), self.entry_password.get()))
+
+            user = cursor.fetchone()
+            connection.close()
+
+            if user:
+                print("Inicio de sesión exitoso")
+                self.destroy()
+                start_game()
+            else:
+                print("Error en las credenciales")
+                
+    def play(self): # Restricción de una Partida a la vez
+        global game_in_progress
+        if not game_in_progress:
+            game_in_progress = True
+            self.destroy()
+            start_game()
+        else:
+            print("Ya hay una partida en curso")           
+    
     def back(self):
         self.destroy()
         app = main_Screen()
@@ -964,7 +1046,6 @@ def start_game():
     game_in_progress = True
     block_screen_instance = BlockScreen()
     block_screen_instance.main_loop()
-
 
 def setup_database():
     # Conectar a la base de datos
