@@ -678,6 +678,8 @@ class BlockScreen:
         self.screen = pygame.display.set_mode((window_width, window_height))
         pygame.display.set_caption("Eagle Defender")
 
+        self.defender_turn_over = False
+
         # Dimensiones del marco interno
         self.ANCHO_MARCO = window_width - 100
         self.ALTO_MARCO = window_height - 150
@@ -782,6 +784,10 @@ class BlockScreen:
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
+                     # Bloquea la colocación de bloques si el turno del defensor ha terminado
+                    if self.defender_turn_over:
+                        continue
+
                     x, y = event.pos
                     fila = (x - self.POS_X_MARCO) // self.CELDA
                     columna = (y - self.POS_Y_MARCO) // self.CELDA
@@ -806,6 +812,10 @@ class BlockScreen:
                                 message_timer = 100
 
                 if event.type == pygame.KEYDOWN:
+                    if self.defender_turn_over:
+                    # Bloquea el movimiento y la selección de bloques si el turno del defensor ha terminado
+                        continue
+
                     if event.key == pygame.K_1:
                         selected_block = "concreto"
                     elif event.key == pygame.K_2:
@@ -831,9 +841,9 @@ class BlockScreen:
                                                 self.POS_Y_MARCO + new_row * self.CELDA)):
                         eagle_row = new_row
                         eagle_col = new_col
-                        if event.key == pygame.K_RETURN:
-                            self.show_confirmation_screen()
-                            self.turn_timer_expired = True
+                    if event.key == pygame.K_RETURN:
+                        self.show_confirmation_screen()
+                        self.turn_timer_expired = True
                 elif self.turn_timer_expired == True:
                     pass    
 
@@ -892,6 +902,7 @@ class BlockScreen:
 
 
     def show_confirmation_screen(self):
+        self.defender_turn_over = True
         confirmation_font = pygame.font.Font(None, 40)
         confirmation_text = confirmation_font.render("Turno completado. ¿Listo para el siguiente jugador?", True, (0, 0, 0))
         confirmation_rect = confirmation_text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2))
