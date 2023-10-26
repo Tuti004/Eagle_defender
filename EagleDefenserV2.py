@@ -702,6 +702,26 @@ class BlockScreen:
         self.turn_timer_expired = False
         self.confirmation_received = False
 
+        # Musica de fondo
+        pygame.mixer.init()
+        self.volume = 0.5
+        pygame.mixer.music.set_volume(self.volume)
+
+        self.defender_songs = "Songs/Defensor"
+        self.init_music(self.defender_songs)
+
+        self.confirmation_button_color = (200, 200, 200)  # Color gris
+        self.confirmation_button_rect = pygame.Rect(650, 530, 120, 40) 
+        self.confirmation_button_font = pygame.font.Font(None, 25)
+        self.confirmation_button_text = "Confirmar Turno"
+
+    def draw_confirmation_button(self):
+        pygame.draw.rect(self.screen, self.confirmation_button_color, self.confirmation_button_rect)
+        text_surf = self.confirmation_button_font.render(self.confirmation_button_text, True, (0, 0, 0))
+        text_rect = text_surf.get_rect(center=self.confirmation_button_rect.center)
+        self.screen.blit(text_surf, text_rect)
+
+
     def main_loop(self):
         running = True
         selected_block = None
@@ -747,6 +767,9 @@ class BlockScreen:
                             eagle_x -= eagle_speed
                         elif event.key == pygame.K_RIGHT:
                             eagle_x += eagle_speed
+                        if event.key == pygame.K_RETURN:
+                            self.show_confirmation_screen()
+                            self.turn_timer_expired = True
                 elif self.turn_timer_expired == True:
                     pass    
 
@@ -811,7 +834,9 @@ class BlockScreen:
                 player.update() 
                 player.draw(self.screen)   
                 bullets.update()
-                bullets.draw(self.screen)      
+                bullets.draw(self.screen) 
+                 
+            self.draw_confirmation_button()     
 
             pygame.display.flip()
 
@@ -824,6 +849,7 @@ class BlockScreen:
         confirmation_text = confirmation_font.render("Turno completado. ¿Listo para el siguiente jugador?", True, (0, 0, 0))
         confirmation_rect = confirmation_text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2))
         self.screen.blit(confirmation_text, confirmation_rect)
+        pygame.mixer.music.stop()
 
         pygame.display.flip()
 
@@ -831,6 +857,12 @@ class BlockScreen:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                     self.confirmation_received = True
+
+                    self.attacker_songs = "Songs/Atacante"
+                    self.init_music(self.attacker_songs)
+
+                    self.timer_start = pygame.time.get_ticks()
+                    self.turn_timer_expired = False
 
     def draw_inventory_block(self, x, y, block_type, count):
         block_color = (255, 255, 255)
@@ -856,6 +888,28 @@ class BlockScreen:
         count_text = font.render(str(count), True, (0, 0, 0))
         count_rect = count_text.get_rect(center=(x + 25, y + 25))
         self.screen.blit(count_text, count_rect)
+
+    def init_music(self, directory):
+        """Initialize the music player with songs from the provided directory."""
+        self.song_list = []
+        
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                if file.endswith(".mp3"):
+                    self.song_list.append(os.path.join(root, file))
+
+        if not self.song_list:
+            print("No songs found in the directory.")
+            return
+        
+        random.shuffle(self.song_list)
+        self.current_song_index = 0
+        self.play_next_song()
+
+    def play_next_song(self):
+        """Reproduce the next song."""
+        pygame.mixer.music.load(self.song_list[self.current_song_index])
+        pygame.mixer.music.play()
 
 #Función para iniciar el juego
 def start_game():
