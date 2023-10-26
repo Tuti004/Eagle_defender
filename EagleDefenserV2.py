@@ -32,6 +32,9 @@ class main_Screen(customtkinter.CTk):
         
         self.song_directory = "Songs/Menu"  # Carpeta donde se encuentran las canciones
         self.song_list = []  # Lista de canciones en la carpeta
+        
+        self.button_help = customtkinter.CTkButton(self, text="Ayuda", command=self.help, fg_color="transparent")
+        self.button_help.place(relx=0.5, rely=0.7, anchor="center")
 
         # Inicializar pygame para la reproducción de música
         pygame.mixer.init()
@@ -72,6 +75,13 @@ class main_Screen(customtkinter.CTk):
         app.title("Eagle Defender")
         app.minsize(900, 600)
         app.mainloop()
+        
+    def help(self):
+        self.destroy()
+        app = Help_Screen()
+        app.title("Eagle Defender")
+        app.minsize(900,600)
+        app.mainloop()
 
     def play_next_song(self):
         """Reproduce la siguiente canción y establece un callback para cuando termine."""
@@ -89,6 +99,33 @@ class main_Screen(customtkinter.CTk):
         self.volume = self.volume_slider.get()
         pygame.mixer.music.set_volume(self.volume)
 
+class Help_Screen(customtkinter.CTk):
+    def __init__(self):
+        super().__init__()
+        self.geometry("800x600")
+        
+        self.label_info_eagle = customtkinter.CTkLabel(self, text="Movimiento del águila")
+        self.label_info_eagle.place(relx=0.2, rely=0.2, anchor="center")
+        
+        self.label_info_blocks = customtkinter.CTkLabel(self, text="Bloques")
+        self.label_info_blocks.place(relx=0.2, rely=0.6, anchor="center")
+        
+        self.label_info_tank = customtkinter.CTkLabel(self, text="Movmimiento del tanque")
+        self.label_info_tank.place(relx=0.8, rely=0.2, anchor="center")
+        
+        self.label_info_shoot = customtkinter.CTkLabel(self, text="Disparos")
+        self.label_info_shoot.place(relx=0.8, rely=0.6, anchor="center")
+        
+        self.button_back = customtkinter.CTkButton(self, text="Back", command=self.back)
+        self.button_back.place(relx=0.5, rely=0.8, anchor="center")
+        
+    def back(self):
+        self.destroy()
+        app = main_Screen()
+        app.title("Eagle Defender")
+        app.minsize(800, 600)
+        app.mainloop()
+            
 
 class LogIn_Screen(customtkinter.CTk):
     def __init__(self):
