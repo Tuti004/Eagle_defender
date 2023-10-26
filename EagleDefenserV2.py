@@ -27,7 +27,7 @@ class main_Screen(customtkinter.CTk):
         self.button_login = customtkinter.CTkButton(self, text="Iniciar sesión", command=self.login,fg_color="transparent")
         self.button_login.place(relx=0.5, rely=0.5, anchor="center")
 
-        self.button_play = customtkinter.CTkButton(self, text="Jugar", command=self.register, fg_color="transparent")
+        self.button_play = customtkinter.CTkButton(self, text="Invitar a jugador 2", command=self.invite, fg_color="transparent")
         self.button_play.place(relx=0.5, rely=0.6, anchor="center")
         
         self.song_directory = "Songs/Menu"  # Carpeta donde se encuentran las canciones
@@ -62,19 +62,16 @@ class main_Screen(customtkinter.CTk):
         app.minsize(900, 600)
         app.mainloop()
 
-    def register(self): # Restricción de una Partida a la vez
-        #global game_in_progress
-        #if not game_in_progress:
-        #    game_in_progress = True
+    def invite(self): # Restricción de una Partida a la vez
+        global game_in_progress
+        if not game_in_progress:
+            game_in_progress = True
+            
         self.destroy()
         app = LogIn_Screen_2()
         app.title("Eagle Defender")
         app.minsize(900, 600)
         app.mainloop()
-        #    start_game()
-            
-        #else:
-        #    print("Ya hay una partida en curso")
 
     def play_next_song(self):
         """Reproduce la siguiente canción y establece un callback para cuando termine."""
@@ -147,7 +144,10 @@ class LogIn_Screen(customtkinter.CTk):
             if user:
                 print("Inicio de sesión exitoso")
                 self.destroy()
-                start_game()
+                app = main_Screen()
+                app.title("Eagle Defender")
+                app.minsize(800,600)
+                app.mainloop()
             else:
                 print("Error en las credenciales")
 
@@ -157,7 +157,7 @@ class LogIn_Screen(customtkinter.CTk):
         app.title("Eagle Defender")
         app.minsize(800, 600)
         app.mainloop()
-
+        
 class LogIn_Screen_2(customtkinter.CTk):
     def __init__(self):
         super().__init__()
@@ -178,12 +178,9 @@ class LogIn_Screen_2(customtkinter.CTk):
 
         self.button_register = customtkinter.CTkButton(self, text="Registrarse", command=self.register)
         self.button_register.place(relx=0.5, rely=0.7, anchor="center")
-        
-        self.button_play = customtkinter.CTkButton(self, text="Play",command=self.play)
-        self.button_play.place(relx=0.5, rely=0.8, anchor="center")
 
         self.button_back = customtkinter.CTkButton(self, text="Back", command=self.back)
-        self.button_back.place(relx=0.5, rely=0.9, anchor="center")
+        self.button_back.place(relx=0.5, rely=0.8, anchor="center")
 
     def register(self):
         self.destroy()
@@ -215,19 +212,10 @@ class LogIn_Screen_2(customtkinter.CTk):
             if user:
                 print("Inicio de sesión exitoso")
                 self.destroy()
-                start_game()
+                start_game()                    
             else:
                 print("Error en las credenciales")
-                
-    def play(self): # Restricción de una Partida a la vez
-        global game_in_progress
-        if not game_in_progress:
-            game_in_progress = True
-            self.destroy()
-            start_game()
-        else:
-            print("Ya hay una partida en curso")           
-    
+
     def back(self):
         self.destroy()
         app = main_Screen()
