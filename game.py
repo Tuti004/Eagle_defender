@@ -25,20 +25,98 @@ class Inventory_Defender:
     def return_block(self, block_type):
         self.blocks[block_type] += 1
 
-#player class
-class Player(pygame.sprite.Sprite):
-    def __init__(self): #empieza clase Player
-        super().__init__() #parent class
-        self.sprite_path = pygame.image.load('assets/tank.png')
+# Clase para las balas de tipo Bomba
+class BombBullet(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        current_directory = os.path.dirname(__file__)
+        image_path = os.path.join(current_directory, 'assets', 'bomba.png')
+        self.sprite_path = pygame.image.load(image_path)
         self.rect = self.sprite_path.get_rect()
         self.image = self.sprite_path
-        self.rect = self.image.get_rect()
+        self.rect.midbottom = (x, y)
+        self.speed = -4
+
+    def update(self):
+        self.rect.move_ip(self.speed, 0)
+        global last_shot_time
+        current_time = pygame.time.get_ticks()
+        if current_time - last_shot_time > 320:
+            self.kill()
+
+class FireBullet(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        current_directory = os.path.dirname(__file__)
+        image_path = os.path.join(current_directory, 'assets', 'bala_fuego.png')
+        self.sprite_path = pygame.image.load(image_path)
+        self.rect = self.sprite_path.get_rect()
+        self.image = self.sprite_path
+        self.rect.midbottom = (x, y)
+        self.speed = -4
+
+    def update(self):
+        self.rect.move_ip(self.speed, 0)
+        global last_shot_time
+        current_time = pygame.time.get_ticks()
+        if current_time - last_shot_time > 320:
+            self.kill()
+
+class WaterBullet(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        current_directory = os.path.dirname(__file__)
+        image_path = os.path.join(current_directory, 'assets', 'bala_agua.png')
+        self.sprite_path = pygame.image.load(image_path)
+        self.rect = self.sprite_path.get_rect()
+        self.image = self.sprite_path
+        self.rect.midbottom = (x, y)
+        self.speed = -4
+
+    def update(self):
+        self.rect.move_ip(self.speed, 0)
+        global last_shot_time
+        current_time = pygame.time.get_ticks()
+        if current_time - last_shot_time > 320:
+            self.kill()
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self, screen):
+        super().__init__()
+        current_directory = os.path.dirname(__file__)
+        image_path = os.path.join(current_directory, 'assets', 'tank.png')
+        self.sprite_path = pygame.image.load(image_path)
+        self.rect = self.sprite_path.get_rect()
+        self.image = self.sprite_path
         self.x = 200
         self.y = 200
         self.x_change = 0
         self.y_change = 0
         self.hearts = 6
         self.speed = 1
+        self.rect.midbottom = (self.x, self.y)
+        self.screen = screen  # Almacena la referencia a la pantalla
+
+        self.bullet_inventory = {
+            BombBullet: 5,
+            FireBullet: 5,
+            WaterBullet: 5
+        }
+
+        self.selected_bullet_type = WaterBullet
+        self.message_timer = 0
+    
+    def select_bomb_bullet(self):
+        self.selected_bullet_type = BombBullet
+
+    def select_fire_bullet(self):
+        self.selected_bullet_type = FireBullet
+
+    def select_water_bullet(self):
+        self.selected_bullet_type = WaterBullet
+
+    def player_input(self):
+        keys = pygame.key.get_pressed()
 
     def player_input(self): #esta funcion permite el moviento con wasd del jugador
         keys = pygame.key.get_pressed()
@@ -58,7 +136,14 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_d]:
             self.x_change = +self.speed
         if keys[pygame.K_SPACE]:
-            bullet_cd(self)  
+            bullet_cd(self)
+
+        if keys[pygame.K_4]:
+            self.select_bomb_bullet()  # Seleccionar bombas
+        if keys[pygame.K_5]:
+            self.select_fire_bullet()  # Seleccionar fuego
+        if keys[pygame.K_6]:
+            self.select_water_bullet()  # Seleccionar agua  
         
     def apply_border(self): #esta funcion causa que el jugador no se pueda salir de los bordes
         if self.x <= 30:
@@ -78,16 +163,26 @@ class Player(pygame.sprite.Sprite):
         self.rect.midbottom = (self.x, self.y)
         #if pygame.sprite.spritecollide(self, aliens, False):
 #            self.hearts = self.hearts-1
-
+        if self.message_timer > 0:
+            font = pygame.font.Font(None, 36)
+            text = font.render("No tienes balas disponibles", True, (255, 0, 0))
+            text_rect = text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() - 50))
+            self.screen.blit(text, text_rect)
+            self.message_timer -= 1
+            
+screen = pygame.display.set_mode((800, 600))
 player = pygame.sprite.Group() #spritegroup player
-player.add(Player()) #agrega a player al sprite group
+player.add(Player(screen)) #agrega a player al sprite group
 
 bullets = pygame.sprite.Group()
 last_shot_time = 0
+
 class PlayerBullet(pygame.sprite.Sprite):
-    def __init__(self, x, y): #el x y y aqui permite que cuando se agrege a bullets a su grupo de balas se ponga en las x y y del player
+    def __init__(self, x, y):
         super().__init__()
-        self.sprite_path = pygame.image.load('assets/bala_jugador.png')        
+        current_directory = os.path.dirname(__file__)
+        image_path = os.path.join(current_directory, 'assets', 'bala_jugador.png')
+        self.sprite_path = pygame.image.load(image_path)
         self.rect = self.sprite_path.get_rect()
         self.image = self.sprite_path
         self.rect = self.image.get_rect()
@@ -101,15 +196,37 @@ class PlayerBullet(pygame.sprite.Sprite):
         if current_time - last_shot_time > 320:
             self.kill()
 
-def bullet_cd(player): #cooldown de balas de jugador
+def bullet_cd(player):
     global last_shot_time
     current_time = pygame.time.get_ticks()
-    if current_time - last_shot_time < 600: #cooldown
-        return
-    new_bullet = PlayerBullet(player.rect.centerx-32, player.rect.centery+15) #cada vez que termina el cooldown agrega la clase bala a su grupo. o sea dispara
-    bullets.add(new_bullet)
-    last_shot_time = current_time #le hace update al ultimo shot reseteando el cooldown
+    new_bullet = None  # Inicializa la variable fuera de las declaraciones condicionales
 
+    if current_time - last_shot_time < 600:  # cooldown
+        return
+    
+    if player.selected_bullet_type == BombBullet:
+        if player.bullet_inventory[BombBullet] > 0:
+            new_bullet = BombBullet(player.rect.centerx - 32, player.rect.centery + 15)
+            player.bullet_inventory[BombBullet] -= 1
+        else:
+            player.message_timer = 60  # Mostrar mensaje durante 1 segundo
+    elif player.selected_bullet_type == FireBullet:
+        if player.bullet_inventory[FireBullet] > 0:
+            new_bullet = FireBullet(player.rect.centerx - 32, player.rect.centery + 15)
+            player.bullet_inventory[FireBullet] -= 1
+        else:
+            player.message_timer = 60  # Mostrar mensaje durante 1 segundo
+    elif player.selected_bullet_type == WaterBullet:
+        if player.bullet_inventory[WaterBullet] > 0:
+            new_bullet = WaterBullet(player.rect.centerx - 32, player.rect.centery + 15)
+            player.bullet_inventory[WaterBullet] -= 1
+        else:
+            player.message_timer = 60  # Mostrar mensaje durante 1 segundo
+     
+    if new_bullet is not None:
+        bullets.add(new_bullet)
+        last_shot_time = current_time
+        
 class BlockScreen:
     def __init__(self, player1_username, player2_username, player1_role):
         pygame.init()
