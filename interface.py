@@ -15,6 +15,94 @@ from game import BlockScreen
 # Variable global para rastrear si hay una partida en curso
 game_in_progress = False
 
+defender_role = None
+attacker_role = None
+
+class role_selection_1(customtkinter.CTk):
+    def __init__(self, login_screen):
+        super().__init__()
+        self.geometry("800x600")
+        self.login_screen = login_screen
+
+        self.label_role = customtkinter.CTkLabel(self, text=f"Jugador 1, elige tu rol:")
+        self.label_role.place(relx=0.5, rely=0.4, anchor="center")
+
+        self.button_attacker = customtkinter.CTkButton(self, text="Atacante", command=self.set_role_attacker)
+        self.button_attacker.place(relx=0.4, rely=0.5, anchor="center")
+
+        self.button_defender = customtkinter.CTkButton(self, text="Defensor", command=self.set_role_defender)
+        self.button_defender.place(relx=0.6, rely=0.5, anchor="center")
+
+        self.button_back = customtkinter.CTkButton(self, text="Back", command=self.back)
+        self.button_back.place(relx=0.5, rely=0.8, anchor="center")
+
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def on_closing(self):
+        self.destroy()
+        self.quit()
+    
+    def set_role_attacker(self):
+        global attacker_role
+        attacker_role = True
+        self.withdraw()
+        self.app = LogIn_Screen_2(self)
+        self.app.title("Eagle Defender")
+        self.app.minsize(800, 600)
+        self.app.deiconify()
+    
+    def set_role_defender(self):
+        global defender_role
+        defender_role = True
+        self.withdraw()
+        self.app = LogIn_Screen_2(self)
+        self.app.title("Eagle Defender")
+        self.app.minsize(800, 600)
+        self.app.deiconify()
+
+    def back(self):
+        self.withdraw()
+        self.login_screen.deiconify()
+
+class role_selection_2(customtkinter.CTk):
+    def __init__(self, login_screen2):
+        global defender_role
+        global attacker_role
+        super().__init__()
+        self.geometry("800x600")
+        self.login_screen2 = login_screen2
+
+        self.label_role = customtkinter.CTkLabel(self, text=f"Jugador 2, elige tu rol:")
+        self.label_role.place(relx=0.5, rely=0.4, anchor="center")
+
+        if defender_role:
+            self.button_defender = customtkinter.CTkButton(self, text="Defensor", command=self.set_role_defender)
+            self.button_defender.place(relx=0.5, rely=0.5, anchor="center")
+        elif attacker_role:
+            self.button_attacker = customtkinter.CTkButton(self, text="Atacante", command=self.set_role_attacker)
+            self.button_attacker.place(relx=0.5, rely=0.5, anchor="center")
+        
+        self.button_back = customtkinter.CTkButton(self, text="Back", command=self.back)
+        self.button_back.place(relx=0.5, rely=0.8, anchor="center")
+
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def on_closing(self):
+        self.destroy()
+        self.quit()
+    
+    def set_role_attacker(self):
+        self.withdraw()
+        start_game()
+    
+    def set_role_defender(self):
+        self.withdraw()
+        start_game()
+    
+    def back(self):
+        self.withdraw()
+        self.login_screen2.deiconify()
+    
 
 class main_Screen(customtkinter.CTk):
     def __init__(self):
@@ -29,9 +117,6 @@ class main_Screen(customtkinter.CTk):
         
         self.button_help = customtkinter.CTkButton(self, text="Ayuda", command=self.help, fg_color="transparent")
         self.button_help.place(relx=0.5, rely=0.7, anchor="center")
-
-        self.button_play = customtkinter.CTkButton(self, text="Play", command=self.play, fg_color="transparent")
-        self.button_play.place(relx=0.5, rely=0.2, anchor="center")
 
         # Inicializar pygame para la reproducción de música
         pygame.mixer.init()
@@ -55,30 +140,36 @@ class main_Screen(customtkinter.CTk):
         self.volume_slider.place(relx=0.5, rely=0.8, anchor="center")
         self.volume_slider.bind("<Motion>", self.update_volume)
 
-    def login(self):
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def on_closing(self):
         self.destroy()
-        app = LogIn_Screen()
-        app.title("Eagle Defender")
-        app.minsize(900, 600)
-        app.mainloop()
+        self.quit()
+
+    def login(self):
+        self.withdraw()
+        self.login_screen = LogIn_Screen(self)
+        self.login_screen.title("Eagle Defender")
+        self.login_screen.minsize(800, 600)
+        self.login_screen.deiconify()
 
     def invite(self): # Restricción de una Partida a la vez
         global game_in_progress
         if not game_in_progress:
             game_in_progress = True
-            
-        self.destroy()
-        app = LogIn_Screen_2()
-        app.title("Eagle Defender")
-        app.minsize(900, 600)
-        app.mainloop()
+
+        self.withdraw()
+        self.app = LogIn_Screen_2(self)
+        self.app.title("Eagle Defender")
+        self.app.minsize(800,600)
+        self.app.deiconify()
         
     def help(self):
-        self.destroy()
-        app = Help_Screen()
-        app.title("Eagle Defender")
-        app.minsize(900,600)
-        app.mainloop()
+        self.withdraw()
+        self.app = Help_Screen(self)
+        self.app.title("Eagle Defender")
+        self.app.minsize(800,600)
+        self.app.deiconify()
 
     def play_next_song(self):
         """Reproduce la siguiente canción y establece un callback para cuando termine."""
@@ -97,9 +188,10 @@ class main_Screen(customtkinter.CTk):
         pygame.mixer.music.set_volume(self.volume)
 
 class Help_Screen(customtkinter.CTk):
-    def __init__(self):
+    def __init__(self, main_screen):
         super().__init__()
         self.geometry("800x600")
+        self.main_screen = main_screen
         
         self.label_info_eagle = customtkinter.CTkLabel(self, text="Movimiento del águila")
         self.label_info_eagle.place(relx=0.2, rely=0.2, anchor="center")
@@ -115,19 +207,23 @@ class Help_Screen(customtkinter.CTk):
         
         self.button_back = customtkinter.CTkButton(self, text="Back", command=self.back)
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
+
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def on_closing(self):
+        self.destroy()
+        self.quit()        
         
     def back(self):
-        self.destroy()
-        app = main_Screen()
-        app.title("Eagle Defender")
-        app.minsize(800, 600)
-        app.mainloop()
+        self.withdraw()
+        self.main_screen.deiconify()
             
 
 class LogIn_Screen(customtkinter.CTk):
-    def __init__(self):
+    def __init__(self, main_screen):
         super().__init__()
         self.geometry("800x600")
+        self.main_screen = main_screen
 
         self.label_username = customtkinter.CTkLabel(self, text="Nombre de usuario:")
         self.label_username.place(relx=0.4, rely=0.4, anchor="center")
@@ -148,21 +244,30 @@ class LogIn_Screen(customtkinter.CTk):
         self.button_back = customtkinter.CTkButton(self, text="Back", command=self.back)
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
 
-    def register(self):
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def on_closing(self):
         self.destroy()
-        app = register_Screen()
-        app.title("Eagle Defender")
-        app.minsize(800, 600)
-        app.mainloop()
+        self.quit()        
+
+    def register(self):
+
+        self.withdraw()
+        self.app = register_Screen(self)
+        self.app.title("Eagle Defender")
+        self.app.minsize(800,600)
+        self.app.deiconify()
 
     def login(self):
+        global player1
         if self.entry_username.get() == "admin" and self.entry_password.get() == "123":
             pygame.mixer.music.stop()
-            self.destroy()
-            app = Admin_Screen()
-            app.title("Eagle Defender")
-            app.minsize(800, 600)
-            app.mainloop()
+
+            self.withdraw()
+            self.app = Admin_Screen(self)
+            self.app.title("Eagle Defender")
+            self.app.minsize(800,600)
+            self.app.deiconify()
         
         else:
             connection = sqlite3.connect("users.db")
@@ -177,25 +282,24 @@ class LogIn_Screen(customtkinter.CTk):
 
             if user:
                 print("Inicio de sesión exitoso")
-                self.destroy()
-                app = main_Screen()
-                app.title("Eagle Defender")
-                app.minsize(800,600)
-                app.mainloop()
+                player1 = True
+                self.withdraw()
+                self.app = role_selection_1(self)
+                self.app.title("Eagle Defender")
+                self.app.minsize(800, 600)
+                self.app.deiconify()
             else:
                 print("Error en las credenciales")
 
     def back(self):
-        self.destroy()
-        app = main_Screen()
-        app.title("Eagle Defender")
-        app.minsize(800, 600)
-        app.mainloop()
+        self.withdraw()
+        self.main_screen.deiconify()
         
 class LogIn_Screen_2(customtkinter.CTk):
-    def __init__(self):
+    def __init__(self, login_screen):
         super().__init__()
         self.geometry("800x600")
+        self.login_screen = login_screen
 
         self.label_username = customtkinter.CTkLabel(self, text="Nombre de usuario:")
         self.label_username.place(relx=0.4, rely=0.4, anchor="center")
@@ -216,21 +320,28 @@ class LogIn_Screen_2(customtkinter.CTk):
         self.button_back = customtkinter.CTkButton(self, text="Back", command=self.back)
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
 
-    def register(self):
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def on_closing(self):
         self.destroy()
-        app = register_Screen()
-        app.title("Eagle Defender")
-        app.minsize(800, 600)
-        app.mainloop()
+        self.quit()        
+
+    def register(self):
+
+        self.withdraw()
+        self.app = register_Screen(self)
+        self.app.title("Eagle Defender")
+        self.app.minsize(800,600)
+        self.app.deiconify()
 
     def login(self):
         if self.entry_username.get() == "admin" and self.entry_password.get() == "123":
             pygame.mixer.music.stop()
-            self.destroy()
-            app = Admin_Screen()
-            app.title("Eagle Defender")
-            app.minsize(800, 600)
-            app.mainloop()
+            self.withdraw()
+            self.app = Admin_Screen(self)
+            self.app.title("Eagle Defender")
+            self.app.minsize(800,600)
+            self.app.deiconify()
         
         else:
             connection = sqlite3.connect("users.db")
@@ -246,21 +357,22 @@ class LogIn_Screen_2(customtkinter.CTk):
             if user:
                 print("Inicio de sesión exitoso")
                 self.withdraw()
-                start_game()                    
+                self.app = role_selection_2(self)
+                self.app.title("Eagle Defender")
+                self.app.minsize(800, 600)
+                self.app.deiconify()                  
             else:
                 print("Error en las credenciales")
 
     def back(self):
-        self.destroy()
-        app = main_Screen()
-        app.title("Eagle Defender")
-        app.minsize(800, 600)
-        app.mainloop()
+        self.withdraw()
+        self.login_screen.deiconify()
 
 class register_Screen(customtkinter.CTk):
-    def __init__(self):
+    def __init__(self, login_screen):
         super().__init__()
         self.geometry("800x600")
+        self.login_screen = login_screen
 
         self.uploaded_files = []
 
@@ -321,6 +433,12 @@ class register_Screen(customtkinter.CTk):
         # Botón Volver
         self.button_back = customtkinter.CTkButton(self, text="Volver", command=self.back)
         self.button_back.place(relx=0.9, rely=0.1, anchor="center")
+
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def on_closing(self):
+        self.destroy()
+        self.quit()        
     
     def add_user_file(self, folder_name):
         if folder_name == "Photos":
@@ -438,16 +556,14 @@ class register_Screen(customtkinter.CTk):
     
     def back(self):
         self.cleanup_uploaded_files()  # Limpia los archivos subidos
-        self.destroy()
-        app = LogIn_Screen()
-        app.title("Eagle Defender")
-        app.minsize(800, 600)
-        app.mainloop()
+        self.withdraw()
+        self.login_screen.deiconify()
 
 class Admin_Screen(customtkinter.CTk):
-    def __init__(self):
+    def __init__(self, login_screen):
         super().__init__()
         self.geometry("800x600")
+        self.login_screen = login_screen
 
         self.songs_frames = {}
         self.players = {}
@@ -520,16 +636,19 @@ class Admin_Screen(customtkinter.CTk):
 
         # Variable para almacenar el estado de la subida y los posibles errores
         self.upload_status = customtkinter.StringVar(value="Estado: Esperando archivo o link...")
-
-        # Agregar el label de estado en cada tabview
-        self.upload_status = customtkinter.StringVar(value="Estado: Esperando archivo o link...")
         for tab_name in self.tab_names:
-            label_status = customtkinter.CTkLabel(self.tabview.tab(tab_name), textvariable=self.upload_status)
-            label_status.place(relx=0.5, rely=0.9, anchor="center")
+            self.label_status = customtkinter.CTkLabel(self.tabview.tab(tab_name), textvariable=self.upload_status)
+            self.label_status.place(relx=0.5, rely=0.9, anchor="center")
 
         # Botón Volver
         self.button_back = customtkinter.CTkButton(self, text="Volver", command=self.back)
         self.button_back.place(relx=0.9, rely=0.05, anchor="center")
+
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def on_closing(self):
+        self.destroy()
+        self.quit()        
 
     def add_scrollable_frame_to_tab(self, tab_name):
         songs = self.load_songs_from_folder(tab_name)
@@ -665,11 +784,8 @@ class Admin_Screen(customtkinter.CTk):
         self.upload_status.set("Estado: Esperando archivo o link...")
 
     def back(self):
-        self.destroy()
-        app = main_Screen()
-        app.title("Eagle Defender")
-        app.minsize(800, 600)
-        app.mainloop()
+        self.withdraw()
+        self.login_screen.deiconify()
 
 
 #Función para iniciar el juego
