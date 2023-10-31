@@ -111,12 +111,16 @@ def bullet_cd(player): #cooldown de balas de jugador
     last_shot_time = current_time #le hace update al ultimo shot reseteando el cooldown
 
 class BlockScreen:
-    def __init__(self):
+    def __init__(self, player1_username, player2_username, player1_role):
         pygame.init()
         window_width = 800
         window_height = 600
         self.screen = pygame.display.set_mode((window_width, window_height))
         pygame.display.set_caption("Eagle Defender")
+    
+        self.player1_username = player1_username
+        self.player2_username = player2_username
+        self.player1_role = player1_role
 
         self.defender_turn_over = False
 
@@ -172,10 +176,38 @@ class BlockScreen:
         self.defender_songs = "Songs/Defensor"
         self.init_music(self.defender_songs)
 
+        confirmation_width = 150
+        confirmation_x = (window_width - confirmation_width) // 2
+
         self.confirmation_button_color = (200, 200, 200)  # Color gris
-        self.confirmation_button_rect = pygame.Rect(650, 530, 120, 40) 
+        self.confirmation_button_rect = pygame.Rect(confirmation_x, 540, confirmation_width, 40) 
         self.confirmation_button_font = pygame.font.Font(None, 25)
         self.confirmation_button_text = "Confirmar Turno"
+
+    def draw_player_info(self):
+        font = pygame.font.Font(None, 24)
+        # Definir las coordenadas y el color del texto
+        text_color = (0, 0, 0)
+
+        if self.player1_role == "defender":
+            # Si el jugador 1 es el defensor, mostrar sus datos en la esquina inferior izquierda
+            username_text = font.render(f"Defensor: {self.player1_username}", True, text_color)
+            username_rect = username_text.get_rect(topleft=(20, self.screen.get_height() - 40))
+            self.screen.blit(username_text, username_rect)
+        else:
+            # Si el jugador 1 es el atacante, mostrar sus datos en la esquina inferior derecha
+            username_text = font.render(f"Atacante: {self.player1_username}", True, text_color)
+            username_rect = username_text.get_rect(topright=(self.screen.get_width() - 20, self.screen.get_height() - 40))
+            self.screen.blit(username_text, username_rect)
+        # Muestra la información del jugador 2 (el que no seleccionó el jugador 1)
+        if self.player1_role == "defender":
+            username_text = font.render(f"Atacante: {self.player2_username}", True, text_color)
+            username_rect = username_text.get_rect(topright=(self.screen.get_width() - 20, self.screen.get_height() - 40))
+            self.screen.blit(username_text, username_rect)
+        else:
+            username_text = font.render(f"Defensor: {self.player2_username}", True, text_color)
+            username_rect = username_text.get_rect(topleft=(20, self.screen.get_height() - 40))
+            self.screen.blit(username_text, username_rect)
 
     def dibujar_cuadricula(self):
         for x in range(self.POS_X_MARCO, self.ANCHO_MARCO + self.POS_X_MARCO, self.CELDA):
@@ -200,8 +232,8 @@ class BlockScreen:
         return False
     
     def cuadro_ocupado(self, fila, columna):
-        if 0 <= fila < self.NUM_CELDAS and 0 <= columna < self.NUM_CELDAS:
-            return bool(self.matriz_celdas[fila][columna])
+        if (0 <= fila < self.NUM_CELDAS) and (0 <= columna < self.NUM_CELDAS):
+            return self.matriz_celdas[fila][columna]
         return False
 
     def draw_confirmation_button(self):
@@ -295,6 +327,7 @@ class BlockScreen:
 
             self.dibujar_cuadricula()
             self.dibujar_imagenes()
+            self.draw_player_info()
 
             # Render and display the timer on the screen
             font = pygame.font.Font(None, 36)
@@ -332,8 +365,6 @@ class BlockScreen:
                 player.draw(self.screen)   
                 bullets.update()
                 bullets.draw(self.screen) 
-                 
-            self.draw_confirmation_button()     
 
             pygame.display.flip()
 

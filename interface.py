@@ -18,6 +18,9 @@ game_in_progress = False
 defender_role = None
 attacker_role = None
 
+player1_data = None
+player2_data = None
+
 class role_selection_1(customtkinter.CTk):
     def __init__(self, login_screen):
         super().__init__()
@@ -75,12 +78,12 @@ class role_selection_2(customtkinter.CTk):
         self.label_role = customtkinter.CTkLabel(self, text=f"Jugador 2, elige tu rol:")
         self.label_role.place(relx=0.5, rely=0.4, anchor="center")
 
-        if defender_role:
-            self.button_defender = customtkinter.CTkButton(self, text="Defensor", command=self.set_role_defender)
-            self.button_defender.place(relx=0.5, rely=0.5, anchor="center")
-        elif attacker_role:
+        if defender_role == True:
             self.button_attacker = customtkinter.CTkButton(self, text="Atacante", command=self.set_role_attacker)
             self.button_attacker.place(relx=0.5, rely=0.5, anchor="center")
+        elif attacker_role == True:
+            self.button_defender = customtkinter.CTkButton(self, text="Defensor", command=self.set_role_defender)
+            self.button_defender.place(relx=0.5, rely=0.5, anchor="center")
         
         self.button_back = customtkinter.CTkButton(self, text="Back", command=self.back)
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
@@ -92,12 +95,16 @@ class role_selection_2(customtkinter.CTk):
         self.quit()
     
     def set_role_attacker(self):
+        global player2_data
+        global player1_data
         self.withdraw()
-        start_game()
+        start_game(player1_data, player2_data)
     
     def set_role_defender(self):
+        global player2_data
+        global player1_data
         self.withdraw()
-        start_game()
+        start_game(player1_data, player2_data)
     
     def back(self):
         self.withdraw()
@@ -259,6 +266,7 @@ class LogIn_Screen(customtkinter.CTk):
         self.app.deiconify()
 
     def login(self):
+        global player1_data
         global player1
         if self.entry_username.get() == "admin" and self.entry_password.get() == "123":
             pygame.mixer.music.stop()
@@ -283,6 +291,7 @@ class LogIn_Screen(customtkinter.CTk):
             if user:
                 print("Inicio de sesión exitoso")
                 player1 = True
+                player1_data = user
                 self.withdraw()
                 self.app = role_selection_1(self)
                 self.app.title("Eagle Defender")
@@ -292,6 +301,8 @@ class LogIn_Screen(customtkinter.CTk):
                 print("Error en las credenciales")
 
     def back(self):
+        global player1_data
+        player1_data = None
         self.withdraw()
         self.main_screen.deiconify()
         
@@ -335,6 +346,8 @@ class LogIn_Screen_2(customtkinter.CTk):
         self.app.deiconify()
 
     def login(self):
+        global player2_data
+        global player1_data
         if self.entry_username.get() == "admin" and self.entry_password.get() == "123":
             pygame.mixer.music.stop()
             self.withdraw()
@@ -355,12 +368,17 @@ class LogIn_Screen_2(customtkinter.CTk):
             connection.close()
 
             if user:
-                print("Inicio de sesión exitoso")
-                self.withdraw()
-                self.app = role_selection_2(self)
-                self.app.title("Eagle Defender")
-                self.app.minsize(800, 600)
-                self.app.deiconify()                  
+                if user[1] == player1_data[1]:
+                    print("No puedes jugar contigo mismo")
+                    return
+                else:
+                    print("Inicio de sesión exitoso")
+                    player2_data = user
+                    self.withdraw()
+                    self.app = role_selection_2(self)
+                    self.app.title("Eagle Defender")
+                    self.app.minsize(800, 600)
+                    self.app.deiconify()                  
             else:
                 print("Error en las credenciales")
 
@@ -789,10 +807,21 @@ class Admin_Screen(customtkinter.CTk):
 
 
 #Función para iniciar el juego
-def start_game():
+def start_game(player1, player2):
     global game_in_progress
+    global defender_role
+    global attacker_role
+    
+    player1_username = player1[2]
+    player2_username = player2[2]
+
+    if defender_role:
+        player1_role = "defender"
+    elif attacker_role:
+        player1_role = "attacker"
+
     game_in_progress = True
-    block_screen_instance = BlockScreen()
+    block_screen_instance = BlockScreen(player1_username, player2_username, player1_role)
     block_screen_instance.main_loop()
 
 def setup_database():
