@@ -26,9 +26,6 @@ class main_Screen(customtkinter.CTk):
 
         self.button_login = customtkinter.CTkButton(self, text="Iniciar sesión", command=self.login,fg_color="transparent")
         self.button_login.place(relx=0.5, rely=0.5, anchor="center")
-
-        self.button_play = customtkinter.CTkButton(self, text="Invitar a jugador 2", command=self.invite, fg_color="transparent")
-        self.button_play.place(relx=0.5, rely=0.6, anchor="center")
         
         self.song_directory = "Songs/Menu"  # Carpeta donde se encuentran las canciones
         self.song_list = []  # Lista de canciones en la carpeta
