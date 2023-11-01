@@ -579,7 +579,7 @@ class register_Screen(Tk):
         self.withdraw()
         self.login_screen.deiconify()
 
-class Admin_Screen(Tk):
+class Admin_Screen(customtkinter.CTk):
     def __init__(self, login_screen):
         super().__init__()
         self.geometry("800x600")
@@ -592,7 +592,7 @@ class Admin_Screen(Tk):
         self.song_paused = False  # Indica si la canción está pausada o no
 
         # Label de Admin
-        self.label_Admin = Label(self, text="Admin de canciones")
+        self.label_Admin = customtkinter.CTkLabel(self, text="Admin de canciones")
         self.label_Admin.place(relx=0.5, rely=0.05, anchor="center")
         
         # create tabview
@@ -605,63 +605,63 @@ class Admin_Screen(Tk):
             self.add_scrollable_frame_to_tab(tab_name)
         
         # Label de Menu
-        self.label_link = Label(self.tabview.tab("Menu"), text="Link: ")
+        self.label_link = customtkinter.CTkLabel(self.tabview.tab("Menu"), text="Link: ")
         self.label_link.place(relx=0.1, rely=0.1, anchor="center")
-        self.entry_link_menu = Entry(self.tabview.tab("Menu"), width=200)
+        self.entry_link_menu = customtkinter.CTkEntry(self.tabview.tab("Menu"), width=200)
         self.entry_link_menu.place(relx=0.3, rely=0.1, anchor="center")
 
-        self.button_add_menu = Button(self.tabview.tab("Menu"), text="Agregar", command=lambda: self.add_youtube("Menu", self.entry_link_menu.get()))
+        self.button_add_menu = customtkinter.CTkButton(self.tabview.tab("Menu"), text="Agregar", command=lambda: self.add_youtube("Menu", self.entry_link_menu.get()))
         self.button_add_menu.place(relx=0.6, rely=0.1, relwidth=0.15, anchor="center")
 
         # Label de Defensor
-        self.label_link = Label(self.tabview.tab("Defensor"), text="Link: ")
+        self.label_link = customtkinter.CTkLabel(self.tabview.tab("Defensor"), text="Link: ")
         self.label_link.place(relx=0.1, rely=0.1, anchor="center")
-        self.entry_link_defender = Entry(self.tabview.tab("Defensor"), width=200)
+        self.entry_link_defender = customtkinter.CTkEntry(self.tabview.tab("Defensor"), width=200)
         self.entry_link_defender.place(relx=0.3, rely=0.1, anchor="center")
 
-        self.button_add_menu = Button(self.tabview.tab("Defensor"), text="Agregar", command=lambda: self.add_youtube("Defensor", self.entry_link_defender.get()))
+        self.button_add_menu = customtkinter.CTkButton(self.tabview.tab("Defensor"), text="Agregar", command=lambda: self.add_youtube("Defensor", self.entry_link_defender.get()))
         self.button_add_menu.place(relx=0.6, rely=0.1, relwidth=0.15, anchor="center")
 
         # Label de Atacante
-        self.label_link = Label(self.tabview.tab("Atacante"), text="Link: ")
+        self.label_link = customtkinter.CTkLabel(self.tabview.tab("Atacante"), text="Link: ")
         self.label_link.place(relx=0.1, rely=0.1, anchor="center")
-        self.entry_link_attacker = Entry(self.tabview.tab("Atacante"), width=200)
+        self.entry_link_attacker = customtkinter.CTkEntry(self.tabview.tab("Atacante"), width=200)
         self.entry_link_attacker.place(relx=0.3, rely=0.1, anchor="center")
 
-        self.button_add_menu = Button(self.tabview.tab("Atacante"), text="Agregar", command=lambda: self.add_youtube("Atacante", self.entry_link_attacker.get()))
+        self.button_add_menu = customtkinter.CTkButton(self.tabview.tab("Atacante"), text="Agregar", command=lambda: self.add_youtube("Atacante", self.entry_link_attacker.get()))
         self.button_add_menu.place(relx=0.6, rely=0.1, relwidth=0.15, anchor="center")
 
         # Label de Especial
-        self.label_link = Label(self.tabview.tab("Especial"), text="Link: ")
+        self.label_link = customtkinter.CTkLabel(self.tabview.tab("Especial"), text="Link: ")
         self.label_link.place(relx=0.1, rely=0.1, anchor="center")
-        self.entry_link_special = Entry(self.tabview.tab("Especial"), width=200)
+        self.entry_link_special = customtkinter.CTkEntry(self.tabview.tab("Especial"), width=200)
         self.entry_link_special.place(relx=0.3, rely=0.1, anchor="center")
 
-        self.button_add_menu = Button(self.tabview.tab("Especial"), text="Agregar", command=lambda: self.add_youtube("Especial", self.entry_link_special.get()))
+        self.button_add_menu = customtkinter.CTkButton(self.tabview.tab("Especial"), text="Agregar", command=lambda: self.add_youtube("Especial", self.entry_link_special.get()))
         self.button_add_menu.place(relx=0.6, rely=0.1, relwidth=0.15, anchor="center")
 
         
         # Botón para agregar canciones por archivo en cada tab
-        self.button_add_file_menu = Button(self.tabview.tab("Menu"), text="Agregar desde sistema", command=lambda: self.add_file("Menu"))
+        self.button_add_file_menu = customtkinter.CTkButton(self.tabview.tab("Menu"), text="Agregar desde sistema", command=lambda: self.add_file("Menu"))
         self.button_add_file_menu.place(relx=0.85, rely=0.1, anchor="center")
 
-        self.button_add_file_defensor = Button(self.tabview.tab("Defensor"), text="Agregar desde sistema", command=lambda: self.add_file("Defensor"))
+        self.button_add_file_defensor = customtkinter.CTkButton(self.tabview.tab("Defensor"), text="Agregar desde sistema", command=lambda: self.add_file("Defensor"))
         self.button_add_file_defensor.place(relx=0.85, rely=0.1, anchor="center")
 
-        self.button_add_file_atacante = Button(self.tabview.tab("Atacante"), text="Agregar desde sistema", command=lambda: self.add_file("Atacante"))
+        self.button_add_file_atacante = customtkinter.CTkButton(self.tabview.tab("Atacante"), text="Agregar desde sistema", command=lambda: self.add_file("Atacante"))
         self.button_add_file_atacante.place(relx=0.85, rely=0.1, anchor="center")
 
-        self.button_add_file_especial = Button(self.tabview.tab("Especial"), text="Agregar desde sistema", command=lambda: self.add_file("Especial"))
+        self.button_add_file_especial = customtkinter.CTkButton(self.tabview.tab("Especial"), text="Agregar desde sistema", command=lambda: self.add_file("Especial"))
         self.button_add_file_especial.place(relx=0.85, rely=0.1, anchor="center")
 
         # Variable para almacenar el estado de la subida y los posibles errores
         self.upload_status = customtkinter.StringVar(value="Estado: Esperando archivo o link...")
         for tab_name in self.tab_names:
-            self.label_status = Label(self.tabview.tab(tab_name), textvariable=self.upload_status)
+            self.label_status = customtkinter.CTkLabel(self.tabview.tab(tab_name), textvariable=self.upload_status)
             self.label_status.place(relx=0.5, rely=0.9, anchor="center")
 
         # Botón Volver
-        self.button_back = Button(self, text="Volver", command=self.back)
+        self.button_back = customtkinter.CTkButton(self, text="Volver", command=self.back)
         self.button_back.place(relx=0.9, rely=0.05, anchor="center")
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
