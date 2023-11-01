@@ -11,6 +11,8 @@ from pydub import AudioSegment
 from CTkWidgets import song_list
 import random
 from game import BlockScreen
+import tkinter as Tk
+from tkinter import *
 
 # Variable global para rastrear si hay una partida en curso
 game_in_progress = False
@@ -111,18 +113,18 @@ class role_selection_2(customtkinter.CTk):
         self.login_screen2.deiconify()
     
 
-class main_Screen(customtkinter.CTk):
+class main_Screen(Tk):
     def __init__(self):
         super().__init__()
         self.geometry("800x600")
 
-        self.button_login = customtkinter.CTkButton(self, text="Iniciar sesión", command=self.login,fg_color="transparent")
+        self.button_login = Button(self, text="Iniciar sesión", command=self.login)
         self.button_login.place(relx=0.5, rely=0.5, anchor="center")
         
         self.song_directory = "Songs/Menu"  # Carpeta donde se encuentran las canciones
         self.song_list = []  # Lista de canciones en la carpeta
         
-        self.button_help = customtkinter.CTkButton(self, text="Ayuda", command=self.help, fg_color="transparent")
+        self.button_help = Button(self, text="Ayuda", command=self.help)
         self.button_help.place(relx=0.5, rely=0.7, anchor="center")
 
         # Inicializar pygame para la reproducción de música
@@ -194,25 +196,25 @@ class main_Screen(customtkinter.CTk):
         self.volume = self.volume_slider.get()
         pygame.mixer.music.set_volume(self.volume)
 
-class Help_Screen(customtkinter.CTk):
+class Help_Screen(Tk):
     def __init__(self, main_screen):
         super().__init__()
         self.geometry("800x600")
         self.main_screen = main_screen
         
-        self.label_info_eagle = customtkinter.CTkLabel(self, text="Movimiento del águila")
+        self.label_info_eagle = Label(self, text="Movimiento del águila")
         self.label_info_eagle.place(relx=0.2, rely=0.2, anchor="center")
         
-        self.label_info_blocks = customtkinter.CTkLabel(self, text="Bloques")
+        self.label_info_blocks = Label(self, text="Bloques")
         self.label_info_blocks.place(relx=0.2, rely=0.6, anchor="center")
         
-        self.label_info_tank = customtkinter.CTkLabel(self, text="Movmimiento del tanque")
+        self.label_info_tank = Label(self, text="Movmimiento del tanque")
         self.label_info_tank.place(relx=0.8, rely=0.2, anchor="center")
         
-        self.label_info_shoot = customtkinter.CTkLabel(self, text="Disparos")
+        self.label_info_shoot = Label(self, text="Disparos")
         self.label_info_shoot.place(relx=0.8, rely=0.6, anchor="center")
         
-        self.button_back = customtkinter.CTkButton(self, text="Back", command=self.back)
+        self.button_back = Button(self, text="Back", command=self.back)
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -226,29 +228,29 @@ class Help_Screen(customtkinter.CTk):
         self.main_screen.deiconify()
             
 
-class LogIn_Screen(customtkinter.CTk):
+class LogIn_Screen(Tk):
     def __init__(self, main_screen):
         super().__init__()
         self.geometry("800x600")
         self.main_screen = main_screen
 
-        self.label_username = customtkinter.CTkLabel(self, text="Nombre de usuario:")
+        self.label_username = Label(self, text="Nombre de usuario:")
         self.label_username.place(relx=0.4, rely=0.4, anchor="center")
-        self.entry_username = customtkinter.CTkEntry(self)
+        self.entry_username = Entry(self)
         self.entry_username.place(relx=0.6, rely=0.4, anchor="center")
 
-        self.label_password = customtkinter.CTkLabel(self, text="Contraseña:")
+        self.label_password = Label(self, text="Contraseña:")
         self.label_password.place(relx=0.4, rely=0.5, anchor="center")
-        self.entry_password = customtkinter.CTkEntry(self, show="*")
+        self.entry_password = Entry(self, show="*")
         self.entry_password.place(relx=0.6, rely=0.5,anchor="center")
 
-        self.button_login = customtkinter.CTkButton(self, text="Iniciar sesión", command=self.login)
+        self.button_login = Button(self, text="Iniciar sesión", command=self.login)
         self.button_login.place(relx=0.5, rely=0.6, anchor="center")
 
-        self.button_register = customtkinter.CTkButton(self, text="Registrarse", command=self.register)
+        self.button_register = Button(self, text="Registrarse", command=self.register)
         self.button_register.place(relx=0.5, rely=0.7, anchor="center")
 
-        self.button_back = customtkinter.CTkButton(self, text="Back", command=self.back)
+        self.button_back = Button(self, text="Back", command=self.back)
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -306,29 +308,29 @@ class LogIn_Screen(customtkinter.CTk):
         self.withdraw()
         self.main_screen.deiconify()
         
-class LogIn_Screen_2(customtkinter.CTk):
+class LogIn_Screen_2(Tk):
     def __init__(self, login_screen):
         super().__init__()
         self.geometry("800x600")
         self.login_screen = login_screen
 
-        self.label_username = customtkinter.CTkLabel(self, text="Nombre de usuario:")
+        self.label_username = Label(self, text="Nombre de usuario:")
         self.label_username.place(relx=0.4, rely=0.4, anchor="center")
-        self.entry_username = customtkinter.CTkEntry(self)
+        self.entry_username = Entry(self)
         self.entry_username.place(relx=0.6, rely=0.4, anchor="center")
 
-        self.label_password = customtkinter.CTkLabel(self, text="Contraseña:")
+        self.label_password = Label(self, text="Contraseña:")
         self.label_password.place(relx=0.4, rely=0.5, anchor="center")
-        self.entry_password = customtkinter.CTkEntry(self, show="*")
+        self.entry_password = Entry(self, show="*")
         self.entry_password.place(relx=0.6, rely=0.5,anchor="center")
 
-        self.button_login = customtkinter.CTkButton(self, text="Iniciar sesión", command=self.login)
+        self.button_login = Button(self, text="Iniciar sesión", command=self.login)
         self.button_login.place(relx=0.5, rely=0.6, anchor="center")
 
-        self.button_register = customtkinter.CTkButton(self, text="Registrarse", command=self.register)
+        self.button_register = Button(self, text="Registrarse", command=self.register)
         self.button_register.place(relx=0.5, rely=0.7, anchor="center")
 
-        self.button_back = customtkinter.CTkButton(self, text="Back", command=self.back)
+        self.button_back = Button(self, text="Back", command=self.back)
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -386,7 +388,7 @@ class LogIn_Screen_2(customtkinter.CTk):
         self.withdraw()
         self.login_screen.deiconify()
 
-class register_Screen(customtkinter.CTk):
+class register_Screen(Tk):
     def __init__(self, login_screen):
         super().__init__()
         self.geometry("800x600")
@@ -395,61 +397,61 @@ class register_Screen(customtkinter.CTk):
         self.uploaded_files = []
 
         # Label de Registro
-        self.label_register = customtkinter.CTkLabel(self, text="Registro")
+        self.label_register = Label(self, text="Registro")
         self.label_register.place(relx=0.5, rely=0.1, anchor="center")
 
         # Nombre
-        self.label_nombre = customtkinter.CTkLabel(self, text="Nombre: ")
+        self.label_nombre = Label(self, text="Nombre: ")
         self.label_nombre.place(relx=0.4, rely=0.2, anchor="center")
-        self.entry_nombre = customtkinter.CTkEntry(self)
+        self.entry_nombre = Entry(self)
         self.entry_nombre.place(relx=0.6, rely=0.2, anchor="center")
 
         # Nickname
-        self.label_nickname = customtkinter.CTkLabel(self, text="Nickname: ")
+        self.label_nickname = Label(self, text="Nickname: ")
         self.label_nickname.place(relx=0.4, rely=0.3, anchor="center")
-        self.entry_nickname = customtkinter.CTkEntry(self)
+        self.entry_nickname = Entry(self)
         self.entry_nickname.place(relx=0.6, rely=0.3, anchor="center")
 
         # Contraseña
-        self.label_password = customtkinter.CTkLabel(self, text="Contraseña: ")
+        self.label_password = Label(self, text="Contraseña: ")
         self.label_password.place(relx=0.4, rely=0.4, anchor="center")
-        self.entry_password = customtkinter.CTkEntry(self)
+        self.entry_password = Entry(self)
         self.entry_password.place(relx=0.6, rely=0.4, anchor="center")
 
         # Correo
-        self.label_correo = customtkinter.CTkLabel(self, text="Correo: ")
+        self.label_correo = Label(self, text="Correo: ")
         self.label_correo.place(relx=0.4, rely=0.5, anchor="center")
-        self.entry_correo = customtkinter.CTkEntry(self)
+        self.entry_correo = Entry(self)
         self.entry_correo.place(relx=0.6, rely=0.5, anchor="center")
 
         # Edad
-        self.label_edad = customtkinter.CTkLabel(self, text="Edad: ")
+        self.label_edad = Label(self, text="Edad: ")
         self.label_edad.place(relx=0.4, rely=0.6, anchor="center")
-        self.entry_edad = customtkinter.CTkEntry(self)
+        self.entry_edad = Entry(self)
         self.entry_edad.place(relx=0.6, rely=0.6, anchor="center")
 
         # Red Social
-        self.label_red_social = customtkinter.CTkLabel(self, text="Red Social: ")
+        self.label_red_social = Label(self, text="Red Social: ")
         self.label_red_social.place(relx=0.4, rely=0.7, anchor="center")
-        self.entry_red_social = customtkinter.CTkEntry(self)
+        self.entry_red_social = Entry(self)
         self.entry_red_social.place(relx=0.6, rely=0.7, anchor="center")
 
         #Foto
-        self.entry_foto = customtkinter.CTkEntry(self)
-        self.button_upload_photo = customtkinter.CTkButton(self, text="Subir Foto", command=self.upload_photo)
+        self.entry_foto = Entry(self)
+        self.button_upload_photo = Button(self, text="Subir Foto", command=self.upload_photo)
         self.button_upload_photo.place(relx=0.4, rely=0.8, anchor="center")
 
         #Canción favorita
-        self.entry_cancion = customtkinter.CTkEntry(self)
-        self.button_upload_song = customtkinter.CTkButton(self, text="Subir Canción Favorita", command=self.upload_song)
+        self.entry_cancion = Entry(self)
+        self.button_upload_song = Button(self, text="Subir Canción Favorita", command=self.upload_song)
         self.button_upload_song.place(relx=0.6, rely=0.8, anchor="center")
 
         # Botón Registrarse
-        self.button_register = customtkinter.CTkButton(self, text="Registrarse", command=self.register)
+        self.button_register = Button(self, text="Registrarse", command=self.register)
         self.button_register.place(relx=0.5, rely=0.9, anchor="center")
 
         # Botón Volver
-        self.button_back = customtkinter.CTkButton(self, text="Volver", command=self.back)
+        self.button_back = Button(self, text="Volver", command=self.back)
         self.button_back.place(relx=0.9, rely=0.1, anchor="center")
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -577,7 +579,7 @@ class register_Screen(customtkinter.CTk):
         self.withdraw()
         self.login_screen.deiconify()
 
-class Admin_Screen(customtkinter.CTk):
+class Admin_Screen(Tk):
     def __init__(self, login_screen):
         super().__init__()
         self.geometry("800x600")
@@ -590,7 +592,7 @@ class Admin_Screen(customtkinter.CTk):
         self.song_paused = False  # Indica si la canción está pausada o no
 
         # Label de Admin
-        self.label_Admin = customtkinter.CTkLabel(self, text="Admin de canciones")
+        self.label_Admin = Label(self, text="Admin de canciones")
         self.label_Admin.place(relx=0.5, rely=0.05, anchor="center")
         
         # create tabview
@@ -603,63 +605,63 @@ class Admin_Screen(customtkinter.CTk):
             self.add_scrollable_frame_to_tab(tab_name)
         
         # Label de Menu
-        self.label_link = customtkinter.CTkLabel(self.tabview.tab("Menu"), text="Link: ")
+        self.label_link = Label(self.tabview.tab("Menu"), text="Link: ")
         self.label_link.place(relx=0.1, rely=0.1, anchor="center")
-        self.entry_link_menu = customtkinter.CTkEntry(self.tabview.tab("Menu"), width=200)
+        self.entry_link_menu = Entry(self.tabview.tab("Menu"), width=200)
         self.entry_link_menu.place(relx=0.3, rely=0.1, anchor="center")
 
-        self.button_add_menu = customtkinter.CTkButton(self.tabview.tab("Menu"), text="Agregar", command=lambda: self.add_youtube("Menu", self.entry_link_menu.get()))
+        self.button_add_menu = Button(self.tabview.tab("Menu"), text="Agregar", command=lambda: self.add_youtube("Menu", self.entry_link_menu.get()))
         self.button_add_menu.place(relx=0.6, rely=0.1, relwidth=0.15, anchor="center")
 
         # Label de Defensor
-        self.label_link = customtkinter.CTkLabel(self.tabview.tab("Defensor"), text="Link: ")
+        self.label_link = Label(self.tabview.tab("Defensor"), text="Link: ")
         self.label_link.place(relx=0.1, rely=0.1, anchor="center")
-        self.entry_link_defender = customtkinter.CTkEntry(self.tabview.tab("Defensor"), width=200)
+        self.entry_link_defender = Entry(self.tabview.tab("Defensor"), width=200)
         self.entry_link_defender.place(relx=0.3, rely=0.1, anchor="center")
 
-        self.button_add_menu = customtkinter.CTkButton(self.tabview.tab("Defensor"), text="Agregar", command=lambda: self.add_youtube("Defensor", self.entry_link_defender.get()))
+        self.button_add_menu = Button(self.tabview.tab("Defensor"), text="Agregar", command=lambda: self.add_youtube("Defensor", self.entry_link_defender.get()))
         self.button_add_menu.place(relx=0.6, rely=0.1, relwidth=0.15, anchor="center")
 
         # Label de Atacante
-        self.label_link = customtkinter.CTkLabel(self.tabview.tab("Atacante"), text="Link: ")
+        self.label_link = Label(self.tabview.tab("Atacante"), text="Link: ")
         self.label_link.place(relx=0.1, rely=0.1, anchor="center")
-        self.entry_link_attacker = customtkinter.CTkEntry(self.tabview.tab("Atacante"), width=200)
+        self.entry_link_attacker = Entry(self.tabview.tab("Atacante"), width=200)
         self.entry_link_attacker.place(relx=0.3, rely=0.1, anchor="center")
 
-        self.button_add_menu = customtkinter.CTkButton(self.tabview.tab("Atacante"), text="Agregar", command=lambda: self.add_youtube("Atacante", self.entry_link_attacker.get()))
+        self.button_add_menu = Button(self.tabview.tab("Atacante"), text="Agregar", command=lambda: self.add_youtube("Atacante", self.entry_link_attacker.get()))
         self.button_add_menu.place(relx=0.6, rely=0.1, relwidth=0.15, anchor="center")
 
         # Label de Especial
-        self.label_link = customtkinter.CTkLabel(self.tabview.tab("Especial"), text="Link: ")
+        self.label_link = Label(self.tabview.tab("Especial"), text="Link: ")
         self.label_link.place(relx=0.1, rely=0.1, anchor="center")
-        self.entry_link_special = customtkinter.CTkEntry(self.tabview.tab("Especial"), width=200)
+        self.entry_link_special = Entry(self.tabview.tab("Especial"), width=200)
         self.entry_link_special.place(relx=0.3, rely=0.1, anchor="center")
 
-        self.button_add_menu = customtkinter.CTkButton(self.tabview.tab("Especial"), text="Agregar", command=lambda: self.add_youtube("Especial", self.entry_link_special.get()))
+        self.button_add_menu = Button(self.tabview.tab("Especial"), text="Agregar", command=lambda: self.add_youtube("Especial", self.entry_link_special.get()))
         self.button_add_menu.place(relx=0.6, rely=0.1, relwidth=0.15, anchor="center")
 
         
         # Botón para agregar canciones por archivo en cada tab
-        self.button_add_file_menu = customtkinter.CTkButton(self.tabview.tab("Menu"), text="Agregar desde sistema", command=lambda: self.add_file("Menu"))
+        self.button_add_file_menu = Button(self.tabview.tab("Menu"), text="Agregar desde sistema", command=lambda: self.add_file("Menu"))
         self.button_add_file_menu.place(relx=0.85, rely=0.1, anchor="center")
 
-        self.button_add_file_defensor = customtkinter.CTkButton(self.tabview.tab("Defensor"), text="Agregar desde sistema", command=lambda: self.add_file("Defensor"))
+        self.button_add_file_defensor = Button(self.tabview.tab("Defensor"), text="Agregar desde sistema", command=lambda: self.add_file("Defensor"))
         self.button_add_file_defensor.place(relx=0.85, rely=0.1, anchor="center")
 
-        self.button_add_file_atacante = customtkinter.CTkButton(self.tabview.tab("Atacante"), text="Agregar desde sistema", command=lambda: self.add_file("Atacante"))
+        self.button_add_file_atacante = Button(self.tabview.tab("Atacante"), text="Agregar desde sistema", command=lambda: self.add_file("Atacante"))
         self.button_add_file_atacante.place(relx=0.85, rely=0.1, anchor="center")
 
-        self.button_add_file_especial = customtkinter.CTkButton(self.tabview.tab("Especial"), text="Agregar desde sistema", command=lambda: self.add_file("Especial"))
+        self.button_add_file_especial = Button(self.tabview.tab("Especial"), text="Agregar desde sistema", command=lambda: self.add_file("Especial"))
         self.button_add_file_especial.place(relx=0.85, rely=0.1, anchor="center")
 
         # Variable para almacenar el estado de la subida y los posibles errores
         self.upload_status = customtkinter.StringVar(value="Estado: Esperando archivo o link...")
         for tab_name in self.tab_names:
-            self.label_status = customtkinter.CTkLabel(self.tabview.tab(tab_name), textvariable=self.upload_status)
+            self.label_status = Label(self.tabview.tab(tab_name), textvariable=self.upload_status)
             self.label_status.place(relx=0.5, rely=0.9, anchor="center")
 
         # Botón Volver
-        self.button_back = customtkinter.CTkButton(self, text="Volver", command=self.back)
+        self.button_back = Button(self, text="Volver", command=self.back)
         self.button_back.place(relx=0.9, rely=0.05, anchor="center")
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
