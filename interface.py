@@ -135,7 +135,7 @@ class main_Screen:
 
         # Logo 
         self.img = PhotoImage(file="assets/Eagle_Defender_title.png")
-        self.canvas.create_image(100,150, image=self.img, anchor="nw")
+        self.canvas.create_image(100,120, image=self.img, anchor="nw")
 
         self.button_login = Button(self.canvas, text="Iniciar sesión", command=self.login, highlightthickness=0, bg="SystemButtonFace")
         self.button_login.place(relx=0.5, rely=0.5, anchor="center")
@@ -205,22 +205,52 @@ class Help_Screen:
         self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
         self.canvas.place(x=0, y=0)
 
-        # Ejemplo de imagen
-        self.img = PhotoImage(file="assets/ss_aguila.png")
-        self.canvas.create_image(100,150, image=self.img, anchor="nw")
-        
+        #help_title
+        self.help_title = PhotoImage(file="assets\HELP_title.png")
+        self.canvas.create_image(325,120, image=self.help_title, anchor="nw")
+
+        #movimiento de aguila
         self.label_info_eagle = Label(self.canvas, text="Movimiento del águila")
         self.label_info_eagle.place(relx=0.2, rely=0.2, anchor="center")
-        
+        #imagen
+        self.aguila_foto = PhotoImage(file="assets/ss_aguila.png")
+        self.canvas.create_image(100,150, image=self.aguila_foto, anchor="nw")
+        #text
+        self.tuto_eagle = Label(self.canvas, text="Usar flechas para mover aguila")
+        self.tuto_eagle.place(relx=0.2, rely=0.46, anchor="center")
+
+        #bloques
         self.label_info_blocks = Label(self.canvas, text="Bloques")
         self.label_info_blocks.place(relx=0.2, rely=0.6, anchor="center")
-        
+        #imagen
+        self.bloque_foto = PhotoImage(file="assets\ss_blocks.png")
+        self.canvas.create_image(65,390, image=self.bloque_foto, anchor="nw")
+        #text
+        self.tuto_blocks = Label(self.canvas, text="Para esoger tipo presionar 1, 2 y 3")
+        self.tuto_blocks.place(relx=0.2, rely=0.87, anchor="center")
+        self.tuto_blocks2 = Label(self.canvas, text="Para colocar usar mouse")
+        self.tuto_blocks2.place(relx=0.2, rely=0.91, anchor="center")
+
+        #movimiento de tanque
         self.label_info_tank = Label(self.canvas, text="Movmimiento del tanque")
         self.label_info_tank.place(relx=0.8, rely=0.2, anchor="center")
-        
+        #imagen
+        self.tanque_foto = PhotoImage(file="assets\ss_tanque.png")
+        self.canvas.create_image(580,150, image=self.tanque_foto, anchor="nw")
+        #text
+        self.tuto_tank = Label(self.canvas, text="Usar WASD para mover tanque")
+        self.tuto_tank.place(relx=0.8, rely=0.46, anchor="center")
+
+        #disparos
         self.label_info_shoot = Label(self.canvas, text="Disparos")
         self.label_info_shoot.place(relx=0.8, rely=0.6, anchor="center")
-        
+        #imagen
+        self.balas_foto = PhotoImage(file="assets\ss_bala.png")
+        self.canvas.create_image(570,390, image=self.balas_foto, anchor="nw")
+        #text
+        self.tuto_shoot = Label(self.canvas, text="Para disparar presione espacio")
+        self.tuto_shoot.place(relx=0.8, rely=0.87, anchor="center")
+
         self.button_back = Button(self.canvas, text="Back", command=self.back)
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")      
         
@@ -233,6 +263,10 @@ class LogIn_Screen:
     def __init__(self, master):
         self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
         self.canvas.place(x=0, y=0)
+
+        # Login_title
+        self.img = PhotoImage(file="assets\login_title.png")
+        self.canvas.create_image(300,120, image=self.img, anchor="nw")
 
         self.label_username = Label(self.canvas, text="Nombre de usuario:")
         self.label_username.place(relx=0.4, rely=0.4, anchor="center")
@@ -297,6 +331,10 @@ class LogIn_Screen_2():
     def __init__(self, master):
         self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
         self.canvas.place(x=0, y=0)
+
+        # Login_title
+        self.img = PhotoImage(file="assets\login_title.png")
+        self.canvas.create_image(300,120, image=self.img, anchor="nw")
 
         self.label_username = Label(self.canvas, text="Nombre de usuario:")
         self.label_username.place(relx=0.4, rely=0.4, anchor="center")
@@ -363,9 +401,9 @@ class register_Screen():
 
         self.uploaded_files = []
 
-        # Label de Registro
-        self.label_register = Label(self.canvas, text="Registro")
-        self.label_register.place(relx=0.5, rely=0.1, anchor="center")
+        # register title
+        self.img = PhotoImage(file="assets\Register_title.png")
+        self.canvas.create_image(240,20, image=self.img, anchor="nw")
 
         # Nombre
         self.label_nombre = Label(self.canvas, text="Nombre: ")
