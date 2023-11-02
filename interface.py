@@ -115,11 +115,29 @@ class main_Screen:
         self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
         self.canvas.place(x=0, y=0)
 
+        # EJEMPLO DE FONDO
+
+        self.background = PhotoImage(file="assets/background_test.png")
+
+        # Obtiene el tamaño de la ventana
+        window_width = 800
+        window_height = 600
+
+        # Obtiene el tamaño de la imagen de fondo
+        image_width = self.background.width()
+        image_height = self.background.height()
+
+        # Escala la imagen de fondo al tamaño de la ventana
+        if image_width != window_width or image_height != window_height:
+            self.background = self.background.subsample(image_width // window_width, image_height // window_height)
+
+        self.canvas.create_image(0,0, image=self.background, anchor="nw")
+
         # Logo 
         self.img = PhotoImage(file="assets/Eagle_Defender_title.png")
         self.canvas.create_image(100,150, image=self.img, anchor="nw")
 
-        self.button_login = Button(self.canvas, text="Iniciar sesión", command=self.login)
+        self.button_login = Button(self.canvas, text="Iniciar sesión", command=self.login, highlightthickness=0, bg="SystemButtonFace")
         self.button_login.place(relx=0.5, rely=0.5, anchor="center")
         
         self.song_directory = "Songs/Menu"  # Carpeta donde se encuentran las canciones
