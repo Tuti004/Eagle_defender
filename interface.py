@@ -24,29 +24,28 @@ attacker_role = None
 player1_data = None
 player2_data = None
 
-class role_selection_1(Tk):
-    def __init__(self, login_screen):
-        super().__init__()
-        self.geometry("800x600")
-        self.login_screen = login_screen
+class role_selection_1:
+    def __init__(self, master):
+        self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
+        self.canvas.place(x=0, y=0)
+
         self.num = 0
 
-        self.label_role = Label(self, text=f"Jugador 1, elige tu rol:")
+        self.label_role = Label(self.canvas, text=f"Jugador 1, elige tu rol:")
         self.label_role.place(relx=0.5, rely=0.4, anchor="center")
 
-        self.button_attacker = Button(self, text="Atacante", command=self.set_role_attacker)
+        self.button_attacker = Button(self.canvas, text="Atacante", command=self.set_role_attacker)
         self.button_attacker.place(relx=0.4, rely=0.5, anchor="center")
         
-        self.button_skin = Button(self, text = ">", command=self.counter)
+        self.button_skin = Button(self.canvas, text = ">", command=self.counter)
         self.button_skin.place(relx=0.4, rely=0.6, anchor="center")
                 
-        self.button_defender = Button(self, text="Defensor", command=self.set_role_defender)
+        self.button_defender = Button(self.canvas, text="Defensor", command=self.set_role_defender)
         self.button_defender.place(relx=0.6, rely=0.5, anchor="center")
 
-        self.button_back = Button(self, text="Back", command=self.back)
+        self.button_back = Button(self.canvas, text="Back", command=self.back)
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
 
-        self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def counter(self): #Contador para determinar el skin del tanque
         if self.num == 3:
@@ -55,88 +54,78 @@ class role_selection_1(Tk):
             self.num += 1
         print(self.num)
     
-    def on_closing(self):
-        self.destroy()
-        self.quit()
-    
     def set_role_attacker(self):
         global attacker_role
         attacker_role = True
-        self.withdraw()
-        self.app = LogIn_Screen_2(self)
-        self.app.title("Eagle Defender")
-        self.app.minsize(800, 600)
-        self.app.deiconify()
+        self.canvas.destroy()
+        LogIn_Screen_2(window)
     
     def set_role_defender(self):
         global defender_role
         defender_role = True
-        self.withdraw()
-        self.app = LogIn_Screen_2(self)
-        self.app.title("Eagle Defender")
-        self.app.minsize(800, 600)
-        self.app.deiconify()
+        self.canvas.destroy()
+        LogIn_Screen_2(window)
 
     def back(self):
-        self.withdraw()
-        self.login_screen.deiconify()
+        self.canvas.destroy()
+        LogIn_Screen(window)
 
-class role_selection_2(Tk):
-    def __init__(self, login_screen2):
+class role_selection_2:
+    def __init__(self, master):
         global defender_role
         global attacker_role
-        super().__init__()
-        self.geometry("800x600")
-        self.login_screen2 = login_screen2
 
-        self.label_role = Label(self, text=f"Jugador 2, elige tu rol:")
+        self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
+        self.canvas.place(x=0, y=0)
+
+        self.label_role = Label(self.canvas, text=f"Jugador 2, elige tu rol:")
         self.label_role.place(relx=0.5, rely=0.4, anchor="center")
 
         if defender_role == True:
-            self.button_attacker = Button(self, text="Atacante", command=self.set_role_attacker)
+            self.button_attacker = Button(self.canvas, text="Atacante", command=self.set_role_attacker)
             self.button_attacker.place(relx=0.5, rely=0.5, anchor="center")
         elif attacker_role == True:
-            self.button_defender = Button(self, text="Defensor", command=self.set_role_defender)
+            self.button_defender = Button(self.canvas, text="Defensor", command=self.set_role_defender)
             self.button_defender.place(relx=0.5, rely=0.5, anchor="center")
         
-        self.button_back = Button(self, text="Back", command=self.back)
+        self.button_back = Button(self.canvas, text="Back", command=self.back)
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
-
-        self.protocol("WM_DELETE_WINDOW", self.on_closing)
-
-    def on_closing(self):
-        self.destroy()
-        self.quit()
     
     def set_role_attacker(self):
         global player2_data
         global player1_data
-        self.withdraw()
+        self.canvas.destroy()
+        window.destroy()
         start_game(player1_data, player2_data)
     
     def set_role_defender(self):
         global player2_data
         global player1_data
-        self.withdraw()
+        self.canvas.destroy()
+        window.destroy()
         start_game(player1_data, player2_data)
     
     def back(self):
-        self.withdraw()
-        self.login_screen2.deiconify()
+        self.canvas.destroy()
+        LogIn_Screen_2(window)
     
 
-class main_Screen(Tk):
-    def __init__(self):
-        super().__init__()
-        self.geometry("800x600")
+class main_Screen:
+    def __init__(self, master):
+        self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
+        self.canvas.place(x=0, y=0)
 
-        self.button_login = Button(self, text="Iniciar sesión", command=self.login)
+        # Logo 
+        self.img = PhotoImage(file="assets/Eagle_Defender_title.png")
+        self.canvas.create_image(100,150, image=self.img, anchor="nw")
+
+        self.button_login = Button(self.canvas, text="Iniciar sesión", command=self.login)
         self.button_login.place(relx=0.5, rely=0.5, anchor="center")
         
         self.song_directory = "Songs/Menu"  # Carpeta donde se encuentran las canciones
         self.song_list = []  # Lista de canciones en la carpeta
         
-        self.button_help = Button(self, text="Ayuda", command=self.help)
+        self.button_help = Button(self.canvas, text="Ayuda", command=self.help)
         self.button_help.place(relx=0.5, rely=0.7, anchor="center")
 
         # Inicializar pygame para la reproducción de música
@@ -156,41 +145,26 @@ class main_Screen(Tk):
         self.play_next_song()
 
         # Slider de volumen
-        self.volume_slider = customtkinter.CTkSlider(self, from_=0, to=1, number_of_steps=100, orientation="horizontal")
+        self.volume_slider = customtkinter.CTkSlider(self.canvas, from_=0, to=1, number_of_steps=100, orientation="horizontal")
         self.volume_slider.set(self.volume)
         self.volume_slider.place(relx=0.5, rely=0.8, anchor="center")
         self.volume_slider.bind("<Motion>", self.update_volume)
 
-        self.protocol("WM_DELETE_WINDOW", self.on_closing)
-
-    def on_closing(self):
-        self.destroy()
-        self.quit()
-
     def login(self):
-        self.withdraw()
-        self.login_screen = LogIn_Screen(self)
-        self.login_screen.title("Eagle Defender")
-        self.login_screen.minsize(800, 600)
-        self.login_screen.deiconify()
+        LogIn_Screen(window)
+        self.canvas.destroy()
 
     def invite(self): # Restricción de una Partida a la vez
         global game_in_progress
         if not game_in_progress:
             game_in_progress = True
 
-        self.withdraw()
-        self.app = LogIn_Screen_2(self)
-        self.app.title("Eagle Defender")
-        self.app.minsize(800,600)
-        self.app.deiconify()
+        LogIn_Screen_2(window)
+        self.canvas.destroy()
         
     def help(self):
-        self.withdraw()
-        self.app = Help_Screen(self)
-        self.app.title("Eagle Defender")
-        self.app.minsize(800,600)
-        self.app.deiconify()
+        Help_Screen(window)
+        self.canvas.destroy()
 
     def play_next_song(self):
         """Reproduce la siguiente canción y establece un callback para cuando termine."""
@@ -199,7 +173,7 @@ class main_Screen(Tk):
         pygame.mixer.music.set_endevent(pygame.USEREVENT + 1)  # Establece un evento para el final de la canción
         
         song_length_ms = pygame.mixer.Sound(self.song_list[self.current_song_index]).get_length() * 1000  # Duración de la canción en milisegundos
-        self.after(int(song_length_ms), self.play_next_song)  # Programa el callback para cuando termine la canción
+        self.canvas.after(int(song_length_ms), self.play_next_song)  # Programa el callback para cuando termine la canción
 
         self.current_song_index = (self.current_song_index + 1) % len(self.song_list)  # Ajusta el índice de la canción
 
@@ -208,76 +182,63 @@ class main_Screen(Tk):
         self.volume = self.volume_slider.get()
         pygame.mixer.music.set_volume(self.volume)
 
-class Help_Screen(Tk):
-    def __init__(self, main_screen):
-        super().__init__()
-        self.geometry("800x600")
-        self.main_screen = main_screen
+class Help_Screen:
+    def __init__(self, master):
+        self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
+        self.canvas.place(x=0, y=0)
+
+        # Ejemplo de imagen
+        self.img = PhotoImage(file="assets/ss_aguila.png")
+        self.canvas.create_image(100,150, image=self.img, anchor="nw")
         
-        self.label_info_eagle = Label(self, text="Movimiento del águila")
+        self.label_info_eagle = Label(self.canvas, text="Movimiento del águila")
         self.label_info_eagle.place(relx=0.2, rely=0.2, anchor="center")
         
-        self.label_info_blocks = Label(self, text="Bloques")
+        self.label_info_blocks = Label(self.canvas, text="Bloques")
         self.label_info_blocks.place(relx=0.2, rely=0.6, anchor="center")
         
-        self.label_info_tank = Label(self, text="Movmimiento del tanque")
+        self.label_info_tank = Label(self.canvas, text="Movmimiento del tanque")
         self.label_info_tank.place(relx=0.8, rely=0.2, anchor="center")
         
-        self.label_info_shoot = Label(self, text="Disparos")
+        self.label_info_shoot = Label(self.canvas, text="Disparos")
         self.label_info_shoot.place(relx=0.8, rely=0.6, anchor="center")
         
-        self.button_back = Button(self, text="Back", command=self.back)
-        self.button_back.place(relx=0.5, rely=0.8, anchor="center")
-
-        self.protocol("WM_DELETE_WINDOW", self.on_closing)
-
-    def on_closing(self):
-        self.destroy()
-        self.quit()        
+        self.button_back = Button(self.canvas, text="Back", command=self.back)
+        self.button_back.place(relx=0.5, rely=0.8, anchor="center")      
         
     def back(self):
-        self.withdraw()
-        self.main_screen.deiconify()
+        self.canvas.destroy()
+        main_Screen(window)
             
 
-class LogIn_Screen(Tk):
-    def __init__(self, main_screen):
-        super().__init__()
-        self.geometry("800x600")
-        self.main_screen = main_screen
+class LogIn_Screen:
+    def __init__(self, master):
+        self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
+        self.canvas.place(x=0, y=0)
 
-        self.label_username = Label(self, text="Nombre de usuario:")
+        self.label_username = Label(self.canvas, text="Nombre de usuario:")
         self.label_username.place(relx=0.4, rely=0.4, anchor="center")
-        self.entry_username = Entry(self)
+        self.entry_username = Entry(self.canvas)
         self.entry_username.place(relx=0.6, rely=0.4, anchor="center")
 
-        self.label_password = Label(self, text="Contraseña:")
+        self.label_password = Label(self.canvas, text="Contraseña:")
         self.label_password.place(relx=0.4, rely=0.5, anchor="center")
-        self.entry_password = Entry(self, show="*")
+        self.entry_password = Entry(self.canvas, show="*")
         self.entry_password.place(relx=0.6, rely=0.5,anchor="center")
 
-        self.button_login = Button(self, text="Iniciar sesión", command=self.login)
+        self.button_login = Button(self.canvas, text="Iniciar sesión", command=self.login)
         self.button_login.place(relx=0.5, rely=0.6, anchor="center")
 
-        self.button_register = Button(self, text="Registrarse", command=self.register)
+        self.button_register = Button(self.canvas, text="Registrarse", command=self.register)
         self.button_register.place(relx=0.5, rely=0.7, anchor="center")
 
-        self.button_back = Button(self, text="Back", command=self.back)
+        self.button_back = Button(self.canvas, text="Back", command=self.back)
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
-
-        self.protocol("WM_DELETE_WINDOW", self.on_closing)
-
-    def on_closing(self):
-        self.destroy()
-        self.quit()        
+  
 
     def register(self):
-
-        self.withdraw()
-        self.app = register_Screen(self)
-        self.app.title("Eagle Defender")
-        self.app.minsize(800,600)
-        self.app.deiconify()
+        self.canvas.destroy()
+        register_Screen(window)
 
     def login(self):
         global player1_data
@@ -285,11 +246,8 @@ class LogIn_Screen(Tk):
         if self.entry_username.get() == "admin" and self.entry_password.get() == "123":
             pygame.mixer.music.stop()
 
-            self.withdraw()
-            self.app = Admin_Screen(self)
-            self.app.title("Eagle Defender")
-            self.app.minsize(800,600)
-            self.app.deiconify()
+            self.canvas.destroy()
+            Admin_Screen(window)
         
         else:
             connection = sqlite3.connect("users.db")
@@ -306,69 +264,52 @@ class LogIn_Screen(Tk):
                 print("Inicio de sesión exitoso")
                 player1 = True
                 player1_data = user
-                self.withdraw()
-                self.app = role_selection_1(self)
-                self.app.title("Eagle Defender")
-                self.app.minsize(800, 600)
-                self.app.deiconify()
+                self.canvas.destroy()
+                role_selection_1(window)
             else:
                 print("Error en las credenciales")
 
     def back(self):
         global player1_data
         player1_data = None
-        self.withdraw()
-        self.main_screen.deiconify()
+        self.canvas.destroy()
+        main_Screen(window)
         
-class LogIn_Screen_2(Tk):
-    def __init__(self, login_screen):
-        super().__init__()
-        self.geometry("800x600")
-        self.login_screen = login_screen
+class LogIn_Screen_2():
+    def __init__(self, master):
+        self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
+        self.canvas.place(x=0, y=0)
 
-        self.label_username = Label(self, text="Nombre de usuario:")
+        self.label_username = Label(self.canvas, text="Nombre de usuario:")
         self.label_username.place(relx=0.4, rely=0.4, anchor="center")
-        self.entry_username = Entry(self)
+        self.entry_username = Entry(self.canvas)
         self.entry_username.place(relx=0.6, rely=0.4, anchor="center")
 
-        self.label_password = Label(self, text="Contraseña:")
+        self.label_password = Label(self.canvas, text="Contraseña:")
         self.label_password.place(relx=0.4, rely=0.5, anchor="center")
-        self.entry_password = Entry(self, show="*")
+        self.entry_password = Entry(self.canvas, show="*")
         self.entry_password.place(relx=0.6, rely=0.5,anchor="center")
 
-        self.button_login = Button(self, text="Iniciar sesión", command=self.login)
+        self.button_login = Button(self.canvas, text="Iniciar sesión", command=self.login)
         self.button_login.place(relx=0.5, rely=0.6, anchor="center")
 
-        self.button_register = Button(self, text="Registrarse", command=self.register)
+        self.button_register = Button(self.canvas, text="Registrarse", command=self.register)
         self.button_register.place(relx=0.5, rely=0.7, anchor="center")
 
-        self.button_back = Button(self, text="Back", command=self.back)
-        self.button_back.place(relx=0.5, rely=0.8, anchor="center")
-
-        self.protocol("WM_DELETE_WINDOW", self.on_closing)
-
-    def on_closing(self):
-        self.destroy()
-        self.quit()        
+        self.button_back = Button(self.canvas, text="Back", command=self.back)
+        self.button_back.place(relx=0.5, rely=0.8, anchor="center")   
 
     def register(self):
-
-        self.withdraw()
-        self.app = register_Screen(self)
-        self.app.title("Eagle Defender")
-        self.app.minsize(800,600)
-        self.app.deiconify()
+        self.destroy()
+        register_Screen(window)
 
     def login(self):
         global player2_data
         global player1_data
         if self.entry_username.get() == "admin" and self.entry_password.get() == "123":
             pygame.mixer.music.stop()
-            self.withdraw()
-            self.app = Admin_Screen(self)
-            self.app.title("Eagle Defender")
-            self.app.minsize(800,600)
-            self.app.deiconify()
+            self.canvas.destroy()
+            Admin_Screen(window)
         
         else:
             connection = sqlite3.connect("users.db")
@@ -388,89 +329,80 @@ class LogIn_Screen_2(Tk):
                 else:
                     print("Inicio de sesión exitoso")
                     player2_data = user
-                    self.withdraw()
-                    self.app = role_selection_2(self)
-                    self.app.title("Eagle Defender")
-                    self.app.minsize(800, 600)
-                    self.app.deiconify()                  
+                    self.canvas.destroy()
+                    role_selection_2(window)                 
             else:
                 print("Error en las credenciales")
 
     def back(self):
-        self.withdraw()
-        self.login_screen.deiconify()
+        self.canvas.destroy()
+        role_selection_1(window)
 
-class register_Screen(Tk):
-    def __init__(self, login_screen):
-        super().__init__()
-        self.geometry("800x600")
-        self.login_screen = login_screen
+class register_Screen():
+    def __init__(self, master):
+        self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')   
+        self.canvas.place(x=0, y=0)
 
         self.uploaded_files = []
 
         # Label de Registro
-        self.label_register = Label(self, text="Registro")
+        self.label_register = Label(self.canvas, text="Registro")
         self.label_register.place(relx=0.5, rely=0.1, anchor="center")
 
         # Nombre
-        self.label_nombre = Label(self, text="Nombre: ")
+        self.label_nombre = Label(self.canvas, text="Nombre: ")
         self.label_nombre.place(relx=0.4, rely=0.2, anchor="center")
-        self.entry_nombre = Entry(self)
+        self.entry_nombre = Entry(self.canvas)
         self.entry_nombre.place(relx=0.6, rely=0.2, anchor="center")
 
         # Nickname
-        self.label_nickname = Label(self, text="Nickname: ")
+        self.label_nickname = Label(self.canvas, text="Nickname: ")
         self.label_nickname.place(relx=0.4, rely=0.3, anchor="center")
-        self.entry_nickname = Entry(self)
+        self.entry_nickname = Entry(self.canvas)
         self.entry_nickname.place(relx=0.6, rely=0.3, anchor="center")
 
         # Contraseña
-        self.label_password = Label(self, text="Contraseña: ")
+        self.label_password = Label(self.canvas, text="Contraseña: ")
         self.label_password.place(relx=0.4, rely=0.4, anchor="center")
-        self.entry_password = Entry(self)
+        self.entry_password = Entry(self.canvas)
         self.entry_password.place(relx=0.6, rely=0.4, anchor="center")
 
         # Correo
-        self.label_correo = Label(self, text="Correo: ")
+        self.label_correo = Label(self.canvas, text="Correo: ")
         self.label_correo.place(relx=0.4, rely=0.5, anchor="center")
-        self.entry_correo = Entry(self)
+        self.entry_correo = Entry(self.canvas)
         self.entry_correo.place(relx=0.6, rely=0.5, anchor="center")
 
         # Edad
-        self.label_edad = Label(self, text="Edad: ")
+        self.label_edad = Label(self.canvas, text="Edad: ")
         self.label_edad.place(relx=0.4, rely=0.6, anchor="center")
-        self.entry_edad = Entry(self)
+        self.entry_edad = Entry(self.canvas)
         self.entry_edad.place(relx=0.6, rely=0.6, anchor="center")
 
         # Red Social
-        self.label_red_social = Label(self, text="Red Social: ")
+        self.label_red_social = Label(self.canvas, text="Red Social: ")
         self.label_red_social.place(relx=0.4, rely=0.7, anchor="center")
-        self.entry_red_social = Entry(self)
+        self.entry_red_social = Entry(self.canvas)
         self.entry_red_social.place(relx=0.6, rely=0.7, anchor="center")
 
         #Foto
-        self.entry_foto = Entry(self)
-        self.button_upload_photo = Button(self, text="Subir Foto", command=self.upload_photo)
+        self.entry_foto = Entry(self.canvas)
+        self.button_upload_photo = Button(self.canvas, text="Subir Foto", command=self.upload_photo)
         self.button_upload_photo.place(relx=0.4, rely=0.8, anchor="center")
 
         #Canción favorita
-        self.entry_cancion = Entry(self)
-        self.button_upload_song = Button(self, text="Subir Canción Favorita", command=self.upload_song)
+        self.entry_cancion = Entry(self.canvas)
+        self.button_upload_song = Button(self.canvas, text="Subir Canción Favorita", command=self.upload_song)
         self.button_upload_song.place(relx=0.6, rely=0.8, anchor="center")
 
         # Botón Registrarse
-        self.button_register = Button(self, text="Registrarse", command=self.register)
+        self.button_register = Button(self.canvas, text="Registrarse", command=self.register)
         self.button_register.place(relx=0.5, rely=0.9, anchor="center")
 
         # Botón Volver
-        self.button_back = Button(self, text="Volver", command=self.back)
+        self.button_back = Button(self.canvas, text="Volver", command=self.back)
         self.button_back.place(relx=0.9, rely=0.1, anchor="center")
-
-        self.protocol("WM_DELETE_WINDOW", self.on_closing)
-
-    def on_closing(self):
-        self.destroy()
-        self.quit()        
+   
     
     def add_user_file(self, folder_name):
         if folder_name == "Photos":
@@ -588,14 +520,13 @@ class register_Screen(Tk):
     
     def back(self):
         self.cleanup_uploaded_files()  # Limpia los archivos subidos
-        self.withdraw()
-        self.login_screen.deiconify()
+        self.canvas.destroy()
+        LogIn_Screen(window)
 
 class Admin_Screen(customtkinter.CTk):
-    def __init__(self, login_screen):
-        super().__init__()
-        self.geometry("800x600")
-        self.login_screen = login_screen
+    def __init__(self, master):
+        self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
+        self.canvas.place(x=0, y=0)
 
         self.songs_frames = {}
         self.players = {}
@@ -604,11 +535,11 @@ class Admin_Screen(customtkinter.CTk):
         self.song_paused = False  # Indica si la canción está pausada o no
 
         # Label de Admin
-        self.label_Admin = customtkinter.CTkLabel(self, text="Admin de canciones")
+        self.label_Admin = customtkinter.CTkLabel(self.canvas, text="Admin de canciones")
         self.label_Admin.place(relx=0.5, rely=0.05, anchor="center")
         
         # create tabview
-        self.tabview = customtkinter.CTkTabview(self, width=600, height=500)
+        self.tabview = customtkinter.CTkTabview(self.canvas, width=600, height=500)
         self.tabview.place(relx=0.5, rely=0.5, anchor="center")
         self.tab_names = ["Menu", "Defensor", "Atacante", "Especial"]
         for tab_name in self.tab_names:
@@ -673,14 +604,8 @@ class Admin_Screen(customtkinter.CTk):
             self.label_status.place(relx=0.5, rely=0.9, anchor="center")
 
         # Botón Volver
-        self.button_back = customtkinter.CTkButton(self, text="Volver", command=self.back)
-        self.button_back.place(relx=0.9, rely=0.05, anchor="center")
-
-        self.protocol("WM_DELETE_WINDOW", self.on_closing)
-
-    def on_closing(self):
-        self.destroy()
-        self.quit()        
+        self.button_back = customtkinter.CTkButton(self.canvas, text="Volver", command=self.back)
+        self.button_back.place(relx=0.9, rely=0.05, anchor="center")   
 
     def add_scrollable_frame_to_tab(self, tab_name):
         songs = self.load_songs_from_folder(tab_name)
@@ -816,8 +741,8 @@ class Admin_Screen(customtkinter.CTk):
         self.upload_status.set("Estado: Esperando archivo o link...")
 
     def back(self):
-        self.withdraw()
-        self.login_screen.deiconify()
+        self.canvas.destroy()
+        main_Screen(window)
 
 
 #Función para iniciar el juego
@@ -860,11 +785,12 @@ def setup_database():
     
     connection.commit()
     connection.close()
-    
-if __name__ == "__main__":
-    setup_database()
-    app = main_Screen()
-    app.title("Eagle Defender")
-    app.minsize(800, 600)
-    app.mainloop()
+
+window = Tk()
+setup_database()
+Main_Screen = main_Screen(window)
+window.title("Eagle Defender")
+window.minsize(800, 600)
+window.resizable(False, False)
+window.mainloop()
         
