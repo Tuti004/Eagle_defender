@@ -29,7 +29,7 @@ class Inventory_Defender:
 class Player(pygame.sprite.Sprite):
     def __init__(self): #empieza clase Player
         super().__init__() #parent class
-        self.sprite_path = pygame.image.load('assets/tank.png')
+        self.sprite_path = pygame.image.load("assets/tank1.png")
         self.rect = self.sprite_path.get_rect()
         self.image = self.sprite_path
         self.rect = self.image.get_rect()

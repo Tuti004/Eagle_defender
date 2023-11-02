@@ -13,6 +13,7 @@ import random
 from game import BlockScreen
 import tkinter as Tk
 from tkinter import *
+from PIL import Image, ImageTk
 
 # Variable global para rastrear si hay una partida en curso
 game_in_progress = False
@@ -23,26 +24,37 @@ attacker_role = None
 player1_data = None
 player2_data = None
 
-class role_selection_1(customtkinter.CTk):
+class role_selection_1(Tk):
     def __init__(self, login_screen):
         super().__init__()
         self.geometry("800x600")
         self.login_screen = login_screen
+        self.num = 0
 
-        self.label_role = customtkinter.CTkLabel(self, text=f"Jugador 1, elige tu rol:")
+        self.label_role = Label(self, text=f"Jugador 1, elige tu rol:")
         self.label_role.place(relx=0.5, rely=0.4, anchor="center")
 
-        self.button_attacker = customtkinter.CTkButton(self, text="Atacante", command=self.set_role_attacker)
+        self.button_attacker = Button(self, text="Atacante", command=self.set_role_attacker)
         self.button_attacker.place(relx=0.4, rely=0.5, anchor="center")
-
-        self.button_defender = customtkinter.CTkButton(self, text="Defensor", command=self.set_role_defender)
+        
+        self.button_skin = Button(self, text = ">", command=self.counter)
+        self.button_skin.place(relx=0.4, rely=0.6, anchor="center")
+                
+        self.button_defender = Button(self, text="Defensor", command=self.set_role_defender)
         self.button_defender.place(relx=0.6, rely=0.5, anchor="center")
 
-        self.button_back = customtkinter.CTkButton(self, text="Back", command=self.back)
+        self.button_back = Button(self, text="Back", command=self.back)
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
+    def counter(self): #Contador para determinar el skin del tanque
+        if self.num == 3:
+            self.num = 1
+        else:
+            self.num += 1
+        print(self.num)
+    
     def on_closing(self):
         self.destroy()
         self.quit()
@@ -69,7 +81,7 @@ class role_selection_1(customtkinter.CTk):
         self.withdraw()
         self.login_screen.deiconify()
 
-class role_selection_2(customtkinter.CTk):
+class role_selection_2(Tk):
     def __init__(self, login_screen2):
         global defender_role
         global attacker_role
@@ -77,17 +89,17 @@ class role_selection_2(customtkinter.CTk):
         self.geometry("800x600")
         self.login_screen2 = login_screen2
 
-        self.label_role = customtkinter.CTkLabel(self, text=f"Jugador 2, elige tu rol:")
+        self.label_role = Label(self, text=f"Jugador 2, elige tu rol:")
         self.label_role.place(relx=0.5, rely=0.4, anchor="center")
 
         if defender_role == True:
-            self.button_attacker = customtkinter.CTkButton(self, text="Atacante", command=self.set_role_attacker)
+            self.button_attacker = Button(self, text="Atacante", command=self.set_role_attacker)
             self.button_attacker.place(relx=0.5, rely=0.5, anchor="center")
         elif attacker_role == True:
-            self.button_defender = customtkinter.CTkButton(self, text="Defensor", command=self.set_role_defender)
+            self.button_defender = Button(self, text="Defensor", command=self.set_role_defender)
             self.button_defender.place(relx=0.5, rely=0.5, anchor="center")
         
-        self.button_back = customtkinter.CTkButton(self, text="Back", command=self.back)
+        self.button_back = Button(self, text="Back", command=self.back)
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
