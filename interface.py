@@ -786,12 +786,12 @@ class Admin_Screen(customtkinter.CTk):
                     file_name_without_ext = os.path.splitext(os.path.basename(file_name))[0]
                     self.songs_frames[playlist_name].add_item(file_name_without_ext + ".mp3")
                     self.upload_status.set(f"Estado: Canción de YouTube agregada a {playlist_name} correctamente.")
-                    self.after(5000, self.reset_status)
+                    self.canvas.after(5000, self.reset_status)
                 except Exception as e:
                     error_msg = f"Error durante la descarga: {str(e)}"
                     print(error_msg)
                     self.upload_status.set(error_msg)
-                    self.after(5000, self.reset_status)
+                    self.canvas.after(5000, self.reset_status)
 
     def reset_status(self):
         self.upload_status.set("Estado: Esperando archivo o link...")
