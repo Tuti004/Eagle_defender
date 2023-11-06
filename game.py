@@ -62,6 +62,8 @@ class AttackerInventory:
 
 
 # Clase para las balas de tipo Bomba
+#bullet death time
+bullet_death_time = 425
 class BombBullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -77,7 +79,7 @@ class BombBullet(pygame.sprite.Sprite):
         self.rect.move_ip(self.speed, 0)
         global last_shot_time
         current_time = pygame.time.get_ticks()
-        if current_time - last_shot_time > 320:
+        if current_time - last_shot_time > bullet_death_time:
             self.kill()
 
 class FireBullet(pygame.sprite.Sprite):
@@ -95,7 +97,7 @@ class FireBullet(pygame.sprite.Sprite):
         self.rect.move_ip(self.speed, 0)
         global last_shot_time
         current_time = pygame.time.get_ticks()
-        if current_time - last_shot_time > 320:
+        if current_time - last_shot_time > bullet_death_time:
             self.kill()
 
 class WaterBullet(pygame.sprite.Sprite):
@@ -113,7 +115,7 @@ class WaterBullet(pygame.sprite.Sprite):
         self.rect.move_ip(self.speed, 0)
         global last_shot_time
         current_time = pygame.time.get_ticks()
-        if current_time - last_shot_time > 320:
+        if current_time - last_shot_time > bullet_death_time:
             self.kill()
 
 class Player(pygame.sprite.Sprite):
@@ -178,14 +180,14 @@ class Player(pygame.sprite.Sprite):
             self.select_water_bullet()  # Seleccionar agua  
         
     def apply_border(self): #esta funcion causa que el jugador no se pueda salir de los bordes
-        if self.x <= 30:
-            self.x = 30
-        if self.x >= 775:
-            self.x = 775
-        if self.y <= 50:
-            self.y = 50
-        if self.y >= 617:
-            self.y = 617
+        if self.x <= 80:
+            self.x = 80
+        if self.x >= 725:
+            self.x = 725
+        if self.y <= 120:
+            self.y = 120
+        if self.y >= 545:
+            self.y = 545
 
     def update(self):  #update cada frame a cada uno de los atributos del jugador
         self.player_input()
@@ -221,7 +223,7 @@ class PlayerBullet(pygame.sprite.Sprite):
         self.rect.move_ip(self.speed, 0)
         global last_shot_time
         current_time = pygame.time.get_ticks()
-        if current_time - last_shot_time > 320:
+        if current_time - last_shot_time > 400:
             self.kill()
 
 def bullet_cd(player):
@@ -308,7 +310,7 @@ class BlockScreen:
         self.eagle_rect = self.eagle_image.get_rect()
 
         # timer
-        self.timer_duration = 90 * 1000  # 90 segundos
+        self.timer_duration = 10 * 1000  # 90 segundos
         self.timer_start = pygame.time.get_ticks()
         self.turn_timer_expired = False
         self.confirmation_received = False
