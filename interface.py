@@ -1,3 +1,4 @@
+from counter import menu_selected_skin
 import customtkinter
 import pygame
 import sqlite3
@@ -26,12 +27,13 @@ player2_data = None
 
 class role_selection_1:
     def __init__(self, master):
+        global menu_selected_skin
         self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
         self.canvas.place(x=0, y=0)
 
         self.num = 1
         
-        self.img = PhotoImage(file="assets/tank1.png")
+        self.img = PhotoImage(file="assets/" + menu_selected_skin)
         self.tank_image = self.canvas.create_image(100,120, image=self.img, anchor="nw")
 
         self.label_role = Label(self.canvas, text=f"Jugador 1, elige tu rol:")
@@ -50,17 +52,19 @@ class role_selection_1:
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
 
     def counter(self): #Contador para determinar el skin del tanque
-        if self.num == 3:
+        global menu_selected_skin
+        if self.num > 2:
             self.num = 1
         else:
             self.num += 1
             
         if self.num == 1:
-            self.img = PhotoImage(file="assets/tank1.png")
+            menu_selected_skin = "tank1.png"
         elif self.num == 2:
-            self.img = PhotoImage(file="assets/tank2.png")
+            menu_selected_skin = "tank2.png"
         elif self.num == 3:
-            self.img = PhotoImage(file="assets/tank3.png")
+            menu_selected_skin = "tank3.png"
+        self.img = PhotoImage(file="assets/" + menu_selected_skin)
 
         # Actualiza la imagen en el canvas
         self.canvas.itemconfig(self.tank_image, image=self.img)

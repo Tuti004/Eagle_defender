@@ -1,8 +1,6 @@
-class Counter:
-    def __init__(self):
-        self.num = 1
+from tkinter import PhotoImage
+import os
 
-    def increment(self):
-        self.num += 1
-        if self.num > 3:
-            self.num = 1
+global menu_selected_skin
+menu_selected_skin = "tank1.png"
+print(menu_selected_skin)

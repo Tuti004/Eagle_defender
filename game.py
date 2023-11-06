@@ -1,3 +1,4 @@
+from counter import menu_selected_skin
 import pygame
 import sqlite3
 from pygame.locals import *
@@ -121,8 +122,10 @@ class WaterBullet(pygame.sprite.Sprite):
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
+        global menu_selected_skin
         current_directory = os.path.dirname(__file__)
-        image_path = os.path.join(current_directory, 'assets', 'tank1.png')
+        image_path = os.path.join(current_directory, 'assets', menu_selected_skin)
+        print(menu_selected_skin)
         self.sprite_path = pygame.image.load(image_path)
         self.rect = self.sprite_path.get_rect()
         self.image = self.sprite_path
