@@ -123,8 +123,8 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.image.load(tank_skin)
         self.rect = self.image.get_rect()
-        self.x = 200
-        self.y = 200
+        self.x = 500
+        self.y = 280
         self.x_change = 0
         self.y_change = 0
         self.hearts = 6

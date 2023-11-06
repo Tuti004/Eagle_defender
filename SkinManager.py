@@ -1,3 +1,4 @@
+# Principio de Respondabilidad Única
 class TankSkinManager:
     def __init__(self):
         self.tank_sprite = 1

@@ -33,7 +33,7 @@ class role_selection_1:
         self.canvas.place(x=0, y=0)
 
         self.img = PhotoImage(file=tank_skin_manager.get_current_skin_path())
-        self.tank_image = self.canvas.create_image(100,120, image=self.img, anchor="nw")
+        self.tank_image = self.canvas.create_image(280,330, image=self.img, anchor="nw")
 
         self.label_role = Label(self.canvas, text=f"Jugador 1, elige tu rol:")
         self.label_role.place(relx=0.5, rely=0.4, anchor="center")
@@ -42,7 +42,7 @@ class role_selection_1:
         self.button_attacker.place(relx=0.4, rely=0.5, anchor="center")
         
         self.button_skin = Button(self.canvas, text = ">", command=self.counter)
-        self.button_skin.place(relx=0.4, rely=0.6, anchor="center")
+        self.button_skin.place(relx=0.4, rely=0.7, anchor="center")
                 
         self.button_defender = Button(self.canvas, text="Defensor", command=self.set_role_defender)
         self.button_defender.place(relx=0.6, rely=0.5, anchor="center")
@@ -71,6 +71,8 @@ class role_selection_1:
         LogIn_Screen_2(window)
 
     def back(self):
+        global player1_data
+        player1_data = None
         self.canvas.destroy()
         LogIn_Screen(window)
 
@@ -88,6 +90,14 @@ class role_selection_2:
         if defender_role == True:
             self.button_attacker = Button(self.canvas, text="Atacante", command=self.set_role_attacker)
             self.button_attacker.place(relx=0.5, rely=0.5, anchor="center")
+
+            self.img = PhotoImage(file=tank_skin_manager.get_current_skin_path())
+            self.tank_image = self.canvas.create_image(370 ,330, image=self.img, anchor="nw")
+
+            self.button_skin = Button(self.canvas, text = ">", command=self.counter)
+            self.button_skin.place(relx=0.5, rely=0.7, anchor="center")
+
+
         elif attacker_role == True:
             self.button_defender = Button(self.canvas, text="Defensor", command=self.set_role_defender)
             self.button_defender.place(relx=0.5, rely=0.5, anchor="center")
@@ -111,7 +121,17 @@ class role_selection_2:
         window.destroy()
         start_game(player1_data, player2_data, tank_img)
     
+    def counter(self):
+        tank_skin_manager.next_skin()  # Cambia el skin al siguiente
+        menu_selected_skin = tank_skin_manager.get_current_skin_path()
+        self.img = PhotoImage(file=menu_selected_skin)
+
+        # Actualiza la imagen en el canvas
+        self.canvas.itemconfig(self.tank_image, image=self.img)
+    
     def back(self):
+        global player2_data
+        player2_data = None
         self.canvas.destroy()
         LogIn_Screen_2(window)
     
@@ -460,66 +480,117 @@ class register_Screen():
 
         self.canvas.create_image(0,0, image=self.background, anchor="nw")
 
+        # Cargar la imagen
+        self.default_user = PhotoImage(file="assets/default_user.png")
 
+        # Cambiar el tamaño de la imagen
+        width = 180  # Ancho deseado
+        height = 180  # Alto deseado
+        self.default_user = self.default_user.zoom(width // self.default_user.width(), height // self.default_user.height())
+
+        # Mostrar la imagen en el lienzo
+        self.canvas.create_image(60, 120, image=self.default_user, anchor="nw")
         self.uploaded_files = []
 
         # register title
         self.img = PhotoImage(file="assets/Register_title.png")
-        self.canvas.create_image(240,20, image=self.img, anchor="nw")
+        self.canvas.create_image(240,30, image=self.img, anchor="nw")
+
+        # Crear un rectángulo con dimensiones ajustables y fondo blanco
+        #self.rectangle = self.canvas.create_rectangle(300, 120, 750, 550, fill="white", stipple="gray25")
+
+        #self.datos_label = Label(self.canvas, text="Datos personales:")
+        #self.datos_label.place(x=525, y=125, anchor="center")
 
         # Nombre
         self.label_nombre = Label(self.canvas, text="Nombre: ")
-        self.label_nombre.place(relx=0.4, rely=0.2, anchor="center")
+        self.label_nombre.place(relx=0.5, rely=0.3, anchor="center")
         self.entry_nombre = Entry(self.canvas)
-        self.entry_nombre.place(relx=0.6, rely=0.2, anchor="center")
+        self.entry_nombre.place(relx=0.7, rely=0.3, anchor="center")
 
         # Nickname
         self.label_nickname = Label(self.canvas, text="Nickname: ")
-        self.label_nickname.place(relx=0.4, rely=0.3, anchor="center")
+        self.label_nickname.place(relx=0.5, rely=0.4, anchor="center")
         self.entry_nickname = Entry(self.canvas)
-        self.entry_nickname.place(relx=0.6, rely=0.3, anchor="center")
+        self.entry_nickname.place(relx=0.7, rely=0.4, anchor="center")
 
         # Contraseña
         self.label_password = Label(self.canvas, text="Contraseña: ")
-        self.label_password.place(relx=0.4, rely=0.4, anchor="center")
+        self.label_password.place(relx=0.5, rely=0.5, anchor="center")
         self.entry_password = Entry(self.canvas)
-        self.entry_password.place(relx=0.6, rely=0.4, anchor="center")
+        self.entry_password.place(relx=0.7, rely=0.5, anchor="center")
 
         # Correo
         self.label_correo = Label(self.canvas, text="Correo: ")
-        self.label_correo.place(relx=0.4, rely=0.5, anchor="center")
+        self.label_correo.place(relx=0.5, rely=0.6, anchor="center")
         self.entry_correo = Entry(self.canvas)
-        self.entry_correo.place(relx=0.6, rely=0.5, anchor="center")
+        self.entry_correo.place(relx=0.7, rely=0.6, anchor="center")
 
         # Edad
         self.label_edad = Label(self.canvas, text="Edad: ")
-        self.label_edad.place(relx=0.4, rely=0.6, anchor="center")
+        self.label_edad.place(relx=0.5, rely=0.7, anchor="center")
         self.entry_edad = Entry(self.canvas)
-        self.entry_edad.place(relx=0.6, rely=0.6, anchor="center")
+        self.entry_edad.place(relx=0.7, rely=0.7, anchor="center")
 
         # Red Social
         self.label_red_social = Label(self.canvas, text="Red Social: ")
-        self.label_red_social.place(relx=0.4, rely=0.7, anchor="center")
+        self.label_red_social.place(relx=0.5, rely=0.8, anchor="center")
         self.entry_red_social = Entry(self.canvas)
-        self.entry_red_social.place(relx=0.6, rely=0.7, anchor="center")
+        self.entry_red_social.place(relx=0.7, rely=0.8, anchor="center")
 
         #Foto
         self.entry_foto = Entry(self.canvas)
         self.button_upload_photo = Button(self.canvas, text="Subir Foto", command=self.upload_photo)
-        self.button_upload_photo.place(relx=0.4, rely=0.8, anchor="center")
+        self.button_upload_photo.place(x=150, y=300, anchor="center")
 
         #Canción favorita
         self.entry_cancion = Entry(self.canvas)
-        self.button_upload_song = Button(self.canvas, text="Subir Canción Favorita", command=self.upload_song)
-        self.button_upload_song.place(relx=0.6, rely=0.8, anchor="center")
+        self.button_upload_song = Button(self.canvas, text="Subir Canción", command=self.upload_song)
+        self.button_upload_song.place(x=150, y=400, anchor="center")
+
+        # Lables para la cancion
+        self.popularidad = Label(self.canvas, text="Popularidad: ")
+        self.popularidad.place(x=130, y=450, anchor="center")
+
+        self.bailabilidad = Label(self.canvas, text="Bailabilidad: ")
+        self.bailabilidad.place(x=130, y=480, anchor="center")
+
+        self.acustico = Label(self.canvas, text="Acústico: ")
+        self.acustico.place(x=130, y=510, anchor="center")
+
+        self.tempo = Label(self.canvas, text="Tempo: ")
+        self.tempo.place(x=130, y=540, anchor="center")
+
+        #Entrys para cada dato de cancion
+
+        self.popularidad_entry = Entry(self.canvas, width=3)
+        self.popularidad_entry.place(x=200, y=450, anchor="center")
+
+        self.bailabilidad_entry = Entry(self.canvas, width=3)
+        self.bailabilidad_entry.place(x=200, y=480, anchor="center")
+
+        self.acustico_entry = Entry(self.canvas, width=3)
+        self.acustico_entry.place(x=200, y=510, anchor="center")
+
+        self.tempo_entry = Entry(self.canvas, width=3)
+        self.tempo_entry.place(x=200, y=540, anchor="center")
 
         # Botón Registrarse
         self.button_register = Button(self.canvas, text="Registrarse", command=self.register)
-        self.button_register.place(relx=0.5, rely=0.9, anchor="center")
+        self.button_register.place(relx=0.55, rely=0.9, anchor="center")
 
         # Botón Volver
         self.button_back = Button(self.canvas, text="Volver", command=self.back)
-        self.button_back.place(relx=0.9, rely=0.1, anchor="center")
+        self.button_back.place(relx=0.7, rely=0.9, anchor="center")
+
+        self.warning_messages = {
+            "password_length": "La contraseña debe tener al menos 8 caracteres",
+            "invalid_email": "Correo inválido",
+            "invalid_age": "Edad inválido",
+            "nickname_exists": "Nickname usado",
+            "email_exists": "Correo usado"
+        }
+
    
     
     def add_user_file(self, folder_name):
@@ -554,7 +625,7 @@ class register_Screen():
         if photo_path:
             self.entry_foto.delete(0, "end")
             self.entry_foto.insert(0, photo_path)
-    
+        
     def upload_song(self):
         song_path = self.add_user_file("Fav_Songs")
         if song_path:
@@ -568,49 +639,45 @@ class register_Screen():
         self.uploaded_files = []  # Reset the list
     
     def register(self):
+        if not self.entry_nombre.get() or not self.entry_nickname.get() or not self.entry_password.get() or not self.entry_correo.get() or not self.entry_edad.get():
+            self.show_warning("Por favor, complete todos los campos.")
+            return
         connection = sqlite3.connect("users.db")
         cursor = connection.cursor()
 
-        # Validar password
-        password = self.entry_password.get()
-        if (len(password) < 8):
-            print("La contrasena debe tener al menos 8 caracteres")
-            connection.close()
-            return
-        
-        #Validar que el correo tenga un formato adecuado
-        correo = self.entry_correo.get()
-        if (correo.find("@") == -1 and correo.find(".") == -1):
-            print("El correo debe tener un formato adecuado")
-            connection.close()
-            return
-        
-        #Validad edad
-        try:
-            edad = int(self.entry_edad.get())
-        except ValueError:
-            print("La edad debe ser un número entero")
-            connection.close()
-            return
-        
-        # Verificar que se haya subido tanto una foto como una canción favorita
-        if not self.entry_foto.get() or not self.entry_cancion.get():
-            print("Debes subir tanto una foto como una canción favorita.")
-            connection.close()
-            return
-
-        #Validar que el nickname y correo no estén en la base de datos
-        cursor.execute("SELECT * FROM users WHERE nickname=?", (self.entry_nickname.get(),))
-        if cursor.fetchone():
-            print("El nickname ya está en uso")
-            connection.close()
-            return
-        
-        cursor.execute("SELECT * FROM users WHERE correo=?", (self.entry_correo.get(),))
-        if cursor.fetchone():
-            print("El correo ya está en uso")
-            connection.close()
-            return
+        for case, warning_message in self.warning_messages.items():
+            if case == "password_length" and len(self.entry_password.get()) < 8:
+                self.show_warning(warning_message)
+                connection.close()
+                return
+            elif case == "invalid_email" and (self.entry_correo.get().find("@") == -1 or self.entry_correo.get().find(".") == -1):
+                self.show_warning(warning_message)
+                connection.close()
+                return
+            elif case == "invalid_age":
+                try:
+                    edad = int(self.entry_edad.get())
+                except ValueError:
+                    self.show_warning(warning_message)
+                    connection.close()
+                    return
+            elif case == "nickname_exists":
+                cursor.execute("SELECT * FROM users WHERE nickname=?", (self.entry_nickname.get(),))
+                if cursor.fetchone():
+                    self.show_warning(warning_message)
+                    connection.close()
+                    return
+            elif case == "email_exists":
+                cursor.execute("SELECT * FROM users WHERE correo=?", (self.entry_correo.get(),))
+                if cursor.fetchone():
+                    self.show_warning(warning_message)
+                    connection.close()
+                    return
+                
+        if self.entry_foto.get() and os.path.exists(self.entry_foto.get()):
+            user_photo_path = self.entry_foto.get()
+        else:
+            user_photo_path = "assets/default_user.png"
 
         try:
             cursor.execute('''
@@ -623,7 +690,7 @@ class register_Screen():
                 self.entry_correo.get(),
                 int(self.entry_edad.get()),  # convertir a entero
                 self.entry_red_social.get(),
-                self.entry_foto.get(),
+                user_photo_path,
                 self.entry_cancion.get()
             ))
             connection.commit()
@@ -635,6 +702,16 @@ class register_Screen():
         connection.close()
 
         self.back()
+
+    def show_warning(self, warning_message):
+        if hasattr(self, "warning_label"):
+            self.warning_label.destroy()  # Elimina el Label de advertencia anterior si existe
+        self.warning_label = Label(self.canvas, text=warning_message, fg="red")
+        self.warning_label.place(relx=0.65, rely=0.95, anchor="center")
+        self.canvas.after(5000, self.clear_warning)
+    def clear_warning(self):
+        if hasattr(self, "warning_label"):
+            self.warning_label.destroy()
     
     def back(self):
         self.cleanup_uploaded_files()  # Limpia los archivos subidos
