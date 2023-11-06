@@ -470,6 +470,8 @@ class BlockScreen:
                     pass    
 
             self.screen.fill((255, 255, 255))  # Llena la pantalla de blanco
+            fondojuego = pygame.image.load("assets/fondojuego.png")
+            self.screen.blit(fondojuego, (0,0))
             current_time = pygame.time.get_ticks()
             elapsed_time = current_time - self.timer_start
             remaining_time = max(0, self.timer_duration - elapsed_time)

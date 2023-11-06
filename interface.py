@@ -31,6 +31,24 @@ class role_selection_1:
         self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
         self.canvas.place(x=0, y=0)
 
+        # EJEMPLO DE FONDO
+
+        self.background = PhotoImage(file="assets/fondo_sin_cosas.png")
+
+        # Obtiene el tamaño de la ventana
+        window_width = 800
+        window_height = 600
+
+        # Obtiene el tamaño de la imagen de fondo
+        image_width = self.background.width()
+        image_height = self.background.height()
+
+        # Escala la imagen de fondo al tamaño de la ventana
+        if image_width != window_width or image_height != window_height:
+            self.background = self.background.subsample(image_width // window_width, image_height // window_height)
+
+        self.canvas.create_image(0,0, image=self.background, anchor="nw")
+
         self.num = 1
         
         self.img = PhotoImage(file="assets/" + menu_selected_skin)
@@ -92,6 +110,24 @@ class role_selection_2:
 
         self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
         self.canvas.place(x=0, y=0)
+
+        # EJEMPLO DE FONDO
+
+        self.background = PhotoImage(file="assets/fondo_sin_cosas.png")
+
+        # Obtiene el tamaño de la ventana
+        window_width = 800
+        window_height = 600
+
+        # Obtiene el tamaño de la imagen de fondo
+        image_width = self.background.width()
+        image_height = self.background.height()
+
+        # Escala la imagen de fondo al tamaño de la ventana
+        if image_width != window_width or image_height != window_height:
+            self.background = self.background.subsample(image_width // window_width, image_height // window_height)
+
+        self.canvas.create_image(0,0, image=self.background, anchor="nw")
 
         self.label_role = Label(self.canvas, text=f"Jugador 2, elige tu rol:")
         self.label_role.place(relx=0.5, rely=0.4, anchor="center")
@@ -384,6 +420,24 @@ class LogIn_Screen_2():
         self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
         self.canvas.place(x=0, y=0)
 
+        # EJEMPLO DE FONDO
+
+        self.background = PhotoImage(file="assets/fondo_sin_cosas.png")
+
+        # Obtiene el tamaño de la ventana
+        window_width = 800
+        window_height = 600
+
+        # Obtiene el tamaño de la imagen de fondo
+        image_width = self.background.width()
+        image_height = self.background.height()
+
+        # Escala la imagen de fondo al tamaño de la ventana
+        if image_width != window_width or image_height != window_height:
+            self.background = self.background.subsample(image_width // window_width, image_height // window_height)
+
+        self.canvas.create_image(0,0, image=self.background, anchor="nw")
+
         # Login_title
         self.img = PhotoImage(file="assets/login_title.png")
         self.canvas.create_image(300,120, image=self.img, anchor="nw")
@@ -451,7 +505,7 @@ class register_Screen():
         self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')   
         self.canvas.place(x=0, y=0)
 
-         # EJEMPLO DE FONDO
+        # EJEMPLO DE FONDO
 
         self.background = PhotoImage(file="assets/fondo_sin_cosas.png")
 
