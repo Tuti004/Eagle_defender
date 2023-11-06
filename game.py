@@ -310,7 +310,7 @@ class BlockScreen:
         self.eagle_rect = self.eagle_image.get_rect()
 
         # timer
-        self.timer_duration = 10 * 1000  # 90 segundos
+        self.timer_duration = 90 * 1000  # 90 segundos
         self.timer_start = pygame.time.get_ticks()
         self.turn_timer_expired = False
         self.confirmation_received = False
