@@ -1,4 +1,3 @@
-from counter import menu_selected_skin
 import pygame
 import sqlite3
 from pygame.locals import *
@@ -120,15 +119,10 @@ class WaterBullet(pygame.sprite.Sprite):
             self.kill()
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, tank_skin):
         super().__init__()
-        global menu_selected_skin
-        current_directory = os.path.dirname(__file__)
-        image_path = os.path.join(current_directory, 'assets', menu_selected_skin)
-        print(menu_selected_skin)
-        self.sprite_path = pygame.image.load(image_path)
-        self.rect = self.sprite_path.get_rect()
-        self.image = self.sprite_path
+        self.image = pygame.image.load(tank_skin)
+        self.rect = self.image.get_rect()
         self.x = 200
         self.y = 200
         self.x_change = 0
@@ -136,13 +130,15 @@ class Player(pygame.sprite.Sprite):
         self.hearts = 6
         self.speed = 1
         self.rect.midbottom = (self.x, self.y)
-        self.attacker_inventory = AttackerInventory() 
+        self.attacker_inventory = AttackerInventory()
 
         self.selected_bullet_type = "agua"
         self.message_timer = 0
 
         self.message_timer_balas = 0
-    
+
+    def update_tank_image(self, new_tank_img):
+        self.image = pygame.image.load(new_tank_img)
     def select_bomb_bullet(self):
         self.selected_bullet_type = "bomba"
 
@@ -192,19 +188,15 @@ class Player(pygame.sprite.Sprite):
         if self.y >= 545:
             self.y = 545
 
-    def update(self):  #update cada frame a cada uno de los atributos del jugador
+    def update(self):
         self.player_input()
         self.apply_border()
         self.x += self.x_change
         self.y += self.y_change
-        self.rect.midbottom = (self.x, self.y)
-        #if pygame.sprite.spritecollide(self, aliens, False):
-#            self.hearts = self.hearts-1
+        self.rect.topleft = (self.x, self.y)
+
         if self.message_timer_balas > 0:
             self.message_timer_balas -= 1
-
-player = pygame.sprite.Group() #spritegroup player
-player.add(Player()) #agrega a player al sprite group
 
 bullets = pygame.sprite.Group()
 last_shot_time = 0
@@ -258,7 +250,7 @@ def bullet_cd(player):
         last_shot_time = current_time
 
 class BlockScreen:
-    def __init__(self, player1_username, player2_username, player1_role):
+    def __init__(self, player1_username, player2_username, player1_role, tank_img):
         pygame.init()
         window_width = 800
         window_height = 600
@@ -268,6 +260,12 @@ class BlockScreen:
         self.player1_username = player1_username
         self.player2_username = player2_username
         self.player1_role = player1_role
+        self.tank_img = tank_img
+
+        self.player = Player(self.tank_img)
+        self.player.update_tank_image(self.tank_img)  # Llama al método para actualizar la imagen
+        self.players = pygame.sprite.Group()
+        self.players.add(self.player)
 
         self.defender_turn_over = False
 
@@ -518,7 +516,7 @@ class BlockScreen:
                 self.draw_bullet_inventory(bullet_inventory_x, bullet_inventory_y, bullet_type, count_bullets)
                 bullet_inventory_x += inventory_spacing
 
-            player_instance = player.sprites()[0]  # Accede a la instancia del jugador
+            player_instance = self.players.sprites()[0]
             if self.confirmation_received:
                 if player_instance.message_timer_balas > 0:  # Accede a message_timer_balas en la instancia del jugador
                     font = pygame.font.Font(None, 36)
@@ -529,8 +527,8 @@ class BlockScreen:
 
 
             if self.confirmation_received == True:
-                player.update() 
-                player.draw(self.screen)   
+                self.players.update() 
+                self.players.draw(self.screen)   
                 bullets.update()
                 bullets.draw(self.screen) 
 

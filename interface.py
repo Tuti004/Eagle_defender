@@ -1,4 +1,3 @@
-from counter import menu_selected_skin
 import customtkinter
 import pygame
 import sqlite3
@@ -15,6 +14,7 @@ from game import BlockScreen
 import tkinter as Tk
 from tkinter import *
 from PIL import Image, ImageTk
+from SkinManager import TankSkinManager
 
 # Variable global para rastrear si hay una partida en curso
 game_in_progress = False
@@ -25,15 +25,14 @@ attacker_role = None
 player1_data = None
 player2_data = None
 
+tank_skin_manager = TankSkinManager()
+
 class role_selection_1:
     def __init__(self, master):
-        global menu_selected_skin
         self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
         self.canvas.place(x=0, y=0)
 
-        self.num = 1
-        
-        self.img = PhotoImage(file="assets/" + menu_selected_skin)
+        self.img = PhotoImage(file=tank_skin_manager.get_current_skin_path())
         self.tank_image = self.canvas.create_image(100,120, image=self.img, anchor="nw")
 
         self.label_role = Label(self.canvas, text=f"Jugador 1, elige tu rol:")
@@ -51,24 +50,14 @@ class role_selection_1:
         self.button_back = Button(self.canvas, text="Back", command=self.back)
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
 
-    def counter(self): #Contador para determinar el skin del tanque
-        global menu_selected_skin
-        if self.num > 2:
-            self.num = 1
-        else:
-            self.num += 1
-            
-        if self.num == 1:
-            menu_selected_skin = "tank1.png"
-        elif self.num == 2:
-            menu_selected_skin = "tank2.png"
-        elif self.num == 3:
-            menu_selected_skin = "tank3.png"
-        self.img = PhotoImage(file="assets/" + menu_selected_skin)
+    def counter(self):
+        tank_skin_manager.next_skin()  # Cambia el skin al siguiente
+        menu_selected_skin = tank_skin_manager.get_current_skin_path()
+        self.img = PhotoImage(file=menu_selected_skin)
 
         # Actualiza la imagen en el canvas
         self.canvas.itemconfig(self.tank_image, image=self.img)
-    
+
     def set_role_attacker(self):
         global attacker_role
         attacker_role = True
@@ -109,16 +98,18 @@ class role_selection_2:
     def set_role_attacker(self):
         global player2_data
         global player1_data
+        tank_img = tank_skin_manager.get_current_skin_path()
         self.canvas.destroy()
         window.destroy()
-        start_game(player1_data, player2_data)
+        start_game(player1_data, player2_data, tank_img)
     
     def set_role_defender(self):
         global player2_data
         global player1_data
+        tank_img = tank_skin_manager.get_current_skin_path()
         self.canvas.destroy()
         window.destroy()
-        start_game(player1_data, player2_data)
+        start_game(player1_data, player2_data, tank_img)
     
     def back(self):
         self.canvas.destroy()
@@ -873,7 +864,7 @@ class Admin_Screen(customtkinter.CTk):
 
 
 #Función para iniciar el juego
-def start_game(player1, player2):
+def start_game(player1, player2, tank_img):
     global game_in_progress
     global defender_role
     global attacker_role
@@ -887,7 +878,7 @@ def start_game(player1, player2):
         player1_role = "attacker"
 
     game_in_progress = True
-    block_screen_instance = BlockScreen(player1_username, player2_username, player1_role)
+    block_screen_instance = BlockScreen(player1_username, player2_username, player1_role, tank_img)
     block_screen_instance.main_loop()
 
 def setup_database():
