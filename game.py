@@ -63,7 +63,7 @@ class AttackerInventory:
 
 # Clase para las balas de tipo Bomba
 #bullet death time
-bullet_death_time = 425
+bullet_death_time = 1150
 class BombBullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -226,7 +226,7 @@ def bullet_cd(player):
     current_time = pygame.time.get_ticks()
     new_bullet = None
 
-    if current_time - last_shot_time < 600:  # cooldown
+    if current_time - last_shot_time < 800:  # cooldown
         return
 
     if player.selected_bullet_type == "bomba":
