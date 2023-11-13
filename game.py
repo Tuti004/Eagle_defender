@@ -555,7 +555,7 @@ class BlockScreen:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                     self.confirmation_received = True
 
-                    self.attacker_songs = "Songs/Atacante"
+                    self.attacker_songs = "User_Data/Fav_Songs"
                     self.init_music(self.attacker_songs)
 
                     self.timer_start = pygame.time.get_ticks()
@@ -652,5 +652,29 @@ class BlockScreen:
 
     def play_next_song(self):
         """Reproduce the next song."""
-        pygame.mixer.music.load(self.song_list[self.current_song_index])
+        
+        song_path = self.song_list[self.current_song_index]
+
+        # Conectar a la base de datos
+        connection = sqlite3.connect("users.db")
+        cursor = connection.cursor()
+
+        # Obtener datos asociados a la canción desde la base de datos
+        cursor.execute("SELECT bailabilidad, acustico, tempo, popularidad FROM users WHERE cancion_favorita=?", (song_path,))
+        datos_cancion = cursor.fetchone()
+
+        # Cerrar la conexión a la base de datos
+        connection.close()
+
+        if datos_cancion:
+            bailabilidad, acustica, tempo, popularidad = datos_cancion
+
+            print(f"Bailabilidad: {bailabilidad}")
+            print(f"Acústica: {acustica}")
+            print(f"Tempo: {tempo}")
+            print(f"Popularidad: {popularidad}")
+        else:
+            print(f"No se encontraron datos para la canción: {song_path}")
+
+        pygame.mixer.music.load(song_path)
         pygame.mixer.music.play()

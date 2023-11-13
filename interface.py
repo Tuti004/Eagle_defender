@@ -568,12 +568,6 @@ class register_Screen():
         self.img = PhotoImage(file="assets/Register_title.png")
         self.canvas.create_image(240,30, image=self.img, anchor="nw")
 
-        # Crear un rectángulo con dimensiones ajustables y fondo blanco
-        #self.rectangle = self.canvas.create_rectangle(300, 120, 750, 550, fill="white", stipple="gray25")
-
-        #self.datos_label = Label(self.canvas, text="Datos personales:")
-        #self.datos_label.place(x=525, y=125, anchor="center")
-
         # Nombre
         self.label_nombre = Label(self.canvas, text="Nombre: ")
         self.label_nombre.place(relx=0.5, rely=0.3, anchor="center")
@@ -620,32 +614,6 @@ class register_Screen():
         self.button_upload_song = Button(self.canvas, text="Subir Canción", command=self.upload_song)
         self.button_upload_song.place(x=150, y=400, anchor="center")
 
-        # Lables para la cancion
-        self.popularidad = Label(self.canvas, text="Popularidad: ")
-        self.popularidad.place(x=130, y=450, anchor="center")
-
-        self.bailabilidad = Label(self.canvas, text="Bailabilidad: ")
-        self.bailabilidad.place(x=130, y=480, anchor="center")
-
-        self.acustico = Label(self.canvas, text="Acústico: ")
-        self.acustico.place(x=130, y=510, anchor="center")
-
-        self.tempo = Label(self.canvas, text="Tempo: ")
-        self.tempo.place(x=130, y=540, anchor="center")
-
-        #Entrys para cada dato de cancion
-
-        self.popularidad_entry = Entry(self.canvas, width=3)
-        self.popularidad_entry.place(x=200, y=450, anchor="center")
-
-        self.bailabilidad_entry = Entry(self.canvas, width=3)
-        self.bailabilidad_entry.place(x=200, y=480, anchor="center")
-
-        self.acustico_entry = Entry(self.canvas, width=3)
-        self.acustico_entry.place(x=200, y=510, anchor="center")
-
-        self.tempo_entry = Entry(self.canvas, width=3)
-        self.tempo_entry.place(x=200, y=540, anchor="center")
 
         # Botón Registrarse
         self.button_register = Button(self.canvas, text="Registrarse", command=self.register)
@@ -704,6 +672,31 @@ class register_Screen():
             self.entry_cancion.delete(0, "end")
             self.entry_cancion.insert(0, song_path)
 
+            # Habilitar las entradas y etiquetas relacionadas con los datos de la canción
+
+            # Lables para la cancion
+            self.popularidad = Label(self.canvas, text="Popularidad: ")
+            self.bailabilidad = Label(self.canvas, text="Bailabilidad: ")
+            self.acustico = Label(self.canvas, text="Acústico: ")
+            self.tempo = Label(self.canvas, text="Tempo: ")
+
+            self.popularidad.place(x=130, y=450, anchor="center")
+            self.bailabilidad.place(x=130, y=480, anchor="center")
+            self.acustico.place(x=130, y=510, anchor="center")
+            self.tempo.place(x=130, y=540, anchor="center")
+
+            #Entrys para cada dato de cancion
+            self.popularidad_entry = Entry(self.canvas, width=3)
+            self.bailabilidad_entry = Entry(self.canvas, width=3)
+            self.acustico_entry = Entry(self.canvas, width=3)
+            self.tempo_entry = Entry(self.canvas, width=3)
+            
+            self.popularidad_entry.place(x=200, y=450, anchor="center")
+            self.bailabilidad_entry.place(x=200, y=480, anchor="center")
+            self.acustico_entry.place(x=200, y=510, anchor="center")
+            self.tempo_entry.place(x=200, y=540, anchor="center")
+
+
     def cleanup_uploaded_files(self):
         for file_path in self.uploaded_files:
             if os.path.exists(file_path):
@@ -751,25 +744,56 @@ class register_Screen():
         else:
             user_photo_path = "assets/default_user.png"
 
-        try:
-            cursor.execute('''
-            INSERT INTO users (nombre, nickname, password, correo, edad, red_social, foto, cancion_favorita)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                self.entry_nombre.get(),
-                self.entry_nickname.get(),
-                self.entry_password.get(),
-                self.entry_correo.get(),
-                int(self.entry_edad.get()),  # convertir a entero
-                self.entry_red_social.get(),
-                user_photo_path,
-                self.entry_cancion.get()
-            ))
-            connection.commit()
-            print("Usuario registrado con éxito")
-            self.uploaded_files = []  # Reset the list after successful registration
-        except sqlite3.IntegrityError:
-            print("El nickname ya está en uso")
+        if self.entry_cancion.get():  # Verifica si se proporciona una canción
+
+            # Verifica si se proporcionan los datos de la canción
+            if not self.bailabilidad_entry.get() or not self.acustico_entry.get() or not self.tempo_entry.get() or not self.popularidad_entry.get():
+                self.show_warning("Por favor, complete todos los campos.")
+                connection.close()
+                return
+
+            try:
+                cursor.execute('''
+                INSERT INTO users (nombre, nickname, password, correo, edad, red_social, foto, cancion_favorita, bailabilidad, acustico, tempo, popularidad)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    self.entry_nombre.get(),
+                    self.entry_nickname.get(),
+                    self.entry_password.get(),
+                    self.entry_correo.get(),
+                    int(self.entry_edad.get()),  # convertir a entero
+                    self.entry_red_social.get(),
+                    user_photo_path,
+                    self.entry_cancion.get(),
+                    int(self.bailabilidad_entry.get()),  # convertir a entero
+                    int(self.acustico_entry.get()),  # convertir a entero
+                    int(self.tempo_entry.get()),  # convertir a entero
+                    int(self.popularidad_entry.get())  # Convertir a entero
+                ))
+                connection.commit()
+                print("Usuario registrado con éxito")
+                self.uploaded_files = []  # Reset the list after successful registration
+            except sqlite3.IntegrityError:
+                print("El nickname ya está en uso")
+        else:
+            try:
+                cursor.execute('''
+                INSERT INTO users (nombre, nickname, password, correo, edad, red_social, foto)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    self.entry_nombre.get(),
+                    self.entry_nickname.get(),
+                    self.entry_password.get(),
+                    self.entry_correo.get(),
+                    int(self.entry_edad.get()),  # convertir a entero
+                    self.entry_red_social.get(),
+                    user_photo_path
+                ))
+                connection.commit()
+                print("Usuario registrado con éxito")
+                self.uploaded_files = []  # Reset the list after successful registration
+            except sqlite3.IntegrityError:
+                print("El nickname ya está en uso")
 
         connection.close()
 
@@ -1046,7 +1070,11 @@ def setup_database():
         edad INTEGER,
         red_social TEXT,
         foto TEXT,
-        cancion_favorita TEXT
+        cancion_favorita TEXT,
+        bailabilidad INTEGER,
+        acustico INTEGER,
+        tempo INTEGER,
+        popularidad INTEGER
     )
     ''')
     
