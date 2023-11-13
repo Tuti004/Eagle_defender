@@ -5,6 +5,9 @@ import sys
 import os
 import random
 
+#global variables
+last_shot_time = 0
+
 # Tipos de bloques disponibles
 BLOCK_TYPES = ["concreto", "madera", "acero"]
 BULLETS_TYPES = ["bomba", "fuego", "agua"]
@@ -16,14 +19,14 @@ class Inventory_Defender:
             "madera": 10,
             "acero": 10
         }
-    
+
         self.block_images = {
             # Carga de imágenes
             "concreto": pygame.image.load("blocks/concreto.png"),
             "madera": pygame.image.load("blocks/madera.jpeg"),
             "acero": pygame.image.load("blocks/acero.png")
         }
-        
+
         for block_type, image in self.block_images.items():
             self.block_images[block_type] = pygame.transform.scale(image, (50, 50))
 
@@ -32,7 +35,7 @@ class Inventory_Defender:
             self.blocks[block_type] -= 1
             return True
         else:
-            return False 
+            return False
     def return_block(self, block_type):
         self.blocks[block_type] += 1
 
@@ -148,9 +151,6 @@ class Player(pygame.sprite.Sprite):
     def select_water_bullet(self):
         self.selected_bullet_type = "agua"
 
-    def player_input(self):
-        keys = pygame.key.get_pressed()
-
     def player_input(self): #esta funcion permite el moviento con wasd del jugador
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
@@ -165,7 +165,7 @@ class Player(pygame.sprite.Sprite):
 
         if keys[pygame.K_s]:
             self.y_change = +self.speed
-        
+
         if keys[pygame.K_d]:
             self.x_change = +self.speed
         if keys[pygame.K_SPACE]:
@@ -177,7 +177,7 @@ class Player(pygame.sprite.Sprite):
             self.select_fire_bullet()  # Seleccionar fuego
         if keys[pygame.K_6]:
             self.select_water_bullet()  # Seleccionar agua  
-        
+
     def apply_border(self): #esta funcion causa que el jugador no se pueda salir de los bordes
         if self.x <= 80:
             self.x = 80
@@ -199,7 +199,6 @@ class Player(pygame.sprite.Sprite):
             self.message_timer_balas -= 1
 
 bullets = pygame.sprite.Group()
-last_shot_time = 0
 
 class PlayerBullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -226,24 +225,24 @@ def bullet_cd(player):
     current_time = pygame.time.get_ticks()
     new_bullet = None
 
-    if current_time - last_shot_time < 800:  # cooldown
+    if current_time - last_shot_time < 1200:  # cooldown
         return
 
     if player.selected_bullet_type == "bomba":
         if player.attacker_inventory.use_bullet("bomba"):
             new_bullet = BombBullet(player.rect.centerx - 32, player.rect.centery + 15)
         else:
-            player.message_timer_balas = 60  # Mostrar mensaje de falta de balas durante 1 segundo
+            player.message_timer_balas = 100  # Mostrar mensaje de falta de balas durante 1 segundo
     elif player.selected_bullet_type == "fuego":
         if player.attacker_inventory.use_bullet("fuego"):
             new_bullet = FireBullet(player.rect.centerx - 32, player.rect.centery + 15)
         else:
-            player.message_timer_balas = 60  # Mostrar mensaje de falta de balas durante 1 segundo
+            player.message_timer_balas = 100  # Mostrar mensaje de falta de balas durante 1 segundo
     elif player.selected_bullet_type == "agua":
         if player.attacker_inventory.use_bullet("agua"):
             new_bullet = WaterBullet(player.rect.centerx - 32, player.rect.centery + 15)
         else:
-            player.message_timer_balas = 60  # Mostrar mensaje de falta de balas durante 1 segundo
+            player.message_timer_balas = 100  # Mostrar mensaje de falta de balas durante 1 segundo
 
     if new_bullet is not None:
         bullets.add(new_bullet)
@@ -256,7 +255,7 @@ class BlockScreen:
         window_height = 600
         self.screen = pygame.display.set_mode((window_width, window_height))
         pygame.display.set_caption("Eagle Defender")
-    
+
         self.player1_username = player1_username
         self.player2_username = player2_username
         self.player1_role = player1_role
@@ -301,10 +300,10 @@ class BlockScreen:
         self.inventory_defender = Inventory_Defender()
 
         # Crea una instancia del inventario del atacante
-        self.attacker_inventory = AttackerInventory() 
+        self.attacker_inventory = AttackerInventory()
 
         # Carga la imagen del águila
-        self.eagle_image = pygame.image.load("aguila3.png")  
+        self.eagle_image = pygame.image.load("aguila3.png")
 
         # Por si quiere que el àguila sea del mismo tamaño que las celdas
         #self.eagle_image = pygame.transform.scale(self.eagle_image, (self.CELDA, self.CELDA))
@@ -328,7 +327,7 @@ class BlockScreen:
         confirmation_x = (window_width - confirmation_width) // 2
 
         self.confirmation_button_color = (200, 200, 200)  # Color gris
-        self.confirmation_button_rect = pygame.Rect(confirmation_x, 540, confirmation_width, 40) 
+        self.confirmation_button_rect = pygame.Rect(confirmation_x, 540, confirmation_width, 40)
         self.confirmation_button_font = pygame.font.Font(None, 25)
         self.confirmation_button_text = "Confirmar Turno"
 
@@ -362,7 +361,7 @@ class BlockScreen:
             pygame.draw.line(self.screen, self.GRIS, (x, self.POS_Y_MARCO), (x, self.ALTO_MARCO + self.POS_Y_MARCO))
         for y in range(self.POS_Y_MARCO, self.ALTO_MARCO + self.POS_Y_MARCO, self.CELDA):
             pygame.draw.line(self.screen, self.GRIS, (self.POS_X_MARCO, y), (self.ANCHO_MARCO + self.POS_X_MARCO, y))
-    
+
     def dibujar_imagenes(self):
         for x in range(self.NUM_CELDAS):
             for y in range(self.NUM_CELDAS):
@@ -378,7 +377,7 @@ class BlockScreen:
             self.POS_Y_MARCO <= y < self.POS_Y_MARCO + self.ALTO_MARCO):
             return True
         return False
-    
+
     def cuadro_ocupado(self, fila, columna):
         if (0 <= fila < self.NUM_CELDAS) and (0 <= columna < self.NUM_CELDAS):
             return self.matriz_celdas[fila][columna]
@@ -411,7 +410,7 @@ class BlockScreen:
                     x, y = event.pos
                     fila = (x - self.POS_X_MARCO) // self.CELDA
                     columna = (y - self.POS_Y_MARCO) // self.CELDA
-                    
+
                     # Obtenga las coordenadas absolutas del bloque
                     bloque_x = fila * self.CELDA + self.POS_X_MARCO
                     bloque_y = columna * self.CELDA + self.POS_Y_MARCO
@@ -454,10 +453,10 @@ class BlockScreen:
                         elif event.key == pygame.K_RIGHT:
                             new_col += 1
                         # Comprueba si el nuevo cuadro está vacío antes de mover el águila
-                        if (0 <= new_row < self.NUM_CELDAS and 
-                            0 <= new_col < self.NUM_CELDAS and 
-                            not self.cuadro_ocupado(new_row, new_col) and 
-                            self.es_dentro_del_marco(self.POS_X_MARCO + new_col * self.CELDA, 
+                        if (0 <= new_row < self.NUM_CELDAS and
+                            0 <= new_col < self.NUM_CELDAS and
+                            not self.cuadro_ocupado(new_row, new_col) and
+                            self.es_dentro_del_marco(self.POS_X_MARCO + new_col * self.CELDA,
                                                     self.POS_Y_MARCO + new_row * self.CELDA)):
                             eagle_row = new_row
                             eagle_col = new_col
@@ -465,7 +464,7 @@ class BlockScreen:
                         self.show_confirmation_screen()
                         self.turn_timer_expired = True
                 elif self.turn_timer_expired == True:
-                    pass    
+                    pass
 
             self.screen.fill((255, 255, 255))  # Llena la pantalla de blanco
             fondojuego = pygame.image.load("assets/fondojuego.png")
@@ -492,7 +491,7 @@ class BlockScreen:
             # Dibuja el águila en la posición deseada basada en las coordenadas de la cuadrícula
             eagle_x = self.POS_X_MARCO + eagle_col * self.CELDA
             eagle_y = self.POS_Y_MARCO + eagle_row * self.CELDA
-            self.screen.blit(self.eagle_image, (eagle_x, eagle_y)) 
+            self.screen.blit(self.eagle_image, (eagle_x, eagle_y))
 
             # Dibuja el inventario del defensor
             inventory_x = 20
@@ -505,11 +504,11 @@ class BlockScreen:
 
             if message_timer > 0:
                 font = pygame.font.Font(None, 36)
-                text = font.render("No tienes bloques disponibles", True, (255, 0, 0))
+                text = font.render("No tienes bloques disponibles", True, (0, 0, 0))
                 text_rect = text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() - 50))
                 self.screen.blit(text, text_rect)
                 message_timer -= 1
-            
+
             # Dibuja el inventario de balas
             bullet_inventory_x = 600
             bullet_inventory_y = 10
@@ -522,17 +521,17 @@ class BlockScreen:
             if self.confirmation_received:
                 if player_instance.message_timer_balas > 0:  # Accede a message_timer_balas en la instancia del jugador
                     font = pygame.font.Font(None, 36)
-                    text = font.render("No tienes balas disponibles", True, (255, 0, 0))
+                    text = font.render("No tienes balas disponibles", True, (0, 0, 0))
                     text_rect = text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() - 50))
                     self.screen.blit(text, text_rect)
                     player_instance.message_timer_balas -= 1
 
 
             if self.confirmation_received == True:
-                self.players.update() 
-                self.players.draw(self.screen)   
+                self.players.update()
+                self.players.draw(self.screen)
                 bullets.update()
-                bullets.draw(self.screen) 
+                bullets.draw(self.screen)
 
             pygame.display.flip()
 
@@ -595,7 +594,7 @@ class BlockScreen:
             count_y = y + 25
 
             self.screen.blit(count_text, (count_x, count_y))
-    
+
     def draw_bullet_inventory(self, x, y, bullet_type, count_bullets):
         bullet_image = self.attacker_inventory.bullet_images.get(bullet_type)
 
@@ -636,7 +635,7 @@ class BlockScreen:
     def init_music(self, directory):
         """Initialize the music player with songs from the provided directory."""
         self.song_list = []
-        
+
         for root, dirs, files in os.walk(directory):
             for file in files:
                 if file.endswith(".mp3"):
@@ -645,7 +644,7 @@ class BlockScreen:
         if not self.song_list:
             print("No songs found in the directory.")
             return
-        
+
         random.shuffle(self.song_list)
         self.current_song_index = 0
         self.play_next_song()
