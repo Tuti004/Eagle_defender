@@ -31,14 +31,14 @@ screen = pygame.display.set_mode((screen_x, screen_y)) #resolucion de pantalla
 pygame.display.set_caption("Eagle Defender") #nombre de pestana de juego
 #background
 #fonts
-fontprincipal = pygame.font.Font('assets/DePixelHalbfett.otf', 25) #import de font principal
-fontsmaller = pygame.font.Font('assets/DePixelHalbfett.otf', 15)
+fontprincipal = pygame.font.Font('../assets/DePixelHalbfett.otf', 25) #import de font principal
+fontsmaller = pygame.font.Font('../assets/DePixelHalbfett.otf', 15)
 
 #todos los textos del espanol
 #title name
 Eagle_Defender = fontprincipal.render('Eagle Defender', True, BLACK)
 #UI elements
-hearts = pygame.image.load("assets/corazon.png")
+hearts = pygame.image.load("../assets/corazon.png")
 
 #title text
 start = fontprincipal.render('start-e', True, WHITE)
@@ -123,7 +123,7 @@ last_shot_time = 0
 class PlayerBullet(pygame.sprite.Sprite):
     def __init__(self, x, y): #el x y y aqui permite que cuando se agrege a bullets a su grupo de balas se ponga en las x y y del player
         super().__init__()
-        self.sprite_path = pygame.image.load('assets/bala_jugador.png')        
+        self.sprite_path = pygame.image.load('../assets/bala_jugador.png')
         self.rect = self.sprite_path.get_rect()
         self.image = self.sprite_path
         self.rect = self.image.get_rect()

@@ -10,11 +10,13 @@ import shutil
 from pydub import AudioSegment
 from CTkWidgets import song_list
 import random
+
+from Music_Strategy import ShuffleStrategy
 from game import BlockScreen
 import tkinter as Tk
 from tkinter import *
 from PIL import Image, ImageTk
-from SkinManager import TankSkinManager
+from SkinManager_SingleResponsibility import TankSkinManager
 
 # Variable global para rastrear si hay una partida en curso
 game_in_progress = False
@@ -220,27 +222,10 @@ class main_Screen:
         self.button_login = Button(self.canvas, text="Iniciar sesión", command=self.login, highlightthickness=0, bg="SystemButtonFace")
         self.button_login.place(relx=0.5, rely=0.5, anchor="center")
         
-        self.song_directory = "Songs/Menu"  # Carpeta donde se encuentran las canciones
-        self.song_list = []  # Lista de canciones en la carpeta
-        
         self.button_help = Button(self.canvas, text="Ayuda", command=self.help)
         self.button_help.place(relx=0.5, rely=0.7, anchor="center")
 
-        # Inicializar pygame para la reproducción de música
-        pygame.mixer.init()
-        self.volume = 0.5  # Volumen inicial
-        pygame.mixer.music.set_volume(self.volume)  # Ajusta el volumen según tus preferencias
-
-        # Llena la lista de canciones
-        for root, dirs, files in os.walk(self.song_directory):
-            for file in files:
-                if file.endswith(".mp3"):
-                    self.song_list.append(os.path.join(root, file))
-        print(self.song_list)
-        
-        random.shuffle(self.song_list)
-        self.current_song_index = 0
-        self.play_next_song()
+        self.setup_music_player()
 
         # Slider de volumen
         self.volume_slider = customtkinter.CTkSlider(self.canvas, from_=0, to=1, number_of_steps=100, orientation="horizontal")
@@ -264,16 +249,25 @@ class main_Screen:
         Help_Screen(window)
         self.canvas.destroy()
 
-    def play_next_song(self):
-        """Reproduce la siguiente canción y establece un callback para cuando termine."""
-        pygame.mixer.music.load(self.song_list[self.current_song_index])
-        pygame.mixer.music.play()
-        pygame.mixer.music.set_endevent(pygame.USEREVENT + 1)  # Establece un evento para el final de la canción
-        
-        song_length_ms = pygame.mixer.Sound(self.song_list[self.current_song_index]).get_length() * 1000  # Duración de la canción en milisegundos
-        self.canvas.after(int(song_length_ms), self.play_next_song)  # Programa el callback para cuando termine la canción
+    def setup_music_player(self):
+        pygame.mixer.init()
+        self.volume = 0.5
+        pygame.mixer.music.set_volume(self.volume)
 
-        self.current_song_index = (self.current_song_index + 1) % len(self.song_list)  # Ajusta el índice de la canción
+        self.song_directory = "Songs/Menu"
+        self.song_list = []
+
+        for root, dirs, files in os.walk(self.song_directory):
+            for file in files:
+                if file.endswith(".mp3"):
+                    self.song_list.append(os.path.join(root, file))
+        print(self.song_list)
+
+        self.current_song_index = 0
+
+        self.strategy = ShuffleStrategy(self.canvas, self.song_list)
+        self.strategy.play_next_song()
+
 
     def update_volume(self, event):
         # Actualiza el volumen según el valor del slider
