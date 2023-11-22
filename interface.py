@@ -10,11 +10,13 @@ import shutil
 from pydub import AudioSegment
 from CTkWidgets import song_list
 import random
+
+from Music_Strategy import ShuffleStrategy
 from game import BlockScreen
 import tkinter as Tk
 from tkinter import *
 from PIL import Image, ImageTk
-from SkinManager import TankSkinManager
+from SkinManager_SingleResponsibility import TankSkinManager
 
 # Variable global para rastrear si hay una partida en curso
 game_in_progress = False
@@ -220,27 +222,10 @@ class main_Screen:
         self.button_login = Button(self.canvas, text="Iniciar sesión", command=self.login, highlightthickness=0, bg="SystemButtonFace")
         self.button_login.place(relx=0.5, rely=0.5, anchor="center")
         
-        self.song_directory = "Songs/Menu"  # Carpeta donde se encuentran las canciones
-        self.song_list = []  # Lista de canciones en la carpeta
-        
         self.button_help = Button(self.canvas, text="Ayuda", command=self.help)
         self.button_help.place(relx=0.5, rely=0.7, anchor="center")
 
-        # Inicializar pygame para la reproducción de música
-        pygame.mixer.init()
-        self.volume = 0.5  # Volumen inicial
-        pygame.mixer.music.set_volume(self.volume)  # Ajusta el volumen según tus preferencias
-
-        # Llena la lista de canciones
-        for root, dirs, files in os.walk(self.song_directory):
-            for file in files:
-                if file.endswith(".mp3"):
-                    self.song_list.append(os.path.join(root, file))
-        print(self.song_list)
-        
-        random.shuffle(self.song_list)
-        self.current_song_index = 0
-        self.play_next_song()
+        self.setup_music_player()
 
         # Slider de volumen
         self.volume_slider = customtkinter.CTkSlider(self.canvas, from_=0, to=1, number_of_steps=100, orientation="horizontal")
@@ -264,16 +249,25 @@ class main_Screen:
         Help_Screen(window)
         self.canvas.destroy()
 
-    def play_next_song(self):
-        """Reproduce la siguiente canción y establece un callback para cuando termine."""
-        pygame.mixer.music.load(self.song_list[self.current_song_index])
-        pygame.mixer.music.play()
-        pygame.mixer.music.set_endevent(pygame.USEREVENT + 1)  # Establece un evento para el final de la canción
-        
-        song_length_ms = pygame.mixer.Sound(self.song_list[self.current_song_index]).get_length() * 1000  # Duración de la canción en milisegundos
-        self.canvas.after(int(song_length_ms), self.play_next_song)  # Programa el callback para cuando termine la canción
+    def setup_music_player(self):
+        pygame.mixer.init()
+        self.volume = 0.5
+        pygame.mixer.music.set_volume(self.volume)
 
-        self.current_song_index = (self.current_song_index + 1) % len(self.song_list)  # Ajusta el índice de la canción
+        self.song_directory = "Songs/Menu"
+        self.song_list = []
+
+        for root, dirs, files in os.walk(self.song_directory):
+            for file in files:
+                if file.endswith(".mp3"):
+                    self.song_list.append(os.path.join(root, file))
+        print(self.song_list)
+
+        self.current_song_index = 0
+
+        self.strategy = ShuffleStrategy(self.canvas, self.song_list)
+        self.strategy.play_next_song()
+
 
     def update_volume(self, event):
         # Actualiza el volumen según el valor del slider
@@ -568,12 +562,6 @@ class register_Screen():
         self.img = PhotoImage(file="assets/Register_title.png")
         self.canvas.create_image(240,30, image=self.img, anchor="nw")
 
-        # Crear un rectángulo con dimensiones ajustables y fondo blanco
-        #self.rectangle = self.canvas.create_rectangle(300, 120, 750, 550, fill="white", stipple="gray25")
-
-        #self.datos_label = Label(self.canvas, text="Datos personales:")
-        #self.datos_label.place(x=525, y=125, anchor="center")
-
         # Nombre
         self.label_nombre = Label(self.canvas, text="Nombre: ")
         self.label_nombre.place(relx=0.5, rely=0.3, anchor="center")
@@ -620,32 +608,6 @@ class register_Screen():
         self.button_upload_song = Button(self.canvas, text="Subir Canción", command=self.upload_song)
         self.button_upload_song.place(x=150, y=400, anchor="center")
 
-        # Lables para la cancion
-        self.popularidad = Label(self.canvas, text="Popularidad: ")
-        self.popularidad.place(x=130, y=450, anchor="center")
-
-        self.bailabilidad = Label(self.canvas, text="Bailabilidad: ")
-        self.bailabilidad.place(x=130, y=480, anchor="center")
-
-        self.acustico = Label(self.canvas, text="Acústico: ")
-        self.acustico.place(x=130, y=510, anchor="center")
-
-        self.tempo = Label(self.canvas, text="Tempo: ")
-        self.tempo.place(x=130, y=540, anchor="center")
-
-        #Entrys para cada dato de cancion
-
-        self.popularidad_entry = Entry(self.canvas, width=3)
-        self.popularidad_entry.place(x=200, y=450, anchor="center")
-
-        self.bailabilidad_entry = Entry(self.canvas, width=3)
-        self.bailabilidad_entry.place(x=200, y=480, anchor="center")
-
-        self.acustico_entry = Entry(self.canvas, width=3)
-        self.acustico_entry.place(x=200, y=510, anchor="center")
-
-        self.tempo_entry = Entry(self.canvas, width=3)
-        self.tempo_entry.place(x=200, y=540, anchor="center")
 
         # Botón Registrarse
         self.button_register = Button(self.canvas, text="Registrarse", command=self.register)
@@ -704,6 +666,31 @@ class register_Screen():
             self.entry_cancion.delete(0, "end")
             self.entry_cancion.insert(0, song_path)
 
+            # Habilitar las entradas y etiquetas relacionadas con los datos de la canción
+
+            # Lables para la cancion
+            self.popularidad = Label(self.canvas, text="Popularidad: ")
+            self.bailabilidad = Label(self.canvas, text="Bailabilidad: ")
+            self.acustico = Label(self.canvas, text="Acústico: ")
+            self.tempo = Label(self.canvas, text="Tempo: ")
+
+            self.popularidad.place(x=130, y=450, anchor="center")
+            self.bailabilidad.place(x=130, y=480, anchor="center")
+            self.acustico.place(x=130, y=510, anchor="center")
+            self.tempo.place(x=130, y=540, anchor="center")
+
+            #Entrys para cada dato de cancion
+            self.popularidad_entry = Entry(self.canvas, width=3)
+            self.bailabilidad_entry = Entry(self.canvas, width=3)
+            self.acustico_entry = Entry(self.canvas, width=3)
+            self.tempo_entry = Entry(self.canvas, width=3)
+            
+            self.popularidad_entry.place(x=200, y=450, anchor="center")
+            self.bailabilidad_entry.place(x=200, y=480, anchor="center")
+            self.acustico_entry.place(x=200, y=510, anchor="center")
+            self.tempo_entry.place(x=200, y=540, anchor="center")
+
+
     def cleanup_uploaded_files(self):
         for file_path in self.uploaded_files:
             if os.path.exists(file_path):
@@ -751,25 +738,56 @@ class register_Screen():
         else:
             user_photo_path = "assets/default_user.png"
 
-        try:
-            cursor.execute('''
-            INSERT INTO users (nombre, nickname, password, correo, edad, red_social, foto, cancion_favorita)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                self.entry_nombre.get(),
-                self.entry_nickname.get(),
-                self.entry_password.get(),
-                self.entry_correo.get(),
-                int(self.entry_edad.get()),  # convertir a entero
-                self.entry_red_social.get(),
-                user_photo_path,
-                self.entry_cancion.get()
-            ))
-            connection.commit()
-            print("Usuario registrado con éxito")
-            self.uploaded_files = []  # Reset the list after successful registration
-        except sqlite3.IntegrityError:
-            print("El nickname ya está en uso")
+        if self.entry_cancion.get():  # Verifica si se proporciona una canción
+
+            # Verifica si se proporcionan los datos de la canción
+            if not self.bailabilidad_entry.get() or not self.acustico_entry.get() or not self.tempo_entry.get() or not self.popularidad_entry.get():
+                self.show_warning("Por favor, complete todos los campos.")
+                connection.close()
+                return
+
+            try:
+                cursor.execute('''
+                INSERT INTO users (nombre, nickname, password, correo, edad, red_social, foto, cancion_favorita, bailabilidad, acustico, tempo, popularidad)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    self.entry_nombre.get(),
+                    self.entry_nickname.get(),
+                    self.entry_password.get(),
+                    self.entry_correo.get(),
+                    int(self.entry_edad.get()),  # convertir a entero
+                    self.entry_red_social.get(),
+                    user_photo_path,
+                    self.entry_cancion.get(),
+                    int(self.bailabilidad_entry.get()),  # convertir a entero
+                    int(self.acustico_entry.get()),  # convertir a entero
+                    int(self.tempo_entry.get()),  # convertir a entero
+                    int(self.popularidad_entry.get())  # Convertir a entero
+                ))
+                connection.commit()
+                print("Usuario registrado con éxito")
+                self.uploaded_files = []  # Reset the list after successful registration
+            except sqlite3.IntegrityError:
+                print("El nickname ya está en uso")
+        else:
+            try:
+                cursor.execute('''
+                INSERT INTO users (nombre, nickname, password, correo, edad, red_social, foto)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    self.entry_nombre.get(),
+                    self.entry_nickname.get(),
+                    self.entry_password.get(),
+                    self.entry_correo.get(),
+                    int(self.entry_edad.get()),  # convertir a entero
+                    self.entry_red_social.get(),
+                    user_photo_path
+                ))
+                connection.commit()
+                print("Usuario registrado con éxito")
+                self.uploaded_files = []  # Reset the list after successful registration
+            except sqlite3.IntegrityError:
+                print("El nickname ya está en uso")
 
         connection.close()
 
@@ -1046,7 +1064,11 @@ def setup_database():
         edad INTEGER,
         red_social TEXT,
         foto TEXT,
-        cancion_favorita TEXT
+        cancion_favorita TEXT,
+        bailabilidad INTEGER,
+        acustico INTEGER,
+        tempo INTEGER,
+        popularidad INTEGER
     )
     ''')
     

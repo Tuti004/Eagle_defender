@@ -165,7 +165,7 @@ class LogIn_Screen(customtkinter.CTk):
             app.mainloop()
         
         else:
-            connection = sqlite3.connect("users.db")
+            connection = sqlite3.connect("../users.db")
             cursor = connection.cursor()
 
             cursor.execute('''
@@ -233,7 +233,7 @@ class LogIn_Screen_2(customtkinter.CTk):
             app.mainloop()
         
         else:
-            connection = sqlite3.connect("users.db")
+            connection = sqlite3.connect("../users.db")
             cursor = connection.cursor()
 
             cursor.execute('''
@@ -330,7 +330,7 @@ class register_Screen(customtkinter.CTk):
         file_path = filedialog.askopenfilename(filetypes=filetypes)
 
         if file_path:
-            destination_folder = os.path.join("User_Data", folder_name)
+            destination_folder = os.path.join("../User_Data", folder_name)
             if not os.path.exists(destination_folder):
                 os.makedirs(destination_folder)
             
@@ -368,7 +368,7 @@ class register_Screen(customtkinter.CTk):
         self.uploaded_files = []  # Reset the list
     
     def register(self):
-        connection = sqlite3.connect("users.db")
+        connection = sqlite3.connect("../users.db")
         cursor = connection.cursor()
 
         # Validar password
@@ -542,7 +542,7 @@ class Admin_Screen(customtkinter.CTk):
             frame.add_item(song)
 
     def load_songs_from_folder(self, playlist):
-        folder_path = os.path.join("Songs", playlist)
+        folder_path = os.path.join("../Songs", playlist)
         songs = [f for f in os.listdir(folder_path) if f.endswith('.mp3')]
         return songs
     
@@ -563,7 +563,7 @@ class Admin_Screen(customtkinter.CTk):
             self.load_and_play(tab_name, song_name)
 
     def load_and_play(self, tab_name, song_name):
-        song_path = os.path.join("Songs", tab_name, song_name)
+        song_path = os.path.join("../Songs", tab_name, song_name)
         pygame.mixer.music.load(song_path)
         pygame.mixer.music.play()
         self.current_song = song_name
@@ -576,7 +576,7 @@ class Admin_Screen(customtkinter.CTk):
             del self.players[tab_name]
 
         # Delete the song from the storage (disk)
-        song_path = os.path.join("Songs", tab_name, song_name)
+        song_path = os.path.join("../Songs", tab_name, song_name)
         if os.path.exists(song_path):
             os.remove(song_path)
 
@@ -592,7 +592,7 @@ class Admin_Screen(customtkinter.CTk):
             file_path = filedialog.askopenfilename(filetypes=[('MP3 files', '*.mp3')])
             if file_path:
                 # Define the destination folder based on the playlist name
-                destination_folder = os.path.join("Songs", playlist_name)
+                destination_folder = os.path.join("../Songs", playlist_name)
                 if not os.path.exists(destination_folder):
                     os.makedirs(destination_folder)
                 
@@ -625,7 +625,7 @@ class Admin_Screen(customtkinter.CTk):
                 speed = d['_speed_str']
                 print("\rDescargando... {0} a {1}".format(p, speed), end='')
         if youtube_link:
-            folder_path = os.path.join("Songs", playlist_name)
+            folder_path = os.path.join("../Songs", playlist_name)
             if not os.path.exists(folder_path):
                 os.makedirs(folder_path)
             
@@ -751,7 +751,7 @@ last_shot_time = 0
 class PlayerBullet(pygame.sprite.Sprite):
     def __init__(self, x, y): #el x y y aqui permite que cuando se agrege a bullets a su grupo de balas se ponga en las x y y del player
         super().__init__()
-        self.sprite_path = pygame.image.load('assets/bala_jugador.png')        
+        self.sprite_path = pygame.image.load('../assets/bala_jugador.png')
         self.rect = self.sprite_path.get_rect()
         self.image = self.sprite_path
         self.rect = self.image.get_rect()
@@ -800,9 +800,9 @@ class BlockScreen:
         self.GRIS = (200, 200, 200)
 
         # Carga de imágenes
-        self.imagen_concreto = pygame.image.load("blocks/concreto.png")
-        self.imagen_madera = pygame.image.load("blocks/madera.jpeg")
-        self.imagen_acero = pygame.image.load("blocks/acero.png")
+        self.imagen_concreto = pygame.image.load("../blocks/concreto.png")
+        self.imagen_madera = pygame.image.load("../blocks/madera.jpeg")
+        self.imagen_acero = pygame.image.load("../blocks/acero.png")
 
         # Ajustar el tamaño de las imágenes
         self.imagen_concreto = pygame.transform.scale(self.imagen_concreto, (self.CELDA, self.CELDA))
@@ -816,7 +816,7 @@ class BlockScreen:
         self.inventory_defender = Inventory_Defender()
 
         # Carga la imagen del águila
-        self.eagle_image = pygame.image.load("aguila3.png")  
+        self.eagle_image = pygame.image.load("../aguila3.png")
 
         # Por si quiere que el àguila sea del mismo tamaño que las celdas
         #self.eagle_image = pygame.transform.scale(self.eagle_image, (self.CELDA, self.CELDA))
@@ -1082,7 +1082,7 @@ def start_game():
 
 def setup_database():
     # Conectar a la base de datos
-    connection = sqlite3.connect("users.db")
+    connection = sqlite3.connect("../users.db")
     cursor = connection.cursor()
     
     # Crear tabla si no existe
