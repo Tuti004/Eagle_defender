@@ -9,7 +9,7 @@ from pydub import AudioSegment
 from UI.CTkWidgets_Factory import *
 from UI.HelpScreeen_Builder import *
 
-from UI.Music_Strategy import ShuffleStrategy
+from UI.Music_DependencyInversion import ShuffleDI
 from game import BlockScreen
 from tkinter import *
 from UI.SkinManager_SingleResponsibility import TankSkinManager
@@ -270,7 +270,7 @@ class main_Screen:
 
         self.current_song_index = 0
 
-        self.strategy = ShuffleStrategy(self.canvas, self.song_list)
+        self.strategy = ShuffleDI(self.canvas, self.song_list)
         self.strategy.play_next_song()
 
 

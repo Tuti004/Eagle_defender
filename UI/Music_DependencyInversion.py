@@ -2,12 +2,12 @@ from abc import ABC, abstractmethod
 import random
 import pygame
 
-class MusicPlayerStrategy(ABC):
+class MusicPlayerDI(ABC):
     @abstractmethod
     def play_next_song(self):
         pass
 
-class ShuffleStrategy(MusicPlayerStrategy):
+class ShuffleDI(MusicPlayerDI):
     def __init__(self, canvas, song_list):
         self.canvas = canvas
         self.song_list = song_list
