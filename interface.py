@@ -6,7 +6,7 @@ import yt_dlp as youtube_dl
 import os
 import shutil
 from pydub import AudioSegment
-from UI.CTkWidgets import song_list
+from UI.CTkWidgets_Factory import *
 from UI.HelpScreeen_Builder import *
 
 from UI.Music_Strategy import ShuffleStrategy
@@ -858,17 +858,23 @@ class Admin_Screen(customtkinter.CTk):
 
         # Botón Volver
         self.button_back = customtkinter.CTkButton(self.canvas, text="Volver", command=self.back)
-        self.button_back.place(relx=0.9, rely=0.05, anchor="center")   
+        self.button_back.place(relx=0.9, rely=0.05, anchor="center")
 
     def add_scrollable_frame_to_tab(self, tab_name):
         songs = self.load_songs_from_folder(tab_name)
-        frame = song_list(self.tabview.tab(tab_name),
-                                           command1=lambda song_name, tn=tab_name: self.play_song(tn, song_name),
-                                           command2=lambda song_name, tn=tab_name: self.delete_song(tn, song_name))
+
+        # Create a Tkinter frame
+        frame = customtkinter.CTkFrame(self.tabview.tab(tab_name))
         frame.place(relx=0.5, rely=0.5, relwidth=0.9, relheight=0.5, anchor="center")
-        self.songs_frames[tab_name] = frame
+
+        # Create an instance of SongList and place it inside the frame
+        song_list = SongList(frame,
+                             command1=lambda song_name, tn=tab_name: self.play_song(tn, song_name),
+                             command2=lambda song_name, tn=tab_name: self.delete_song(tn, song_name)
+                             )
+        self.songs_frames[tab_name] = song_list
         for song in songs:
-            frame.add_item(song)
+            song_list.add_item(song)
 
     def load_songs_from_folder(self, playlist):
         folder_path = os.path.join("Songs", playlist)

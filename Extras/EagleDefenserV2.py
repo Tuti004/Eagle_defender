@@ -7,7 +7,7 @@ import yt_dlp as youtube_dl
 import os
 import shutil
 from pydub import AudioSegment
-from UI.CTkWidgets import song_list
+from UI.CTkWidgets_Factory import song_list
 import random
 
 # Variable global para rastrear si hay una partida en curso
