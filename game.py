@@ -8,6 +8,13 @@ import random
 #global variables
 last_shot_time = 0
 
+bailabilidad_label = 0
+acustica_label = 0
+tempo_label = 0
+popularidad_label = 0
+
+extra_agua = 0
+
 # Tipos de bloques disponibles
 BLOCK_TYPES = ["concreto", "madera", "acero"]
 BULLETS_TYPES = ["bomba", "fuego", "agua"]
@@ -56,12 +63,15 @@ class AttackerInventory:
     def use_bullet(self, bullet_type):
         if self.bullet_types[bullet_type] > 0:
             self.bullet_types[bullet_type] -= 1
-            return True
+            return True, self.bullet_types.copy()
         else:
-            return False
+            return False, self.bullet_types.copy()
 
     def return_bullet(self, bullet_type):
         self.bullet_types[bullet_type] += 1
+
+    def adjust_water_bullets(self, amount):
+        self.bullet_types["agua"] += amount
 
 #bullet death time
 bullet_death_time = 1150
@@ -217,6 +227,11 @@ class BlockScreen:
         self.player1_role = player1_role
         self.tank_img = tank_img
         self.game_time = game_time
+
+        self.half_time_text_displayed = False
+
+        self.pause_start_time = 0
+        self.is_paused = False
 
         self.player = Player(self.tank_img)
         self.player.update_tank_image(self.tank_img)  # Llama al método para actualizar la imagen
@@ -444,6 +459,53 @@ class BlockScreen:
             timer_rect = timer_text.get_rect(center=(self.screen.get_width() // 2, 30))
             self.screen.blit(timer_text, timer_rect)
 
+            if self.defender_turn_over:
+
+                global bailabilidad_label
+                global acustica_label
+                global tempo_label
+                global popularidad_label
+                global extra_agua
+
+                if remaining_time <= self.timer_duration // 2 and not self.half_time_text_displayed:
+                    # Pausar el tiempo
+                    pause_start_time = pygame.time.get_ticks()
+                    self.is_paused = True
+
+                    self.attacker_inventory.adjust_water_bullets(extra_agua)
+
+                    print("Cantidad de balas de agua extra " + str(self.attacker_inventory.bullet_types["agua"]))
+
+                    dynamic_text = f"Beneficio Foráneo! \n Bailabilidad: {str(bailabilidad_label)}\nAcústica: {str(acustica_label)}\nTempo: {str(tempo_label)}\nPopularidad: {str(popularidad_label)}\n Balas de agua extra: {str(extra_agua)}"
+
+                    half_time_font = pygame.font.Font(None, 48)
+                    half_time_text = half_time_font.render(dynamic_text, True, (255, 0, 0))
+
+                    # Dividir el texto en líneas individuales
+                    lines = dynamic_text.split('\n')
+
+                    # Obtener la altura de cada línea de texto
+                    line_height = half_time_text.get_height()
+
+                    # Calcular la altura total del bloque de texto
+                    total_height = len(lines) * line_height
+
+                    # Calcular la posición y mostrar cada línea por separado
+                    for i, line in enumerate(lines):
+                        text_surface = half_time_font.render(line, True, (255, 0, 0))
+                        text_rect = text_surface.get_rect(
+                            center=(self.screen.get_width() // 2,
+                                    self.screen.get_height() // 2 - total_height // 2 + i * line_height))
+                        self.screen.blit(text_surface, text_rect)
+
+                    pygame.display.flip()  # Actualizar la pantalla para mostrar el texto
+                    pygame.time.delay(10000)  # Esperar 5 segundos
+                    self.half_time_text_displayed = True
+
+                    # Reanudar el tiempo después de mostrar el mensaje
+                    self.is_paused = False
+                    self.timer_start += pygame.time.get_ticks() - pause_start_time
+
             if remaining_time == 0 and not self.turn_timer_expired:
                 self.show_confirmation_screen()
                 self.turn_timer_expired = True
@@ -610,6 +672,13 @@ class BlockScreen:
         self.play_next_song()
 
     def play_next_song(self):
+        global bailabilidad_label
+        global acustica_label
+        global tempo_label
+        global popularidad_label
+
+        global extra_agua
+
         """Reproduce the next song."""
         
         song_path = self.song_list[self.current_song_index]
@@ -628,10 +697,21 @@ class BlockScreen:
         if datos_cancion:
             bailabilidad, acustica, tempo, popularidad = datos_cancion
 
-            print(f"Bailabilidad: {bailabilidad}")
-            print(f"Acústica: {acustica}")
-            print(f"Tempo: {tempo}")
-            print(f"Popularidad: {popularidad}")
+            bailabilidad_label = bailabilidad
+            acustica_label = acustica
+            tempo_label = tempo
+            popularidad_label = popularidad
+
+            print(f"Bailabilidad: {bailabilidad_label}")
+            print(f"Acústica: {acustica_label}")
+            print(f"Tempo: {tempo_label}")
+            print(f"Popularidad: {popularidad_label}")
+
+            print("before" + str(extra_agua))
+
+            extra_agua = (popularidad // bailabilidad * acustica + tempo)
+            print("after" + str(extra_agua))
+
         else:
             print(f"No se encontraron datos para la canción: {song_path}")
 
