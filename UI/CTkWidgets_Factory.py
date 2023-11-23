@@ -37,7 +37,7 @@ class WidgetFactory:
 
 class DefaultWidgetFactory(WidgetFactory):
     def create_label(self, master, text, image):
-        return customtkinter.CTkLabel(master, text=text, image=image, width=100, compound="left", padx=5, anchor="w")
+        return customtkinter.CTkLabel(master, text=text, image=image, width=80, compound="left", padx=5, anchor="w")
 
     def create_button(self, master, text, command):
-        return customtkinter.CTkButton(master, text=text, width=100, height=24, command=command)
+        return customtkinter.CTkButton(master, text=text, width=50, height=24, command=command)

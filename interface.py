@@ -25,6 +25,8 @@ player2_data = None
 
 tank_skin_manager = TankSkinManager()
 
+game_time = 90
+
 class role_selection_1:
     def __init__(self, master):
         self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
@@ -614,8 +616,8 @@ class register_Screen():
                 shutil.copy2(file_path, destination_path)
             elif file_path.endswith('.mp3'):
                 song = AudioSegment.from_mp3(file_path)
-                if len(song) > 90000:  # 1:30 minutes in milliseconds
-                    song = song[:90000]
+                if len(song) > 240000:  # 1:30 minutes in milliseconds
+                    song = song[:240000]
                     song.export(destination_path, format="mp3")
                 else:
                     shutil.copy2(file_path, destination_path)
@@ -794,7 +796,7 @@ class Admin_Screen(customtkinter.CTk):
         # create tabview
         self.tabview = customtkinter.CTkTabview(self.canvas, width=600, height=500)
         self.tabview.place(relx=0.5, rely=0.5, anchor="center")
-        self.tab_names = ["Menu", "Defensor", "Atacante", "Especial"]
+        self.tab_names = ["Menu", "Defensor", "Config"]
         for tab_name in self.tab_names:
             self.tabview.add(tab_name)
             self.tabview.tab(tab_name).grid_columnconfigure(0, weight=1)
@@ -818,25 +820,27 @@ class Admin_Screen(customtkinter.CTk):
         self.button_add_menu = customtkinter.CTkButton(self.tabview.tab("Defensor"), text="Agregar", command=lambda: self.add_youtube("Defensor", self.entry_link_defender.get()))
         self.button_add_menu.place(relx=0.6, rely=0.1, relwidth=0.15, anchor="center")
 
-        # Label de Atacante
-        self.label_link = customtkinter.CTkLabel(self.tabview.tab("Atacante"), text="Link: ")
-        self.label_link.place(relx=0.1, rely=0.1, anchor="center")
-        self.entry_link_attacker = customtkinter.CTkEntry(self.tabview.tab("Atacante"), width=200)
-        self.entry_link_attacker.place(relx=0.3, rely=0.1, anchor="center")
+        self.label_time = customtkinter.CTkLabel(self.tabview.tab("Config"), text="Tiempo de juego: ")
+        self.label_time.place(relx=0.5, rely=0.1, anchor="center")
 
-        self.button_add_menu = customtkinter.CTkButton(self.tabview.tab("Atacante"), text="Agregar", command=lambda: self.add_youtube("Atacante", self.entry_link_attacker.get()))
-        self.button_add_menu.place(relx=0.6, rely=0.1, relwidth=0.15, anchor="center")
+        self.time_90 = customtkinter.CTkButton(self.tabview.tab("Config"), text="1:30 min", command=lambda: self.set_time(90))
+        self.time_90.place(relx=0.5, rely=0.2, anchor="center")
 
-        # Label de Especial
-        self.label_link = customtkinter.CTkLabel(self.tabview.tab("Especial"), text="Link: ")
-        self.label_link.place(relx=0.1, rely=0.1, anchor="center")
-        self.entry_link_special = customtkinter.CTkEntry(self.tabview.tab("Especial"), width=200)
-        self.entry_link_special.place(relx=0.3, rely=0.1, anchor="center")
+        self.time_120 = customtkinter.CTkButton(self.tabview.tab("Config"), text="2:00 min", command=lambda: self.set_time(120))
+        self.time_120.place(relx=0.5, rely=0.3, anchor="center")
 
-        self.button_add_menu = customtkinter.CTkButton(self.tabview.tab("Especial"), text="Agregar", command=lambda: self.add_youtube("Especial", self.entry_link_special.get()))
-        self.button_add_menu.place(relx=0.6, rely=0.1, relwidth=0.15, anchor="center")
+        self.time_150 = customtkinter.CTkButton(self.tabview.tab("Config"), text="2:30 min", command=lambda: self.set_time(150))
+        self.time_150.place(relx=0.5, rely=0.4, anchor="center")
 
-        
+        self.time_180 = customtkinter.CTkButton(self.tabview.tab("Config"), text="3:00 min", command=lambda: self.set_time(180))
+        self.time_180.place(relx=0.5, rely=0.5, anchor="center")
+
+        self.time_210 = customtkinter.CTkButton(self.tabview.tab("Config"), text="3:30 min", command=lambda: self.set_time(210))
+        self.time_210.place(relx=0.5, rely=0.6, anchor="center")
+
+        self.time_240 = customtkinter.CTkButton(self.tabview.tab("Config"), text="4:00 min", command=lambda: self.set_time(240))
+        self.time_240.place(relx=0.5, rely=0.7, anchor="center")
+
         # Botón para agregar canciones por archivo en cada tab
         self.button_add_file_menu = customtkinter.CTkButton(self.tabview.tab("Menu"), text="Agregar desde sistema", command=lambda: self.add_file("Menu"))
         self.button_add_file_menu.place(relx=0.85, rely=0.1, anchor="center")
@@ -844,15 +848,11 @@ class Admin_Screen(customtkinter.CTk):
         self.button_add_file_defensor = customtkinter.CTkButton(self.tabview.tab("Defensor"), text="Agregar desde sistema", command=lambda: self.add_file("Defensor"))
         self.button_add_file_defensor.place(relx=0.85, rely=0.1, anchor="center")
 
-        self.button_add_file_atacante = customtkinter.CTkButton(self.tabview.tab("Atacante"), text="Agregar desde sistema", command=lambda: self.add_file("Atacante"))
-        self.button_add_file_atacante.place(relx=0.85, rely=0.1, anchor="center")
-
-        self.button_add_file_especial = customtkinter.CTkButton(self.tabview.tab("Especial"), text="Agregar desde sistema", command=lambda: self.add_file("Especial"))
-        self.button_add_file_especial.place(relx=0.85, rely=0.1, anchor="center")
-
         # Variable para almacenar el estado de la subida y los posibles errores
         self.upload_status = customtkinter.StringVar(value="Estado: Esperando archivo o link...")
         for tab_name in self.tab_names:
+            if tab_name == "Config":
+                continue
             self.label_status = customtkinter.CTkLabel(self.tabview.tab(tab_name), textvariable=self.upload_status)
             self.label_status.place(relx=0.5, rely=0.9, anchor="center")
 
@@ -860,7 +860,15 @@ class Admin_Screen(customtkinter.CTk):
         self.button_back = customtkinter.CTkButton(self.canvas, text="Volver", command=self.back)
         self.button_back.place(relx=0.9, rely=0.05, anchor="center")
 
+    def set_time(self, time):
+        global game_time
+        game_time = time
+        print(game_time)
+
     def add_scrollable_frame_to_tab(self, tab_name):
+        if tab_name == "Config":
+            return
+
         songs = self.load_songs_from_folder(tab_name)
 
         # Create a Tkinter frame
@@ -934,10 +942,10 @@ class Admin_Screen(customtkinter.CTk):
                 # Define the destination path for the mp3 file
                 destination_path = os.path.join(destination_folder, os.path.basename(file_path))
                 
-                # Crop the file to 1:30 minutes if it is longer
+                # Crop the file to 4:00 minutes if it is longer
                 song = AudioSegment.from_mp3(file_path)
-                if len(song) > 90000:  # 1:30 minutes in milliseconds
-                    song = song[:90000]
+                if len(song) > 240000:  # 4:00 minutes in milliseconds
+                    song = song[:240000]
                     song.export(destination_path, format="mp3")
                 else:
                     # Copy the selected file to the corresponding folder
@@ -974,7 +982,7 @@ class Admin_Screen(customtkinter.CTk):
                     },
                     {
                         'key': 'ExecAfterDownload',
-                        'exec_cmd': 'ffmpeg -i {} -t 90 -c:v copy -c:a copy {}.temp.mp3 && mv {}.temp.mp3 {}'
+                        'exec_cmd': 'ffmpeg -i {} -t 240 -c:v copy -c:a copy {}.temp.mp3 && mv {}.temp.mp3 {}'
                     }
                 ],
                 'outtmpl': os.path.join(folder_path, '%(title)s.%(ext)s'),
@@ -1009,6 +1017,11 @@ def start_game(player1, player2, tank_img):
     global game_in_progress
     global defender_role
     global attacker_role
+    global game_time
+
+    time = game_time
+
+    print("Time before: " + str(time))
     
     player1_username = player1[2]
     player2_username = player2[2]
@@ -1019,7 +1032,7 @@ def start_game(player1, player2, tank_img):
         player1_role = "attacker"
 
     game_in_progress = True
-    block_screen_instance = BlockScreen(player1_username, player2_username, player1_role, tank_img)
+    block_screen_instance = BlockScreen(player1_username, player2_username, player1_role, tank_img, time)
     block_screen_instance.main_loop()
 
 def setup_database():

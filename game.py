@@ -205,7 +205,7 @@ def bullet_cd(player):
         last_shot_time = current_time
 
 class BlockScreen:
-    def __init__(self, player1_username, player2_username, player1_role, tank_img):
+    def __init__(self, player1_username, player2_username, player1_role, tank_img, game_time):
         pygame.init()
         window_width = 800
         window_height = 600
@@ -216,6 +216,7 @@ class BlockScreen:
         self.player2_username = player2_username
         self.player1_role = player1_role
         self.tank_img = tank_img
+        self.game_time = game_time
 
         self.player = Player(self.tank_img)
         self.player.update_tank_image(self.tank_img)  # Llama al método para actualizar la imagen
@@ -266,7 +267,10 @@ class BlockScreen:
         self.eagle_rect = self.eagle_image.get_rect()
 
         # timer
-        self.timer_duration = 90 * 1000  # 90 segundos
+        self.timer_duration = self.game_time * 1000  # 90 segundos
+
+        print(self.timer_duration)
+
         self.timer_start = pygame.time.get_ticks()
         self.turn_timer_expired = False
         self.confirmation_received = False
@@ -631,5 +635,14 @@ class BlockScreen:
         else:
             print(f"No se encontraron datos para la canción: {song_path}")
 
+        # Cargar la canción en el mezclador de música de pygame
         pygame.mixer.music.load(song_path)
-        pygame.mixer.music.play()
+
+        # Configurar el evento de finalización para activar la reproducción en bucle
+        pygame.mixer.music.set_endevent(pygame.USEREVENT)
+
+        # Reproducir la canción en bucle
+        pygame.mixer.music.play(-1)  # El argumento -1 indica reproducción en bucle
+
+        # pygame.mixer.music.load(song_path)
+        # pygame.mixer.music.play()
