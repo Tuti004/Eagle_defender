@@ -63,16 +63,16 @@ class AttackerInventory:
     def return_bullet(self, bullet_type):
         self.bullet_types[bullet_type] += 1
 
-
-# Clase para las balas de tipo Bomba
 #bullet death time
 bullet_death_time = 1150
-class BombBullet(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+
+# Open/Closed Principle
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, x, y, image_path):
         super().__init__()
         current_directory = os.path.dirname(__file__)
-        image_path = os.path.join(current_directory, 'assets', 'bomba.png')
-        self.sprite_path = pygame.image.load(image_path)
+        full_image_path = os.path.join(current_directory, 'assets', image_path)
+        self.sprite_path = pygame.image.load(full_image_path)
         self.rect = self.sprite_path.get_rect()
         self.image = self.sprite_path
         self.rect.midbottom = (x, y)
@@ -85,41 +85,17 @@ class BombBullet(pygame.sprite.Sprite):
         if current_time - last_shot_time > bullet_death_time:
             self.kill()
 
-class FireBullet(pygame.sprite.Sprite):
+class BombBullet(Bullet):
     def __init__(self, x, y):
-        super().__init__()
-        current_directory = os.path.dirname(__file__)
-        image_path = os.path.join(current_directory, 'assets', 'bala_fuego.png')
-        self.sprite_path = pygame.image.load(image_path)
-        self.rect = self.sprite_path.get_rect()
-        self.image = self.sprite_path
-        self.rect.midbottom = (x, y)
-        self.speed = -4
+        super().__init__(x, y, 'bomba.png')
 
-    def update(self):
-        self.rect.move_ip(self.speed, 0)
-        global last_shot_time
-        current_time = pygame.time.get_ticks()
-        if current_time - last_shot_time > bullet_death_time:
-            self.kill()
-
-class WaterBullet(pygame.sprite.Sprite):
+class FireBullet(Bullet):
     def __init__(self, x, y):
-        super().__init__()
-        current_directory = os.path.dirname(__file__)
-        image_path = os.path.join(current_directory, 'assets', 'bala_agua.png')
-        self.sprite_path = pygame.image.load(image_path)
-        self.rect = self.sprite_path.get_rect()
-        self.image = self.sprite_path
-        self.rect.midbottom = (x, y)
-        self.speed = -4
+        super().__init__(x, y, 'bala_fuego.png')
 
-    def update(self):
-        self.rect.move_ip(self.speed, 0)
-        global last_shot_time
-        current_time = pygame.time.get_ticks()
-        if current_time - last_shot_time > bullet_death_time:
-            self.kill()
+class WaterBullet(Bullet):
+    def __init__(self, x, y):
+        super().__init__(x, y, 'bala_agua.png')
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, tank_skin):
@@ -199,26 +175,6 @@ class Player(pygame.sprite.Sprite):
             self.message_timer_balas -= 1
 
 bullets = pygame.sprite.Group()
-
-class PlayerBullet(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        current_directory = os.path.dirname(__file__)
-        image_path = os.path.join(current_directory, 'assets', 'bala_jugador.png')
-        self.sprite_path = pygame.image.load(image_path)
-        self.rect = self.sprite_path.get_rect()
-        self.image = self.sprite_path
-        self.rect = self.image.get_rect()
-        self.rect.midbottom = (x, y)
-        self.speed = -4
-
-
-    def update(self):
-        self.rect.move_ip(self.speed, 0)
-        global last_shot_time
-        current_time = pygame.time.get_ticks()
-        if current_time - last_shot_time > 400:
-            self.kill()
 
 def bullet_cd(player):
     global last_shot_time
