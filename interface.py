@@ -225,6 +225,9 @@ class main_Screen:
         self.button_help = Button(self.canvas, text="Ayuda", command=self.help)
         self.button_help.place(relx=0.5, rely=0.7, anchor="center")
 
+        self.button_leaderboard = Button(self.canvas, text="Leaderboard", command=self.leaderboard)
+        self.button_leaderboard.place(relx=0.5, rely=0.6, anchor="center")
+
         self.setup_music_player()
 
         # Slider de volumen
@@ -247,6 +250,10 @@ class main_Screen:
         
     def help(self):
         Help_Screen(window)
+        self.canvas.destroy()
+
+    def leaderboard(self):
+        Leaderboard_Screen(window)
         self.canvas.destroy()
 
     def setup_music_player(self):
@@ -273,6 +280,46 @@ class main_Screen:
         # Actualiza el volumen según el valor del slider
         self.volume = self.volume_slider.get()
         pygame.mixer.music.set_volume(self.volume)
+
+class Leaderboard_Screen:
+    def __init__(self, master):
+        self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
+        self.canvas.place(x=0, y=0)
+
+        # EJEMPLO DE FONDO
+
+        self.background = PhotoImage(file="assets/fondo_sin_cosas.png")
+
+        # Obtiene el tamaño de la ventana
+        window_width = 800
+        window_height = 600
+
+        # Obtiene el tamaño de la imagen de fondo
+        image_width = self.background.width()
+        image_height = self.background.height()
+
+        # Escala la imagen de fondo al tamaño de la ventana
+        if image_width != window_width or image_height != window_height:
+            self.background = self.background.subsample(image_width // window_width, image_height // window_height)
+
+        self.canvas.create_image(0, 0, image=self.background, anchor="nw")
+
+        # leaderboard_title
+        self.help_title = PhotoImage(file="assets/Leaderboard_title.png")
+        self.canvas.create_image(190, 120, image=self.help_title, anchor="nw")
+
+
+
+
+
+
+
+        self.button_back = Button(self.canvas, text="Back", command=self.back)
+        self.button_back.place(relx=0.5, rely=0.8, anchor="center")
+
+    def back(self):
+        self.canvas.destroy()
+        main_Screen(window)
 
 class Help_Screen:
     def __init__(self, master):
