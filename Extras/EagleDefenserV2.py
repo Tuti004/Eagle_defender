@@ -1,17 +1,14 @@
 import customtkinter
 import pygame
 import sqlite3
-from pygame.locals import *
 import sys
 from tkinter import filedialog
 import yt_dlp as youtube_dl
 import os
 import shutil
 from pydub import AudioSegment
-from CTkWidgets import song_list
+from UI.CTkWidgets import song_list
 import random
-import time
-import threading
 
 # Variable global para rastrear si hay una partida en curso
 game_in_progress = False

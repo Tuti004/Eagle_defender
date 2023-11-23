@@ -1,22 +1,18 @@
 import customtkinter
 import pygame
 import sqlite3
-from pygame.locals import *
-import sys
 from tkinter import filedialog
 import yt_dlp as youtube_dl
 import os
 import shutil
 from pydub import AudioSegment
-from CTkWidgets import song_list
-import random
+from UI.CTkWidgets import song_list
+from UI.HelpScreeen_Builder import *
 
-from Music_Strategy import ShuffleStrategy
+from UI.Music_Strategy import ShuffleStrategy
 from game import BlockScreen
-import tkinter as Tk
 from tkinter import *
-from PIL import Image, ImageTk
-from SkinManager_SingleResponsibility import TankSkinManager
+from UI.SkinManager_SingleResponsibility import TankSkinManager
 
 # Variable global para rastrear si hay una partida en curso
 game_in_progress = False
@@ -249,8 +245,10 @@ class main_Screen:
         self.canvas.destroy()
         
     def help(self):
-        Help_Screen(window)
-        self.canvas.destroy()
+        help_screen_builder = HelpScreenBuilder()
+        help_screen_director = HelpScreenDirector(help_screen_builder)
+        help_screen_director.construct()
+        help_screen = help_screen_builder.get_help_screen()
 
     def leaderboard(self):
         Leaderboard_Screen(window)
@@ -320,83 +318,6 @@ class Leaderboard_Screen:
     def back(self):
         self.canvas.destroy()
         main_Screen(window)
-
-class Help_Screen:
-    def __init__(self, master):
-        self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
-        self.canvas.place(x=0, y=0)
-
-        # EJEMPLO DE FONDO
-
-        self.background = PhotoImage(file="assets/fondo_sin_cosas.png")
-
-        # Obtiene el tamaño de la ventana
-        window_width = 800
-        window_height = 600
-
-        # Obtiene el tamaño de la imagen de fondo
-        image_width = self.background.width()
-        image_height = self.background.height()
-
-        # Escala la imagen de fondo al tamaño de la ventana
-        if image_width != window_width or image_height != window_height:
-            self.background = self.background.subsample(image_width // window_width, image_height // window_height)
-
-        self.canvas.create_image(0,0, image=self.background, anchor="nw")
-
-        #help_title
-        self.help_title = PhotoImage(file="assets/HELP_title.png")
-        self.canvas.create_image(325,120, image=self.help_title, anchor="nw")
-
-        #movimiento de aguila
-        self.label_info_eagle = Label(self.canvas, text="Movimiento del águila")
-        self.label_info_eagle.place(relx=0.2, rely=0.2, anchor="center")
-        #imagen
-        self.aguila_foto = PhotoImage(file="assets/ss_aguila.png")
-        self.canvas.create_image(100,150, image=self.aguila_foto, anchor="nw")
-        #text
-        self.tuto_eagle = Label(self.canvas, text="Usar flechas para mover aguila")
-        self.tuto_eagle.place(relx=0.2, rely=0.46, anchor="center")
-
-        #bloques
-        self.label_info_blocks = Label(self.canvas, text="Bloques")
-        self.label_info_blocks.place(relx=0.2, rely=0.6, anchor="center")
-        #imagen
-        self.bloque_foto = PhotoImage(file="assets/ss_blocks.png")
-        self.canvas.create_image(65,390, image=self.bloque_foto, anchor="nw")
-        #text
-        self.tuto_blocks = Label(self.canvas, text="Para esoger tipo presionar 1, 2 y 3")
-        self.tuto_blocks.place(relx=0.2, rely=0.87, anchor="center")
-        self.tuto_blocks2 = Label(self.canvas, text="Para colocar usar mouse")
-        self.tuto_blocks2.place(relx=0.2, rely=0.91, anchor="center")
-
-        #movimiento de tanque
-        self.label_info_tank = Label(self.canvas, text="Movmimiento del tanque")
-        self.label_info_tank.place(relx=0.8, rely=0.2, anchor="center")
-        #imagen
-        self.tanque_foto = PhotoImage(file="assets/ss_tanque.png")
-        self.canvas.create_image(580,150, image=self.tanque_foto, anchor="nw")
-        #text
-        self.tuto_tank = Label(self.canvas, text="Usar WASD para mover tanque")
-        self.tuto_tank.place(relx=0.8, rely=0.46, anchor="center")
-
-        #disparos
-        self.label_info_shoot = Label(self.canvas, text="Disparos")
-        self.label_info_shoot.place(relx=0.8, rely=0.6, anchor="center")
-        #imagen
-        self.balas_foto = PhotoImage(file="assets/ss_bala.png")
-        self.canvas.create_image(570,390, image=self.balas_foto, anchor="nw")
-        #text
-        self.tuto_shoot = Label(self.canvas, text="Para disparar presione espacio")
-        self.tuto_shoot.place(relx=0.8, rely=0.87, anchor="center")
-
-        self.button_back = Button(self.canvas, text="Back", command=self.back)
-        self.button_back.place(relx=0.5, rely=0.8, anchor="center")      
-        
-    def back(self):
-        self.canvas.destroy()
-        main_Screen(window)
-            
 
 class LogIn_Screen:
     def __init__(self, master):
