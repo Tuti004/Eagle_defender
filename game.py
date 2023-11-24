@@ -66,9 +66,9 @@ class AttackerInventory:
     def use_bullet(self, bullet_type):
         if self.bullet_types[bullet_type] > 0:
             self.bullet_types[bullet_type] -= 1
-            return True, self.bullet_types.copy()
+            return True
         else:
-            return False, self.bullet_types.copy()
+            return False
 
     def return_bullet(self, bullet_type):
         self.bullet_types[bullet_type] += 1
