@@ -60,6 +60,8 @@ class AttackerInventory:
             "agua": pygame.image.load("assets/bala_agua.png")
         }
 
+        self.last_bullet_return_time = 0
+
     def use_bullet(self, bullet_type):
         if self.bullet_types[bullet_type] > 0:
             self.bullet_types[bullet_type] -= 1
@@ -177,6 +179,7 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         self.player_input()
         self.apply_border()
+        bullet_regen(self)
         self.x += self.x_change
         self.y += self.y_change
         self.rect.topleft = (self.x, self.y)
@@ -185,6 +188,16 @@ class Player(pygame.sprite.Sprite):
             self.message_timer_balas -= 1
 
 bullets = pygame.sprite.Group()
+
+def bullet_regen(player):
+    current_time = pygame.time.get_ticks()
+
+    if current_time - player.attacker_inventory.last_bullet_return_time >= 1000 * 10:
+        for bullet_type in BULLETS_TYPES:
+            if player.attacker_inventory.bullet_types[bullet_type] < 5:
+                player.attacker_inventory.bullet_types[bullet_type] += 1
+
+        player.attacker_inventory.last_bullet_return_time = current_time
 
 def bullet_cd(player):
     global last_shot_time
