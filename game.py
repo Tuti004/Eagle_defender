@@ -200,7 +200,7 @@ bullets = pygame.sprite.Group()
 def bullet_regen(player):
     current_time = pygame.time.get_ticks()
 
-    if current_time - player.attacker_inventory.last_bullet_return_time >= 1000 * 10:
+    if current_time - player.attacker_inventory.last_bullet_return_time >= 1000 * 30:
         for bullet_type in BULLETS_TYPES:
             if player.attacker_inventory.bullet_types[bullet_type] < 5:
                 player.attacker_inventory.bullet_types[bullet_type] += 1
