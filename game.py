@@ -242,6 +242,7 @@ class BlockScreen:
         self.half_time_text_displayed = False
 
         self.pause_start_time = 0
+        self.selected_button_paused = 0
 
         self.pause_window_active = False
         self.confirmation_window_active = False
@@ -355,7 +356,7 @@ class BlockScreen:
 
     def draw_pause_window(self):
         window_width = 300
-        window_height = 250  # Aumenté la altura para dejar espacio al botón de ayuda
+        window_height = 300  # Aumenté la altura para dejar espacio al botón de ayuda y al texto del volumen
         window_rect = Rect((self.screen.get_width() - window_width) // 2,
                            (self.screen.get_height() - window_height) // 2,
                            window_width, window_height)
@@ -379,7 +380,19 @@ class BlockScreen:
         self.screen.blit(quit_text, quit_button_rect.move(10, 5).topleft)
         self.screen.blit(help_text, help_button_rect.move(10, 5).topleft)  # Coloca el texto del botón de ayuda
 
-        return resume_button_rect, quit_button_rect, help_button_rect  # Devuelve también el rectángulo del botón de ayuda
+        # Texto de volumen
+        volume_text = font.render("Volumen", True, (0, 0, 0))
+        self.screen.blit(volume_text, (window_rect.left + 50, window_rect.top + 210))
+
+        # Controlador de volumen
+        volume_slider_rect = Rect(window_rect.left + 50, window_rect.top + 250, 200, 20)
+        pygame.draw.rect(self.screen, (0, 0, 0), volume_slider_rect)  # Fondo negro
+        volume_slider_value = int(self.volume * volume_slider_rect.width)
+        pygame.draw.rect(self.screen, (200, 200, 200), (
+            volume_slider_rect.left, volume_slider_rect.top, volume_slider_value,
+            volume_slider_rect.height))  # Indicador gris
+
+        return [resume_button_rect, quit_button_rect, help_button_rect, volume_slider_rect]
 
     def draw_player_info(self):
         font = pygame.font.Font(None, 24)
@@ -545,7 +558,15 @@ class BlockScreen:
             pause_button_rect = self.draw_pause_button()
 
             if is_paused:
-                resume_button_rect, quit_button_rect, help_button_rect = self.draw_pause_window()
+
+                elements = self.draw_pause_window()
+
+                volume_slider_rect = elements[3]
+                quit_button_rect = elements[1]
+                resume_button_rect = elements[0]
+                help_button_rect = elements[2]
+
+                volume_slider_value = int(self.volume * volume_slider_rect.width)
 
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONDOWN:
@@ -553,8 +574,8 @@ class BlockScreen:
                             is_paused = False
                             pygame.mixer.music.unpause()
                             self.timer_start += pygame.time.get_ticks() - pause_start_time
-                        elif help_button_rect.collidepoint(event.pos):  # Si se presiona el botón de ayuda
-                            # Crea una ventana emergente con las instrucciones
+                        elif help_button_rect.collidepoint(event.pos):
+                            # Si se presiona el botón de ayuda, muestra la ventana emergente y verifica si se cerró
                             if self.show_help_popup():
                                 # Usuario cerró la ventana de ayuda, vuelve a la pantalla principal
                                 is_paused = False
@@ -563,6 +584,42 @@ class BlockScreen:
                         elif quit_button_rect.collidepoint(event.pos):
                             pygame.quit()
                             sys.exit()
+
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_LEFT:
+                            # Reducir el volumen con la flecha izquierda
+                            volume_slider_value = max(0, volume_slider_value - 20)
+                            self.volume = volume_slider_value / volume_slider_rect.width
+                            pygame.mixer.music.set_volume(self.volume)
+                        elif event.key == pygame.K_RIGHT:
+                            # Aumentar el volumen con la flecha derecha
+                            volume_slider_value = min(volume_slider_rect.width, volume_slider_value + 20)
+                            self.volume = volume_slider_value / volume_slider_rect.width
+                            pygame.mixer.music.set_volume(self.volume)
+                        elif event.key == pygame.K_DOWN:
+                            # Cambia al siguiente botón
+                            self.selected_button_paused = (self.selected_button_paused + 1) % len(elements)
+                        elif event.key == pygame.K_UP:
+                            # Cambia al botón anterior
+                            self.selected_button_paused = (self.selected_button_paused - 1) % len(elements)
+                        elif event.key == pygame.K_RETURN:
+                            # Realiza la acción asociada al botón seleccionado
+                            selected_button = elements[self.selected_button_paused]
+                            if isinstance(selected_button, pygame.Rect):
+                                # Es un rectángulo (botón), realiza la acción correspondiente
+                                if selected_button == resume_button_rect:
+                                    is_paused = False
+                                    pygame.mixer.music.unpause()
+                                    self.timer_start += pygame.time.get_ticks() - pause_start_time
+                                elif selected_button == help_button_rect:
+                                    if self.show_help_popup():
+                                        is_paused = False
+                                        pygame.mixer.music.unpause()
+                                        self.timer_start += pygame.time.get_ticks() - pause_start_time
+                                elif selected_button == quit_button_rect:
+                                    pygame.quit()
+                                    sys.exit()
+
 
                 # Render and display the timer on the screen
             font = pygame.font.Font(None, 36)
