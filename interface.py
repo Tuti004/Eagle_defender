@@ -7,10 +7,10 @@ import os
 import shutil
 from pydub import AudioSegment
 from UI.CTkWidgets_Factory import *
-from UI.HelpScreeen_Builder import *
+from UI.HelpScreen_Builder import *
+from game import BlockScreen
 
 from UI.Music_DependencyInversion import ShuffleDI
-from game import BlockScreen
 from tkinter import *
 from UI.SkinManager_SingleResponsibility import TankSkinManager
 
@@ -25,7 +25,15 @@ player2_data = None
 
 tank_skin_manager = TankSkinManager()
 
-game_time = 90
+# Lee el valor desde el archivo game_config.txt
+with open('game_config.txt', 'r') as file:
+    # Lee una línea del archivo
+    line = file.readline()
+    # Encuentra la parte de la línea que contiene el valor numérico
+    value_part = line.split('=')[1].strip()
+    # Convierte el valor a entero
+    game_time = int(value_part)
+print("initial gametime: " + str(game_time))
 
 class role_selection_1:
     def __init__(self, master):
@@ -863,7 +871,11 @@ class Admin_Screen(customtkinter.CTk):
     def set_time(self, time):
         global game_time
         game_time = time
-        print(game_time)
+        # Escribe el nuevo valor en el archivo game_config.txt
+        with open('game_config.txt', 'w') as file:
+            file.write(f'game_time = {game_time}')
+
+        print(f"Game Time set to: {game_time}")
 
     def add_scrollable_frame_to_tab(self, tab_name):
         if tab_name == "Config":
@@ -1069,4 +1081,3 @@ window.title("Eagle Defender")
 window.minsize(800, 600)
 window.resizable(False, False)
 window.mainloop()
-        
