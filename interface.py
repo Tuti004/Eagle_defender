@@ -7,10 +7,10 @@ import os
 import shutil
 from pydub import AudioSegment
 from UI.CTkWidgets_Factory import *
-from UI.HelpScreeen_Builder import *
+from UI.HelpScreen_Builder import *
+from game import BlockScreen
 
 from UI.Music_DependencyInversion import ShuffleDI
-from game import BlockScreen
 from tkinter import *
 from UI.SkinManager_SingleResponsibility import TankSkinManager
 
@@ -1069,4 +1069,3 @@ window.title("Eagle Defender")
 window.minsize(800, 600)
 window.resizable(False, False)
 window.mainloop()
-        

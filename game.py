@@ -15,6 +15,9 @@ popularidad_label = 0
 
 extra_agua = 0
 
+is_paused = False
+pause_start_time = 0
+
 # Tipos de bloques disponibles
 BLOCK_TYPES = ["concreto", "madera", "acero"]
 BULLETS_TYPES = ["bomba", "fuego", "agua"]
@@ -138,31 +141,36 @@ class Player(pygame.sprite.Sprite):
         self.selected_bullet_type = "agua"
 
     def player_input(self): #esta funcion permite el moviento con wasd del jugador
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_w]:
-            self.y_change = -self.speed
-        if keys[pygame.K_w] == False:
-            self.y_change = 0
+        global is_paused
 
-        if keys[pygame.K_a]:
-            self.x_change = -self.speed
-        if keys[pygame.K_a] == False:
-            self.x_change = 0
+        if is_paused:
+            return
+        else:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_w]:
+                self.y_change = -self.speed
+            if keys[pygame.K_w] == False:
+                self.y_change = 0
 
-        if keys[pygame.K_s]:
-            self.y_change = +self.speed
+            if keys[pygame.K_a]:
+                self.x_change = -self.speed
+            if keys[pygame.K_a] == False:
+                self.x_change = 0
 
-        if keys[pygame.K_d]:
-            self.x_change = +self.speed
-        if keys[pygame.K_SPACE]:
-            bullet_cd(self)
+            if keys[pygame.K_s]:
+                self.y_change = +self.speed
 
-        if keys[pygame.K_4]:
-            self.select_bomb_bullet()  # Seleccionar bombas
-        if keys[pygame.K_5]:
-            self.select_fire_bullet()  # Seleccionar fuego
-        if keys[pygame.K_6]:
-            self.select_water_bullet()  # Seleccionar agua  
+            if keys[pygame.K_d]:
+                self.x_change = +self.speed
+            if keys[pygame.K_SPACE]:
+                bullet_cd(self)
+
+            if keys[pygame.K_4]:
+                self.select_bomb_bullet()  # Seleccionar bombas
+            if keys[pygame.K_5]:
+                self.select_fire_bullet()  # Seleccionar fuego
+            if keys[pygame.K_6]:
+                self.select_water_bullet()  # Seleccionar agua
 
     def apply_border(self): #esta funcion causa que el jugador no se pueda salir de los bordes
         if self.x <= 80:
@@ -222,6 +230,9 @@ class BlockScreen:
         self.screen = pygame.display.set_mode((window_width, window_height))
         pygame.display.set_caption("Eagle Defender")
 
+        self.screen_width = window_width
+        self.screen_height = window_height
+
         self.player1_username = player1_username
         self.player2_username = player2_username
         self.player1_role = player1_role
@@ -231,7 +242,9 @@ class BlockScreen:
         self.half_time_text_displayed = False
 
         self.pause_start_time = 0
-        self.is_paused = False
+
+        self.pause_window_active = False
+        self.confirmation_window_active = False
 
         self.player = Player(self.tank_img)
         self.player.update_tank_image(self.tank_img)  # Llama al método para actualizar la imagen
@@ -306,6 +319,68 @@ class BlockScreen:
         self.confirmation_button_font = pygame.font.Font(None, 25)
         self.confirmation_button_text = "Confirmar Turno"
 
+    def show_help_popup(self):
+        help_image = pygame.image.load("assets/help_pygame.png")  # Reemplaza con la ruta de tu imagen
+        help_image_rect = help_image.get_rect(center=(self.screen_width // 2, self.screen_height // 2))
+
+        help_popup = pygame.display.set_mode((800, 600))
+        pygame.display.set_caption("Ayuda")
+
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            help_popup.blit(help_image, help_image_rect)
+            pygame.display.flip()
+
+            # Verifica si el usuario cerró la ventana de ayuda
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_ESCAPE]:  # Puedes ajustar esto a la tecla que prefieras
+                return True  # Usuario cerró la ventana
+
+    def draw_pause_button(self):
+        button_size = 30
+        margin = 10
+        button_rect = Rect(self.screen.get_width() - button_size - margin, margin, button_size, button_size)
+
+        pygame.draw.rect(self.screen, (200, 200, 200), button_rect)  # Color gris para el botón
+        pygame.draw.line(self.screen, (0, 0, 0), (button_rect.left + 5, button_rect.top + 5),
+                         (button_rect.right - 5, button_rect.bottom - 5), 2)
+        pygame.draw.line(self.screen, (0, 0, 0), (button_rect.left + 5, button_rect.bottom - 5),
+                         (button_rect.right - 5, button_rect.top + 5), 2)
+
+        return button_rect
+
+    def draw_pause_window(self):
+        window_width = 300
+        window_height = 250  # Aumenté la altura para dejar espacio al botón de ayuda
+        window_rect = Rect((self.screen.get_width() - window_width) // 2,
+                           (self.screen.get_height() - window_height) // 2,
+                           window_width, window_height)
+
+        pygame.draw.rect(self.screen, (255, 255, 255), window_rect)  # Color blanco para la ventana
+
+        font = pygame.font.Font(None, 36)
+        resume_button_rect = Rect(window_rect.left + 50, window_rect.top + 50, 200, 40)
+        quit_button_rect = Rect(window_rect.left + 50, window_rect.top + 100, 200, 40)
+        help_button_rect = Rect(window_rect.left + 50, window_rect.top + 150, 200, 40)  # Nuevo botón de ayuda
+
+        pygame.draw.rect(self.screen, (200, 200, 200), resume_button_rect)  # Color gris para el botón
+        pygame.draw.rect(self.screen, (200, 200, 200), quit_button_rect)  # Color gris para el botón
+        pygame.draw.rect(self.screen, (200, 200, 200), help_button_rect)  # Color gris para el botón de ayuda
+
+        resume_text = font.render("Resume", True, (0, 0, 0))
+        quit_text = font.render("Quit", True, (0, 0, 0))
+        help_text = font.render("Help", True, (0, 0, 0))  # Texto para el botón de ayuda
+
+        self.screen.blit(resume_text, resume_button_rect.move(10, 5).topleft)
+        self.screen.blit(quit_text, quit_button_rect.move(10, 5).topleft)
+        self.screen.blit(help_text, help_button_rect.move(10, 5).topleft)  # Coloca el texto del botón de ayuda
+
+        return resume_button_rect, quit_button_rect, help_button_rect  # Devuelve también el rectángulo del botón de ayuda
+
     def draw_player_info(self):
         font = pygame.font.Font(None, 24)
         # Definir las coordenadas y el color del texto
@@ -364,8 +439,9 @@ class BlockScreen:
         text_rect = text_surf.get_rect(center=self.confirmation_button_rect.center)
         self.screen.blit(text_surf, text_rect)
 
-
     def main_loop(self):
+        global is_paused
+        global pause_start_time
         running = True
         selected_block = None
         message_timer = 0
@@ -406,55 +482,96 @@ class BlockScreen:
                                 message_timer = 100
 
                 if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_p:
+                        is_paused = not is_paused
+                        if is_paused:
+                            pygame.mixer.music.pause()
+                            pause_start_time = pygame.time.get_ticks()
+                            self.draw_pause_window()
+                        else:
+                            pygame.mixer.music.unpause()
+                            pass
+
+                        # Evitar eventos adicionales mientras se mantiene presionada la tecla
+                        pygame.event.clear(pygame.KEYUP)
+                        pygame.event.clear(pygame.KEYDOWN)
+                        pygame.time.delay(200)
+
                     if self.defender_turn_over:
                     # Bloquea el movimiento y la selección de bloques si el turno del defensor ha terminado
                         continue
 
-                    if event.key == pygame.K_1:
-                        selected_block = "concreto"
-                    elif event.key == pygame.K_2:
-                        selected_block = "madera"
-                    elif event.key == pygame.K_3:
-                        selected_block = "acero"
-                    elif event.type == pygame.KEYDOWN:
-                        new_row = eagle_row
-                        new_col = eagle_col
-                        if event.key == pygame.K_UP:
-                            new_row -= 1
-                        elif event.key == pygame.K_DOWN:
-                            new_row += 1
-                        elif event.key == pygame.K_LEFT:
-                            new_col -= 1
-                        elif event.key == pygame.K_RIGHT:
-                            new_col += 1
-                        # Comprueba si el nuevo cuadro está vacío antes de mover el águila
-                        if (0 <= new_row < self.NUM_CELDAS and
-                            0 <= new_col < self.NUM_CELDAS and
-                            not self.cuadro_ocupado(new_row, new_col) and
-                            self.es_dentro_del_marco(self.POS_X_MARCO + new_col * self.CELDA,
-                                                    self.POS_Y_MARCO + new_row * self.CELDA)):
-                            eagle_row = new_row
-                            eagle_col = new_col
-                    if event.key == pygame.K_RETURN:
-                        self.show_confirmation_screen()
-                        self.turn_timer_expired = True
+                    if is_paused:
+                        continue
+                    else:
+                        if event.key == pygame.K_1:
+                            selected_block = "concreto"
+                        elif event.key == pygame.K_2:
+                            selected_block = "madera"
+                        elif event.key == pygame.K_3:
+                            selected_block = "acero"
+                        elif event.type == pygame.KEYDOWN:
+                            new_row = eagle_row
+                            new_col = eagle_col
+                            if event.key == pygame.K_UP:
+                                new_row -= 1
+                            elif event.key == pygame.K_DOWN:
+                                new_row += 1
+                            elif event.key == pygame.K_LEFT:
+                                new_col -= 1
+                            elif event.key == pygame.K_RIGHT:
+                                new_col += 1
+                            # Comprueba si el nuevo cuadro está vacío antes de mover el águila
+                            if (0 <= new_row < self.NUM_CELDAS and
+                                0 <= new_col < self.NUM_CELDAS and
+                                not self.cuadro_ocupado(new_row, new_col) and
+                                self.es_dentro_del_marco(self.POS_X_MARCO + new_col * self.CELDA,
+                                                        self.POS_Y_MARCO + new_row * self.CELDA)):
+                                eagle_row = new_row
+                                eagle_col = new_col
+                        if event.key == pygame.K_RETURN:
+                            self.show_confirmation_screen()
+                            self.turn_timer_expired = True
                 elif self.turn_timer_expired == True:
                     pass
 
             self.screen.fill((255, 255, 255))  # Llena la pantalla de blanco
             fondojuego = pygame.image.load("assets/fondojuego.png")
             self.screen.blit(fondojuego, (0,0))
-            current_time = pygame.time.get_ticks()
-            elapsed_time = current_time - self.timer_start
-            remaining_time = max(0, self.timer_duration - elapsed_time)
-            minutes, seconds = divmod(remaining_time // 1000, 60)
 
             self.dibujar_cuadricula()
             self.dibujar_imagenes()
             self.draw_player_info()
+            pause_button_rect = self.draw_pause_button()
 
-            # Render and display the timer on the screen
+            if is_paused:
+                resume_button_rect, quit_button_rect, help_button_rect = self.draw_pause_window()
+
+                for event in pygame.event.get():
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if resume_button_rect.collidepoint(event.pos):
+                            is_paused = False
+                            pygame.mixer.music.unpause()
+                            self.timer_start += pygame.time.get_ticks() - pause_start_time
+                        elif help_button_rect.collidepoint(event.pos):  # Si se presiona el botón de ayuda
+                            # Crea una ventana emergente con las instrucciones
+                            if self.show_help_popup():
+                                # Usuario cerró la ventana de ayuda, vuelve a la pantalla principal
+                                is_paused = False
+                                pygame.mixer.music.unpause()
+                                self.timer_start += pygame.time.get_ticks() - pause_start_time
+                        elif quit_button_rect.collidepoint(event.pos):
+                            pygame.quit()
+                            sys.exit()
+
+                # Render and display the timer on the screen
             font = pygame.font.Font(None, 36)
+            if not is_paused:
+                current_time = pygame.time.get_ticks()
+                elapsed_time = current_time - self.timer_start
+                remaining_time = max(0, self.timer_duration - elapsed_time)
+            minutes, seconds = divmod(remaining_time // 1000, 60)
+
             timer_text = font.render(f"Time: {minutes:02}:{seconds:02}", True, (0, 0, 0))
             timer_rect = timer_text.get_rect(center=(self.screen.get_width() // 2, 30))
             self.screen.blit(timer_text, timer_rect)
@@ -652,8 +769,6 @@ class BlockScreen:
 
             self.screen.blit(count_text, (count_x, count_y))
 
-
-
     def init_music(self, directory):
         """Initialize the music player with songs from the provided directory."""
         self.song_list = []
@@ -676,10 +791,7 @@ class BlockScreen:
         global acustica_label
         global tempo_label
         global popularidad_label
-
         global extra_agua
-
-        """Reproduce the next song."""
         
         song_path = self.song_list[self.current_song_index]
 
@@ -701,17 +813,7 @@ class BlockScreen:
             acustica_label = acustica
             tempo_label = tempo
             popularidad_label = popularidad
-
-            print(f"Bailabilidad: {bailabilidad_label}")
-            print(f"Acústica: {acustica_label}")
-            print(f"Tempo: {tempo_label}")
-            print(f"Popularidad: {popularidad_label}")
-
-            print("before" + str(extra_agua))
-
             extra_agua = (popularidad // bailabilidad * acustica + tempo)
-            print("after" + str(extra_agua))
-
         else:
             print(f"No se encontraron datos para la canción: {song_path}")
 
@@ -723,6 +825,3 @@ class BlockScreen:
 
         # Reproducir la canción en bucle
         pygame.mixer.music.play(-1)  # El argumento -1 indica reproducción en bucle
-
-        # pygame.mixer.music.load(song_path)
-        # pygame.mixer.music.play()
