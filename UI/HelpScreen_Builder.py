@@ -60,7 +60,7 @@ class HelpScreen:
         self.aguila_foto = PhotoImage(file="assets/ss_aguila.png")
         self.canvas.create_image(100, 150, image=self.aguila_foto, anchor="nw")
 
-        self.tuto_eagle = Label(self.canvas, text="Usar flechas para mover águila")
+        self.tuto_eagle = Label(self.canvas, text="Usar WASD para mover aguila despues de presionar el switch")
         self.tuto_eagle.place(relx=0.2, rely=0.46, anchor="center")
 
         self.label_info_blocks = Label(self.canvas, text="Bloques")
@@ -69,7 +69,7 @@ class HelpScreen:
         self.bloque_foto = PhotoImage(file="assets/ss_blocks.png")
         self.canvas.create_image(65, 390, image=self.bloque_foto, anchor="nw")
 
-        self.tuto_blocks = Label(self.canvas, text="Para elegir tipo presionar 1, 2 y 3")
+        self.tuto_blocks = Label(self.canvas, text="Para elegir tipo presionar Z, X y C")
         self.tuto_blocks.place(relx=0.2, rely=0.87, anchor="center")
 
         self.tuto_blocks2 = Label(self.canvas, text="Para colocar usar mouse")
