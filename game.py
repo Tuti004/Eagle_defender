@@ -305,6 +305,7 @@ class BlockScreen:
 
         # Carga la imagen del águila
         self.eagle_image = pygame.image.load("aguila3.png")
+        self.eagle_alive = True
 
         # Por si quiere que el àguila sea del mismo tamaño que las celdas
         #self.eagle_image = pygame.transform.scale(self.eagle_image, (self.CELDA, self.CELDA))
@@ -336,7 +337,11 @@ class BlockScreen:
         self.confirmation_button_text = "Confirmar Turno"
 
     def show_help_popup(self):
-        help_image = pygame.image.load("assets/help_pygame.png")  # Reemplaza con la ruta de tu imagen
+        if self.idioma == "spanish":
+            help_image = pygame.image.load("assets/help_pygame.png")
+        elif self.idioma == "english":
+            help_image = pygame.image.load("assets/help_pygame_english.png")
+
         help_image_rect = help_image.get_rect(center=(self.screen_width // 2, self.screen_height // 2))
 
         help_popup = pygame.display.set_mode((800, 600))
@@ -344,7 +349,10 @@ class BlockScreen:
             pygame.display.set_caption("Ayuda")
         if self.idioma == "english":
             pygame.display.set_caption("Help")
-        
+
+        # Posición y dimensiones del botón de cierre
+        button_rect = pygame.Rect(700, 10, 80, 30)
+        button_color = (255, 0, 0)
 
         while True:
             for event in pygame.event.get():
@@ -352,12 +360,26 @@ class BlockScreen:
                     pygame.quit()
                     sys.exit()
 
+                # Verifica eventos de clic del mouse
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if button_rect.collidepoint(event.pos):
+                        return True  # Usuario cerró la ventana
+
             help_popup.blit(help_image, help_image_rect)
+
+            # Dibuja el botón de cierre
+            pygame.draw.rect(help_popup, button_color, button_rect)
+            font = pygame.font.Font(None, 36)
+            if self.idioma == "spanish":
+                text = font.render("Cerrar", True, (255, 255, 255))
+            elif self.idioma == "english":
+                text = font.render("Close", True, (255, 255, 255))
+            help_popup.blit(text, button_rect.move(10, 5))
+
             pygame.display.flip()
 
-            # Verifica si el usuario cerró la ventana de ayuda
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_ESCAPE]:  # Puedes ajustar esto a la tecla que prefieras
+            if keys[pygame.K_ESCAPE]:
                 return True  # Usuario cerró la ventana
 
     def draw_pause_button(self):
@@ -686,8 +708,7 @@ class BlockScreen:
 
                         if self.idioma == "spanish":
                             dynamic_text = f"Beneficio Foráneo! \n Bailabilidad: {str(bailabilidad_label)}\nAcústica: {str(acustica_label)}\nTempo: {str(tempo_label)}\nPopularidad: {str(popularidad_label)}\n Balas de agua extra: {str(extra_agua)}"
-
-                        if self.idioma == "english":
+                        elif self.idioma == "english":
                             dynamic_text = f"Foreign Benefit! \n Bailability: {str(bailabilidad_label)}\nAcoustic: {str(acustica_label)}\nTempo: {str(tempo_label)}\nPopularity: {str(popularidad_label)}\n Extra Water Balls: {str(extra_agua)}"
   
 
@@ -719,12 +740,13 @@ class BlockScreen:
                         self.is_paused = False
                         self.timer_start += pygame.time.get_ticks() - pause_start_time
 
+                    elif remaining_time == 0 and self.eagle_alive == True:
+                        self.state = "defender_winner"
+                        self.init_music("Songs/Especial")
+
                 if remaining_time == 0 and self.turn_timer_expired == False:
                     self.show_confirmation_screen()
                     self.turn_timer_expired = True
-
-                if remaining_time == 0 and self.turn_timer_expired == True:
-                    self.state = "defender_winner"
 
                 #if self.turn_timer_expired == True: and gana el tanque
                 #    self.state = "attacker_winner"
@@ -789,17 +811,14 @@ class BlockScreen:
                 fondo_winner = pygame.image.load("assets/fondo_sin_cosas.png")
                 self.screen.blit(fondo_winner, (0,0))
 
-
-                pygame.display.flip
+                pygame.display.flip()
 
             elif self.state == "attacker_winner":
                 self.screen.fill((8, 93, 21))
                 fondo_winner = pygame.image.load("assets/fondo_sin_cosas.png")
                 self.screen.blit(fondo_winner, (0,0))
 
-
-
-                pygame.display.flip
+                pygame.display.flip()
 
             pygame.display.flip()
 
@@ -926,6 +945,7 @@ class BlockScreen:
         global extra_agua
         
         song_path = self.song_list[self.current_song_index]
+        print(song_path)
 
         # Conectar a la base de datos
         connection = sqlite3.connect("users.db")
