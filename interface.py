@@ -23,6 +23,8 @@ attacker_role = None
 player1_data = None
 player2_data = None
 
+idioma = "spanish"
+
 tank_skin_manager = TankSkinManager()
 
 # Lee el valor desde el archivo game_config.txt
@@ -79,19 +81,33 @@ class role_selection_1:
         self.img = PhotoImage(file=tank_skin_manager.get_current_skin_path())
         self.tank_image = self.canvas.create_image(280,330, image=self.img, anchor="nw")
 
-        self.label_role = Label(self.canvas, text=f"Jugador 1, elige tu rol:")
+        if idioma == "spanish":
+            self.label_role = Label(self.canvas, text=f"Jugador 1, elige tu rol:")
+            self.button_attacker = Button(self.canvas, text="Atacante", command=self.set_role_attacker)
+            self.button_defender = Button(self.canvas, text="Defensor", command=self.set_role_defender)
+            self.button_back = Button(self.canvas, text="Atras", command=self.back)
+
+            
+
+        if idioma == "english":
+            self.label_role = Label(self.canvas, text=f"Player 1, choose your role:")
+            self.button_attacker = Button(self.canvas, text="Attacker", command=self.set_role_attacker)
+            self.button_defender = Button(self.canvas, text="Defender", command=self.set_role_defender)
+            self.button_back = Button(self.canvas, text="Back", command=self.back)
+
+        #player 1 role
         self.label_role.place(relx=0.5, rely=0.4, anchor="center")
 
-        self.button_attacker = Button(self.canvas, text="Atacante", command=self.set_role_attacker)
+        #attacker button
         self.button_attacker.place(relx=0.4, rely=0.5, anchor="center")
         
         self.button_skin = Button(self.canvas, text = ">", command=self.counter)
         self.button_skin.place(relx=0.4, rely=0.7, anchor="center")
                 
-        self.button_defender = Button(self.canvas, text="Defensor", command=self.set_role_defender)
+        #defener button
         self.button_defender.place(relx=0.6, rely=0.5, anchor="center")
 
-        self.button_back = Button(self.canvas, text="Back", command=self.back)
+        #back button
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
 
     def counter(self):
@@ -146,11 +162,23 @@ class role_selection_2:
 
         self.canvas.create_image(0,0, image=self.background, anchor="nw")
 
-        self.label_role = Label(self.canvas, text=f"Jugador 2, elige tu rol:")
+        if idioma == "spanish":
+            self.label_role = Label(self.canvas, text=f"Jugador 2, elige tu rol:")
+            self.button_attacker = Button(self.canvas, text="Atacante", command=self.set_role_attacker)
+            self.button_defender = Button(self.canvas, text="Defensor", command=self.set_role_defender)
+            self.button_back = Button(self.canvas, text="Atras", command=self.back)
+
+        if idioma == "english":
+            self.label_role = Label(self.canvas, text=f"Player 2, choose your role:")
+            self.button_attacker = Button(self.canvas, text="Attacker", command=self.set_role_attacker)
+            self.button_defender = Button(self.canvas, text="Defender", command=self.set_role_defender)
+            self.button_back = Button(self.canvas, text="Back", command=self.back)
+
+        #player 2 role
         self.label_role.place(relx=0.5, rely=0.4, anchor="center")
 
         if defender_role == True:
-            self.button_attacker = Button(self.canvas, text="Atacante", command=self.set_role_attacker)
+            #attacker role
             self.button_attacker.place(relx=0.5, rely=0.5, anchor="center")
 
             self.img = PhotoImage(file=tank_skin_manager.get_current_skin_path())
@@ -161,10 +189,10 @@ class role_selection_2:
 
 
         elif attacker_role == True:
-            self.button_defender = Button(self.canvas, text="Defensor", command=self.set_role_defender)
+            #defender
             self.button_defender.place(relx=0.5, rely=0.5, anchor="center")
         
-        self.button_back = Button(self.canvas, text="Back", command=self.back)
+        #back button
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
     
     def set_role_attacker(self):
@@ -198,11 +226,11 @@ class role_selection_2:
         LogIn_Screen_2(window)
     
 
-class main_Screen:
+class language:
     def __init__(self, master):
         self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
         self.canvas.place(x=0, y=0)
-
+        global idioma
         # EJEMPLO DE FONDO
 
         self.background = PhotoImage(file="assets/background_test.png")
@@ -221,17 +249,75 @@ class main_Screen:
 
         self.canvas.create_image(0,0, image=self.background, anchor="nw")
 
-        # Logo 
+        self.language1 = PhotoImage(file="assets/language1.png")
+        self.canvas.create_image(90, 120, image=self.language1, anchor="nw")
+
+        self.language2 = PhotoImage(file="assets/language2.png")
+        self.canvas.create_image(160, 150, image=self.language2, anchor="nw")
+
+        #boton idioma
+        self.button_idioma = Button(self.canvas, text="Language/Idioma", command=self.language_change)
+        self.button_idioma.place(relx=0.5, rely=0.8, anchor="center")
+
+
+        self.button_back = Button(self.canvas, text="Empezar/Start", command=self.back)
+        self.button_back.place(relx=0.5, rely=0.6, anchor="center")
+
+    def back(self):
+        self.canvas.destroy()
+        main_Screen(window)    
+
+    def language_change(self):
+        global idioma
+        if idioma == "spanish":
+            idioma = "english"
+
+    
+
+
+
+class main_Screen:
+    def __init__(self, master):
+        self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
+        self.canvas.place(x=0, y=0)
+        global idioma
+        # EJEMPLO DE FONDO
+
+        self.background = PhotoImage(file="assets/background_test.png")
+
+        # Obtiene el tamaño de la ventana
+        window_width = 800
+        window_height = 600
+
+        # Obtiene el tamaño de la imagen de fondo
+        image_width = self.background.width()
+        image_height = self.background.height()
+
+        # Escala la imagen de fondo al tamaño de la ventana
+        if image_width != window_width or image_height != window_height:
+            self.background = self.background.subsample(image_width // window_width, image_height // window_height)
+
+        self.canvas.create_image(0,0, image=self.background, anchor="nw")
+
+        if idioma == "spanish":
+            self.button_login = Button(self.canvas, text="Iniciar sesión", command=self.login, highlightthickness=0, bg="SystemButtonFace")
+            self.button_help = Button(self.canvas, text="Ayuda", command=self.help)
+            self.button_leaderboard = Button(self.canvas, text="Salon De Fama", command=self.leaderboard)
+            
+
+        if idioma == "english":
+            self.button_login = Button(self.canvas, text="Sign in", command=self.login, highlightthickness=0, bg="SystemButtonFace")
+            self.button_help = Button(self.canvas, text="Help", command=self.help)
+            self.button_leaderboard = Button(self.canvas, text="Leaderboard", command=self.leaderboard)
+            
+        #logo    
         self.img = PhotoImage(file="assets/Eagle_Defender_title.png")
         self.canvas.create_image(100,120, image=self.img, anchor="nw")
-
-        self.button_login = Button(self.canvas, text="Iniciar sesión", command=self.login, highlightthickness=0, bg="SystemButtonFace")
+        #login
         self.button_login.place(relx=0.5, rely=0.5, anchor="center")
-        
-        self.button_help = Button(self.canvas, text="Ayuda", command=self.help)
+        #help
         self.button_help.place(relx=0.5, rely=0.7, anchor="center")
-
-        self.button_leaderboard = Button(self.canvas, text="Leaderboard", command=self.leaderboard)
+        #leaderboard
         self.button_leaderboard.place(relx=0.5, rely=0.6, anchor="center")
 
         self.setup_music_player()
@@ -293,6 +379,7 @@ class Leaderboard_Screen:
     def __init__(self, master):
         self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
         self.canvas.place(x=0, y=0)
+        global idioma
 
         # EJEMPLO DE FONDO
 
@@ -333,7 +420,8 @@ class LogIn_Screen:
     def __init__(self, master):
         self.canvas = Canvas(master, width=800, height=600, highlightthickness=0, relief='ridge')
         self.canvas.place(x=0, y=0)
-        
+        global idioma
+
          # EJEMPLO DE FONDO
 
         self.background = PhotoImage(file="assets/fondo_sin_cosas.png")
@@ -352,28 +440,41 @@ class LogIn_Screen:
 
         self.canvas.create_image(0,0, image=self.background, anchor="nw")
 
+        if idioma == "spanish":
+            self.label_username = Label(self.canvas, text="Nombre de usuario:")
+            self.label_password = Label(self.canvas, text="Contraseña:")
+            self.button_login = Button(self.canvas, text="Iniciar sesión", command=self.login)
+            self.button_register = Button(self.canvas, text="Registrarse", command=self.register)
+            self.button_back = Button(self.canvas, text="Atras", command=self.back)
+
+        if idioma == "english":
+            self.label_username = Label(self.canvas, text="Username: ")
+            self.label_password = Label(self.canvas, text="Password:")
+            self.button_login = Button(self.canvas, text="Sign in", command=self.login)
+            self.button_register = Button(self.canvas, text="Register", command=self.register)
+            self.button_back = Button(self.canvas, text="Back", command=self.back)
 
         # Login_title
         self.img = PhotoImage(file="assets/login_title.png")
         self.canvas.create_image(300,120, image=self.img, anchor="nw")
 
-        self.label_username = Label(self.canvas, text="Nombre de usuario:")
+        #user input
         self.label_username.place(relx=0.4, rely=0.4, anchor="center")
         self.entry_username = Entry(self.canvas)
         self.entry_username.place(relx=0.6, rely=0.4, anchor="center")
 
-        self.label_password = Label(self.canvas, text="Contraseña:")
+        #password input
         self.label_password.place(relx=0.4, rely=0.5, anchor="center")
         self.entry_password = Entry(self.canvas, show="*")
         self.entry_password.place(relx=0.6, rely=0.5,anchor="center")
 
-        self.button_login = Button(self.canvas, text="Iniciar sesión", command=self.login)
+        #login button
         self.button_login.place(relx=0.5, rely=0.6, anchor="center")
 
-        self.button_register = Button(self.canvas, text="Registrarse", command=self.register)
+        #register button
         self.button_register.place(relx=0.5, rely=0.7, anchor="center")
 
-        self.button_back = Button(self.canvas, text="Back", command=self.back)
+        #back button
         self.button_back.place(relx=0.5, rely=0.8, anchor="center")
   
 
@@ -439,28 +540,42 @@ class LogIn_Screen_2():
 
         self.canvas.create_image(0,0, image=self.background, anchor="nw")
 
+        if idioma == "spanish":
+            self.label_username = Label(self.canvas, text="Nombre de usuario:")
+            self.label_password = Label(self.canvas, text="Contraseña:")
+            self.button_login = Button(self.canvas, text="Iniciar sesión", command=self.login)
+            self.button_register = Button(self.canvas, text="Registrarse", command=self.register)
+            self.button_back = Button(self.canvas, text="Atras", command=self.back)
+
+        if idioma == "english":
+            self.label_username = Label(self.canvas, text="Username: ")
+            self.label_password = Label(self.canvas, text="Password:")
+            self.button_login = Button(self.canvas, text="Sign in", command=self.login)
+            self.button_register = Button(self.canvas, text="Register", command=self.register)
+            self.button_back = Button(self.canvas, text="Back", command=self.back)
+
         # Login_title
         self.img = PhotoImage(file="assets/login_title.png")
         self.canvas.create_image(300,120, image=self.img, anchor="nw")
 
-        self.label_username = Label(self.canvas, text="Nombre de usuario:")
+        #user input
         self.label_username.place(relx=0.4, rely=0.4, anchor="center")
         self.entry_username = Entry(self.canvas)
         self.entry_username.place(relx=0.6, rely=0.4, anchor="center")
 
-        self.label_password = Label(self.canvas, text="Contraseña:")
+        #password input
         self.label_password.place(relx=0.4, rely=0.5, anchor="center")
         self.entry_password = Entry(self.canvas, show="*")
         self.entry_password.place(relx=0.6, rely=0.5,anchor="center")
 
-        self.button_login = Button(self.canvas, text="Iniciar sesión", command=self.login)
+        #login button
         self.button_login.place(relx=0.5, rely=0.6, anchor="center")
 
-        self.button_register = Button(self.canvas, text="Registrarse", command=self.register)
+        #register button
         self.button_register.place(relx=0.5, rely=0.7, anchor="center")
 
-        self.button_back = Button(self.canvas, text="Back", command=self.back)
-        self.button_back.place(relx=0.5, rely=0.8, anchor="center")   
+        #back button
+        self.button_back.place(relx=0.5, rely=0.8, anchor="center")
 
     def register(self):
         self.destroy()
@@ -540,59 +655,73 @@ class register_Screen():
         self.img = PhotoImage(file="assets/Register_title.png")
         self.canvas.create_image(240,30, image=self.img, anchor="nw")
 
+        if idioma == "spanish":
+            self.label_nombre = Label(self.canvas, text="Nombre: ")
+            self.label_nickname = Label(self.canvas, text="Pronombre: ")
+            self.label_password = Label(self.canvas, text="Contraseña: ")
+            self.label_correo = Label(self.canvas, text="Correo: ")
+            self.label_edad = Label(self.canvas, text="Edad: ")
+            self.label_red_social = Label(self.canvas, text="Red Social: ")
+            self.button_upload_photo = Button(self.canvas, text="Subir Foto", command=self.upload_photo)
+            self.button_upload_song = Button(self.canvas, text="Subir Canción", command=self.upload_song)
+            self.button_register = Button(self.canvas, text="Registrarse", command=self.register)
+            self.button_back = Button(self.canvas, text="Atras", command=self.back)
+
+        if idioma == "english":
+            self.label_nombre = Label(self.canvas, text="Name: ")
+            self.label_nickname = Label(self.canvas, text="Nickname: ")
+            self.label_password = Label(self.canvas, text="Password: ")
+            self.label_correo = Label(self.canvas, text="Email: ")
+            self.label_edad = Label(self.canvas, text="Age: ")
+            self.label_red_social = Label(self.canvas, text="Social Media: ")
+            self.button_upload_photo = Button(self.canvas, text="Upload Picture", command=self.upload_photo)
+            self.button_upload_song = Button(self.canvas, text="Upload Song", command=self.upload_song)
+            self.button_register = Button(self.canvas, text="Register", command=self.register)
+            self.button_back = Button(self.canvas, text="Back", command=self.back)
+
+
         # Nombre
-        self.label_nombre = Label(self.canvas, text="Nombre: ")
         self.label_nombre.place(relx=0.5, rely=0.3, anchor="center")
         self.entry_nombre = Entry(self.canvas)
         self.entry_nombre.place(relx=0.7, rely=0.3, anchor="center")
 
         # Nickname
-        self.label_nickname = Label(self.canvas, text="Nickname: ")
         self.label_nickname.place(relx=0.5, rely=0.4, anchor="center")
         self.entry_nickname = Entry(self.canvas)
         self.entry_nickname.place(relx=0.7, rely=0.4, anchor="center")
 
         # Contraseña
-        self.label_password = Label(self.canvas, text="Contraseña: ")
         self.label_password.place(relx=0.5, rely=0.5, anchor="center")
         self.entry_password = Entry(self.canvas)
         self.entry_password.place(relx=0.7, rely=0.5, anchor="center")
 
         # Correo
-        self.label_correo = Label(self.canvas, text="Correo: ")
         self.label_correo.place(relx=0.5, rely=0.6, anchor="center")
         self.entry_correo = Entry(self.canvas)
         self.entry_correo.place(relx=0.7, rely=0.6, anchor="center")
 
         # Edad
-        self.label_edad = Label(self.canvas, text="Edad: ")
         self.label_edad.place(relx=0.5, rely=0.7, anchor="center")
         self.entry_edad = Entry(self.canvas)
         self.entry_edad.place(relx=0.7, rely=0.7, anchor="center")
 
         # Red Social
-        self.label_red_social = Label(self.canvas, text="Red Social: ")
         self.label_red_social.place(relx=0.5, rely=0.8, anchor="center")
         self.entry_red_social = Entry(self.canvas)
         self.entry_red_social.place(relx=0.7, rely=0.8, anchor="center")
 
         #Foto
         self.entry_foto = Entry(self.canvas)
-        self.button_upload_photo = Button(self.canvas, text="Subir Foto", command=self.upload_photo)
         self.button_upload_photo.place(x=150, y=300, anchor="center")
 
         #Canción favorita
         self.entry_cancion = Entry(self.canvas)
-        self.button_upload_song = Button(self.canvas, text="Subir Canción", command=self.upload_song)
         self.button_upload_song.place(x=150, y=400, anchor="center")
 
-
         # Botón Registrarse
-        self.button_register = Button(self.canvas, text="Registrarse", command=self.register)
         self.button_register.place(relx=0.55, rely=0.9, anchor="center")
 
         # Botón Volver
-        self.button_back = Button(self.canvas, text="Volver", command=self.back)
         self.button_back.place(relx=0.7, rely=0.9, anchor="center")
 
         self.warning_messages = {
@@ -677,7 +806,10 @@ class register_Screen():
     
     def register(self):
         if not self.entry_nombre.get() or not self.entry_nickname.get() or not self.entry_password.get() or not self.entry_correo.get() or not self.entry_edad.get():
-            self.show_warning("Por favor, complete todos los campos.")
+            if idioma == "spanish":
+                self.show_warning("Por favor, complete todos los campos.")
+            if idioma == "english":
+                self.show_warning("Please, complete all spaces")
             return
         connection = sqlite3.connect("users.db")
         cursor = connection.cursor()
@@ -720,7 +852,10 @@ class register_Screen():
 
             # Verifica si se proporcionan los datos de la canción
             if not self.bailabilidad_entry.get() or not self.acustico_entry.get() or not self.tempo_entry.get() or not self.popularidad_entry.get():
-                self.show_warning("Por favor, complete todos los campos.")
+                if idioma == "spanish":
+                    self.show_warning("Por favor, complete todos los campos.")
+                if idioma == "english":
+                    self.show_warning("Please, complete all spaces")
                 connection.close()
                 return
 
@@ -1044,7 +1179,7 @@ def start_game(player1, player2, tank_img):
         player1_role = "attacker"
 
     game_in_progress = True
-    block_screen_instance = BlockScreen(player1_username, player2_username, player1_role, tank_img, time)
+    block_screen_instance = BlockScreen(player1_username, player2_username, player1_role, tank_img, time, idioma)
     block_screen_instance.main_loop()
 
 def setup_database():
@@ -1076,7 +1211,7 @@ def setup_database():
 
 window = Tk()
 setup_database()
-Main_Screen = main_Screen(window)
+Main_Screen = language(window)
 window.title("Eagle Defender")
 window.minsize(800, 600)
 window.resizable(False, False)

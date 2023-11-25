@@ -236,7 +236,7 @@ def bullet_cd(player):
         last_shot_time = current_time
 
 class BlockScreen:
-    def __init__(self, player1_username, player2_username, player1_role, tank_img, game_time):
+    def __init__(self, player1_username, player2_username, player1_role, tank_img, game_time, idioma):
         pygame.init()
         window_width = 800
         window_height = 600
@@ -251,6 +251,7 @@ class BlockScreen:
         self.player1_role = player1_role
         self.tank_img = tank_img
         self.game_time = game_time
+        self.idioma = idioma
 
         self.half_time_text_displayed = False
 
@@ -266,6 +267,7 @@ class BlockScreen:
         self.players.add(self.player)
 
         self.defender_turn_over = False
+        self.state = "game"
 
         # Dimensiones del marco interno
         self.ANCHO_MARCO = window_width - 100
@@ -338,7 +340,11 @@ class BlockScreen:
         help_image_rect = help_image.get_rect(center=(self.screen_width // 2, self.screen_height // 2))
 
         help_popup = pygame.display.set_mode((800, 600))
-        pygame.display.set_caption("Ayuda")
+        if self.idioma == "spanish":
+            pygame.display.set_caption("Ayuda")
+        if self.idioma == "english":
+            pygame.display.set_caption("Help")
+        
 
         while True:
             for event in pygame.event.get():
@@ -414,21 +420,33 @@ class BlockScreen:
 
         if self.player1_role == "defender":
             # Si el jugador 1 es el defensor, mostrar sus datos en la esquina inferior izquierda
-            username_text = font.render(f"Defensor: {self.player1_username}", True, text_color)
+            if self.idioma == "spanish":
+                username_text = font.render(f"Defensor: {self.player1_username}", True, text_color)
+            if self.idioma == "english":
+                username_text = font.render(f"Defender: {self.player1_username}", True, text_color)
             username_rect = username_text.get_rect(topleft=(20, self.screen.get_height() - 40))
             self.screen.blit(username_text, username_rect)
         else:
             # Si el jugador 1 es el atacante, mostrar sus datos en la esquina inferior derecha
-            username_text = font.render(f"Atacante: {self.player1_username}", True, text_color)
+            if self.idioma == "spanish":
+                username_text = font.render(f"Atacante: {self.player1_username}", True, text_color)
+            if self.idioma == "english":
+                username_text = font.render(f"Attacker: {self.player1_username}", True, text_color)
             username_rect = username_text.get_rect(topright=(self.screen.get_width() - 20, self.screen.get_height() - 40))
             self.screen.blit(username_text, username_rect)
         # Muestra la información del jugador 2 (el que no seleccionó el jugador 1)
         if self.player1_role == "defender":
-            username_text = font.render(f"Atacante: {self.player2_username}", True, text_color)
+            if self.idioma == "spanish":
+                username_text = font.render(f"Atacante: {self.player2_username}", True, text_color)
+            if self.idioma == "english":
+                username_text = font.render(f"Attacker: {self.player2_username}", True, text_color)
             username_rect = username_text.get_rect(topright=(self.screen.get_width() - 20, self.screen.get_height() - 40))
             self.screen.blit(username_text, username_rect)
         else:
-            username_text = font.render(f"Defensor: {self.player2_username}", True, text_color)
+            if self.idioma == "spanish":
+                username_text = font.render(f"Defensor: {self.player2_username}", True, text_color)
+            if self.idioma == "english":
+                username_text = font.render(f"Defender: {self.player2_username}", True, text_color)
             username_rect = username_text.get_rect(topleft=(20, self.screen.get_height() - 40))
             self.screen.blit(username_text, username_rect)
 
@@ -565,182 +583,223 @@ class BlockScreen:
             fondojuego = pygame.image.load("assets/fondojuego.png")
             self.screen.blit(fondojuego, (0,0))
 
-            self.dibujar_cuadricula()
-            self.dibujar_imagenes()
-            self.draw_player_info()
-            pause_button_rect = self.draw_pause_button()
 
-            if is_paused:
+            if self.state == "game":
+                self.dibujar_cuadricula()
+                self.dibujar_imagenes()
+                self.draw_player_info()
+                pause_button_rect = self.draw_pause_button()
 
-                elements = self.draw_pause_window()
+                if is_paused:
 
-                volume_slider_rect = elements[3]
-                quit_button_rect = elements[1]
-                resume_button_rect = elements[0]
-                help_button_rect = elements[2]
+                    elements = self.draw_pause_window()
 
-                volume_slider_value = int(self.volume * volume_slider_rect.width)
+                    volume_slider_rect = elements[3]
+                    quit_button_rect = elements[1]
+                    resume_button_rect = elements[0]
+                    help_button_rect = elements[2]
 
-                for event in pygame.event.get():
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        if resume_button_rect.collidepoint(event.pos):
-                            is_paused = False
-                            pygame.mixer.music.unpause()
-                            self.timer_start += pygame.time.get_ticks() - pause_start_time
-                        elif help_button_rect.collidepoint(event.pos):
-                            # Si se presiona el botón de ayuda, muestra la ventana emergente y verifica si se cerró
-                            if self.show_help_popup():
-                                # Usuario cerró la ventana de ayuda, vuelve a la pantalla principal
+                    volume_slider_value = int(self.volume * volume_slider_rect.width)
+
+                    for event in pygame.event.get():
+                        if event.type == pygame.MOUSEBUTTONDOWN:
+                            if resume_button_rect.collidepoint(event.pos):
                                 is_paused = False
                                 pygame.mixer.music.unpause()
                                 self.timer_start += pygame.time.get_ticks() - pause_start_time
-                        elif quit_button_rect.collidepoint(event.pos):
-                            pygame.quit()
-                            sys.exit()
-
-                    elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_LEFT:
-                            # Reducir el volumen con la flecha izquierda
-                            volume_slider_value = max(0, volume_slider_value - 20)
-                            self.volume = volume_slider_value / volume_slider_rect.width
-                            pygame.mixer.music.set_volume(self.volume)
-                        elif event.key == pygame.K_RIGHT:
-                            # Aumentar el volumen con la flecha derecha
-                            volume_slider_value = min(volume_slider_rect.width, volume_slider_value + 20)
-                            self.volume = volume_slider_value / volume_slider_rect.width
-                            pygame.mixer.music.set_volume(self.volume)
-                        elif event.key == pygame.K_DOWN:
-                            # Cambia al siguiente botón
-                            self.selected_button_paused = (self.selected_button_paused + 1) % len(elements)
-                        elif event.key == pygame.K_UP:
-                            # Cambia al botón anterior
-                            self.selected_button_paused = (self.selected_button_paused - 1) % len(elements)
-                        elif event.key == pygame.K_RETURN:
-                            # Realiza la acción asociada al botón seleccionado
-                            selected_button = elements[self.selected_button_paused]
-                            if isinstance(selected_button, pygame.Rect):
-                                # Es un rectángulo (botón), realiza la acción correspondiente
-                                if selected_button == resume_button_rect:
+                            elif help_button_rect.collidepoint(event.pos):
+                                # Si se presiona el botón de ayuda, muestra la ventana emergente y verifica si se cerró
+                                if self.show_help_popup():
+                                    # Usuario cerró la ventana de ayuda, vuelve a la pantalla principal
                                     is_paused = False
                                     pygame.mixer.music.unpause()
                                     self.timer_start += pygame.time.get_ticks() - pause_start_time
-                                elif selected_button == help_button_rect:
-                                    if self.show_help_popup():
+                            elif quit_button_rect.collidepoint(event.pos):
+                                pygame.quit()
+                                sys.exit()
+
+                        elif event.type == pygame.KEYDOWN:
+                            if event.key == pygame.K_LEFT:
+                                # Reducir el volumen con la flecha izquierda
+                                volume_slider_value = max(0, volume_slider_value - 20)
+                                self.volume = volume_slider_value / volume_slider_rect.width
+                                pygame.mixer.music.set_volume(self.volume)
+                            elif event.key == pygame.K_RIGHT:
+                                # Aumentar el volumen con la flecha derecha
+                                volume_slider_value = min(volume_slider_rect.width, volume_slider_value + 20)
+                                self.volume = volume_slider_value / volume_slider_rect.width
+                                pygame.mixer.music.set_volume(self.volume)
+                            elif event.key == pygame.K_DOWN:
+                                # Cambia al siguiente botón
+                                self.selected_button_paused = (self.selected_button_paused + 1) % len(elements)
+                            elif event.key == pygame.K_UP:
+                                # Cambia al botón anterior
+                                self.selected_button_paused = (self.selected_button_paused - 1) % len(elements)
+                            elif event.key == pygame.K_RETURN:
+                                # Realiza la acción asociada al botón seleccionado
+                                selected_button = elements[self.selected_button_paused]
+                                if isinstance(selected_button, pygame.Rect):
+                                    # Es un rectángulo (botón), realiza la acción correspondiente
+                                    if selected_button == resume_button_rect:
                                         is_paused = False
                                         pygame.mixer.music.unpause()
                                         self.timer_start += pygame.time.get_ticks() - pause_start_time
-                                elif selected_button == quit_button_rect:
-                                    pygame.quit()
-                                    sys.exit()
+                                    elif selected_button == help_button_rect:
+                                        if self.show_help_popup():
+                                            is_paused = False
+                                            pygame.mixer.music.unpause()
+                                            self.timer_start += pygame.time.get_ticks() - pause_start_time
+                                    elif selected_button == quit_button_rect:
+                                        pygame.quit()
+                                        sys.exit()
 
 
-                # Render and display the timer on the screen
-            font = pygame.font.Font(None, 36)
-            if not is_paused:
-                current_time = pygame.time.get_ticks()
-                elapsed_time = current_time - self.timer_start
-                remaining_time = max(0, self.timer_duration - elapsed_time)
-            minutes, seconds = divmod(remaining_time // 1000, 60)
-
-            timer_text = font.render(f"Time: {minutes:02}:{seconds:02}", True, (0, 0, 0))
-            timer_rect = timer_text.get_rect(center=(self.screen.get_width() // 2, 30))
-            self.screen.blit(timer_text, timer_rect)
-
-            if self.defender_turn_over:
-
-                global bailabilidad_label
-                global acustica_label
-                global tempo_label
-                global popularidad_label
-                global extra_agua
-
-                if remaining_time <= self.timer_duration // 2 and not self.half_time_text_displayed:
-                    # Pausar el tiempo
-                    pause_start_time = pygame.time.get_ticks()
-                    self.is_paused = True
-
-                    self.attacker_inventory.adjust_water_bullets(extra_agua)
-
-                    print("Cantidad de balas de agua extra " + str(self.attacker_inventory.bullet_types["agua"]))
-
-                    dynamic_text = f"Beneficio Foráneo! \n Bailabilidad: {str(bailabilidad_label)}\nAcústica: {str(acustica_label)}\nTempo: {str(tempo_label)}\nPopularidad: {str(popularidad_label)}\n Balas de agua extra: {str(extra_agua)}"
-
-                    half_time_font = pygame.font.Font(None, 48)
-                    half_time_text = half_time_font.render(dynamic_text, True, (255, 0, 0))
-
-                    # Dividir el texto en líneas individuales
-                    lines = dynamic_text.split('\n')
-
-                    # Obtener la altura de cada línea de texto
-                    line_height = half_time_text.get_height()
-
-                    # Calcular la altura total del bloque de texto
-                    total_height = len(lines) * line_height
-
-                    # Calcular la posición y mostrar cada línea por separado
-                    for i, line in enumerate(lines):
-                        text_surface = half_time_font.render(line, True, (255, 0, 0))
-                        text_rect = text_surface.get_rect(
-                            center=(self.screen.get_width() // 2,
-                                    self.screen.get_height() // 2 - total_height // 2 + i * line_height))
-                        self.screen.blit(text_surface, text_rect)
-
-                    pygame.display.flip()  # Actualizar la pantalla para mostrar el texto
-                    pygame.time.delay(10000)  # Esperar 5 segundos
-                    self.half_time_text_displayed = True
-
-                    # Reanudar el tiempo después de mostrar el mensaje
-                    self.is_paused = False
-                    self.timer_start += pygame.time.get_ticks() - pause_start_time
-
-            if remaining_time == 0 and not self.turn_timer_expired:
-                self.show_confirmation_screen()
-                self.turn_timer_expired = True
-
-            # Dibuja el águila en la posición deseada basada en las coordenadas de la cuadrícula
-            eagle_x = self.POS_X_MARCO + eagle_col * self.CELDA
-            eagle_y = self.POS_Y_MARCO + eagle_row * self.CELDA
-            self.screen.blit(self.eagle_image, (eagle_x, eagle_y))
-
-            # Dibuja el inventario del defensor
-            inventory_x = 20
-            inventory_y = 10
-            inventory_spacing = 60
-            for block_type in BLOCK_TYPES:
-                count = self.inventory_defender.blocks[block_type]
-                self.draw_inventory_block(inventory_x, inventory_y, block_type, count)
-                inventory_x += inventory_spacing
-
-            if message_timer > 0:
+                    # Render and display the timer on the screen
                 font = pygame.font.Font(None, 36)
-                text = font.render("No tienes bloques disponibles", True, (0, 0, 0))
-                text_rect = text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() - 50))
-                self.screen.blit(text, text_rect)
-                message_timer -= 1
+                if not is_paused:
+                    current_time = pygame.time.get_ticks()
+                    elapsed_time = current_time - self.timer_start
+                    remaining_time = max(0, self.timer_duration - elapsed_time)
+                minutes, seconds = divmod(remaining_time // 1000, 60)
 
-            # Dibuja el inventario de balas
-            bullet_inventory_x = 600
-            bullet_inventory_y = 10
-            for bullet_type in BULLETS_TYPES:
-                count_bullets = self.attacker_inventory.bullet_types[bullet_type]
-                self.draw_bullet_inventory(bullet_inventory_x, bullet_inventory_y, bullet_type, count_bullets)
-                bullet_inventory_x += inventory_spacing
+                timer_text = font.render(f"Time: {minutes:02}:{seconds:02}", True, (0, 0, 0))
+                timer_rect = timer_text.get_rect(center=(self.screen.get_width() // 2, 30))
+                self.screen.blit(timer_text, timer_rect)
 
-            player_instance = self.players.sprites()[0]
-            if self.confirmation_received:
-                if player_instance.message_timer_balas > 0:  # Accede a message_timer_balas en la instancia del jugador
+                if self.defender_turn_over:
+
+                    global bailabilidad_label
+                    global acustica_label
+                    global tempo_label
+                    global popularidad_label
+                    global extra_agua
+
+                    if remaining_time <= self.timer_duration // 2 and not self.half_time_text_displayed:
+                        # Pausar el tiempo
+                        pause_start_time = pygame.time.get_ticks()
+                        self.is_paused = True
+
+                        self.attacker_inventory.adjust_water_bullets(extra_agua)
+
+                        print("Cantidad de balas de agua extra " + str(self.attacker_inventory.bullet_types["agua"]))
+
+
+                        if self.idioma == "spanish":
+                            dynamic_text = f"Beneficio Foráneo! \n Bailabilidad: {str(bailabilidad_label)}\nAcústica: {str(acustica_label)}\nTempo: {str(tempo_label)}\nPopularidad: {str(popularidad_label)}\n Balas de agua extra: {str(extra_agua)}"
+
+                        if self.idioma == "english":
+                            dynamic_text = f"Foreign Benefit! \n Bailability: {str(bailabilidad_label)}\nAcoustic: {str(acustica_label)}\nTempo: {str(tempo_label)}\nPopularity: {str(popularidad_label)}\n Extra Water Balls: {str(extra_agua)}"
+  
+
+                        half_time_font = pygame.font.Font(None, 48)
+                        half_time_text = half_time_font.render(dynamic_text, True, (255, 0, 0))
+
+                        # Dividir el texto en líneas individuales
+                        lines = dynamic_text.split('\n')
+
+                        # Obtener la altura de cada línea de texto
+                        line_height = half_time_text.get_height()
+
+                        # Calcular la altura total del bloque de texto
+                        total_height = len(lines) * line_height
+
+                        # Calcular la posición y mostrar cada línea por separado
+                        for i, line in enumerate(lines):
+                            text_surface = half_time_font.render(line, True, (255, 0, 0))
+                            text_rect = text_surface.get_rect(
+                                center=(self.screen.get_width() // 2,
+                                        self.screen.get_height() // 2 - total_height // 2 + i * line_height))
+                            self.screen.blit(text_surface, text_rect)
+
+                        pygame.display.flip()  # Actualizar la pantalla para mostrar el texto
+                        pygame.time.delay(5000)  # Esperar 5 segundos
+                        self.half_time_text_displayed = True
+
+                        # Reanudar el tiempo después de mostrar el mensaje
+                        self.is_paused = False
+                        self.timer_start += pygame.time.get_ticks() - pause_start_time
+
+                if remaining_time == 0 and self.turn_timer_expired == False:
+                    self.show_confirmation_screen()
+                    self.turn_timer_expired = True
+
+                if remaining_time == 0 and self.turn_timer_expired == True:
+                    self.state = "defender_winner"
+
+                #if self.turn_timer_expired == True: and gana el tanque
+                #    self.state = "attacker_winner"
+
+                # Dibuja el águila en la posición deseada basada en las coordenadas de la cuadrícula
+                eagle_x = self.POS_X_MARCO + eagle_col * self.CELDA
+                eagle_y = self.POS_Y_MARCO + eagle_row * self.CELDA
+                self.screen.blit(self.eagle_image, (eagle_x, eagle_y))
+
+                # Dibuja el inventario del defensor
+                inventory_x = 20
+                inventory_y = 10
+                inventory_spacing = 60
+                for block_type in BLOCK_TYPES:
+                    count = self.inventory_defender.blocks[block_type]
+                    self.draw_inventory_block(inventory_x, inventory_y, block_type, count)
+                    inventory_x += inventory_spacing
+
+                if message_timer > 0:
                     font = pygame.font.Font(None, 36)
-                    text = font.render("No tienes balas disponibles", True, (0, 0, 0))
+                    if self.idioma == "spanish":
+                        text = font.render("No tienes bloques disponibles", True, (0, 0, 0))
+                    if self.idioma == "english":
+                        text = font.render("No available blocks", True, (0, 0, 0))
+
                     text_rect = text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() - 50))
                     self.screen.blit(text, text_rect)
-                    player_instance.message_timer_balas -= 1
+                    message_timer -= 1
+
+                # Dibuja el inventario de balas
+                bullet_inventory_x = 600
+                bullet_inventory_y = 10
+                for bullet_type in BULLETS_TYPES:
+                    count_bullets = self.attacker_inventory.bullet_types[bullet_type]
+                    self.draw_bullet_inventory(bullet_inventory_x, bullet_inventory_y, bullet_type, count_bullets)
+                    bullet_inventory_x += inventory_spacing
+
+                player_instance = self.players.sprites()[0]
 
 
-            if self.confirmation_received == True:
-                self.players.update()
-                self.players.draw(self.screen)
-                bullets.update()
-                bullets.draw(self.screen)
+
+                if self.confirmation_received == True:
+                    self.players.update()
+                    self.players.draw(self.screen)
+                    bullets.update()
+                    bullets.draw(self.screen)
+                    if player_instance.message_timer_balas > 0:  # Accede a message_timer_balas en la instancia del jugador
+                        font = pygame.font.Font(None, 36)
+                        if self.idioma == "spanish":
+                            text = font.render("No tienes balas disponibles", True, (0, 0, 0))
+                        if self.idioma == "english":
+                            text = font.render("No available bullets", True, (0, 0, 0))
+                        text_rect = text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() - 50))
+                        self.screen.blit(text, text_rect)
+                        player_instance.message_timer_balas -= 1
+
+                pygame.display.flip()
+
+
+            elif self.state == "defender_winner":
+                self.screen.fill((8, 93, 21))
+                fondo_winner = pygame.image.load("assets/fondo_sin_cosas.png")
+                self.screen.blit(fondo_winner, (0,0))
+
+
+                pygame.display.flip
+
+            elif self.state == "attacker_winner":
+                self.screen.fill((8, 93, 21))
+                fondo_winner = pygame.image.load("assets/fondo_sin_cosas.png")
+                self.screen.blit(fondo_winner, (0,0))
+
+
+
+                pygame.display.flip
 
             pygame.display.flip()
 
@@ -751,7 +810,10 @@ class BlockScreen:
     def show_confirmation_screen(self):
         self.defender_turn_over = True
         confirmation_font = pygame.font.Font(None, 40)
-        confirmation_text = confirmation_font.render("Turno completado. ¿Listo para el siguiente jugador?", True, (0, 0, 0))
+        if self.idioma == "spanish":
+            confirmation_text = confirmation_font.render("Turno completado. ¿Listo para el siguiente jugador?", True, (0, 0, 0))
+        if self.idioma == "english":
+            confirmation_text = confirmation_font.render("Turn complete. Ready for the next player?", True, (0, 0, 0))
         confirmation_rect = confirmation_text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2))
         self.screen.blit(confirmation_text, confirmation_rect)
         pygame.mixer.music.stop()
