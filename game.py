@@ -117,7 +117,7 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.image.load(tank_skin)
         self.rect = self.image.get_rect()
-        self.x = 500
+        self.x = 600
         self.y = 280
         self.x_change = 0
         self.y_change = 0
@@ -820,6 +820,9 @@ class BlockScreen:
                 self.screen.fill((8, 93, 21))
                 fondo_winner = pygame.image.load("assets/fondo_sin_cosas.png")
                 self.screen.blit(fondo_winner, (0,0))
+
+                defender_win = pygame.image.load("assets/defender_wins.png")
+                self.screen.blit(defender_win, (190,100))
 
                 pygame.display.flip()
 
