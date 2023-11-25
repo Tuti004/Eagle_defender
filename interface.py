@@ -271,6 +271,9 @@ class language:
         global idioma
         if idioma == "spanish":
             idioma = "english"
+        else:
+            idioma = "spanish"
+
 
     
 
@@ -303,12 +306,14 @@ class main_Screen:
             self.button_login = Button(self.canvas, text="Iniciar sesión", command=self.login, highlightthickness=0, bg="SystemButtonFace")
             self.button_help = Button(self.canvas, text="Ayuda", command=self.help)
             self.button_leaderboard = Button(self.canvas, text="Salon De Fama", command=self.leaderboard)
+            self.button_language = Button(self.canvas, text="Lenguaje", command=self.language)
             
 
         if idioma == "english":
             self.button_login = Button(self.canvas, text="Sign in", command=self.login, highlightthickness=0, bg="SystemButtonFace")
             self.button_help = Button(self.canvas, text="Help", command=self.help)
             self.button_leaderboard = Button(self.canvas, text="Leaderboard", command=self.leaderboard)
+            self.button_language = Button(self.canvas, text="Language", command=self.language)
             
         #logo    
         self.img = PhotoImage(file="assets/Eagle_Defender_title.png")
@@ -319,6 +324,8 @@ class main_Screen:
         self.button_help.place(relx=0.5, rely=0.7, anchor="center")
         #leaderboard
         self.button_leaderboard.place(relx=0.5, rely=0.6, anchor="center")
+        #language
+        self.button_language.place(relx=0.9, rely=0.9, anchor="center")
 
         self.setup_music_player()
 
@@ -348,6 +355,10 @@ class main_Screen:
 
     def leaderboard(self):
         Leaderboard_Screen(window)
+        self.canvas.destroy()
+
+    def language(self):
+        language(window)
         self.canvas.destroy()
 
     def setup_music_player(self):
@@ -1211,7 +1222,7 @@ def setup_database():
 
 window = Tk()
 setup_database()
-Main_Screen = language(window)
+Main_Screen = main_Screen(window)
 window.title("Eagle Defender")
 window.minsize(800, 600)
 window.resizable(False, False)
