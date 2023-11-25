@@ -167,11 +167,11 @@ class Player(pygame.sprite.Sprite):
             if keys[pygame.K_SPACE]:
                 bullet_cd(self)
 
-            if keys[pygame.K_4]:
+            if keys[pygame.K_z]:
                 self.select_bomb_bullet()  # Seleccionar bombas
-            if keys[pygame.K_5]:
+            if keys[pygame.K_x]:
                 self.select_fire_bullet()  # Seleccionar fuego
-            if keys[pygame.K_6]:
+            if keys[pygame.K_c]:
                 self.select_water_bullet()  # Seleccionar agua
 
     def apply_border(self): #esta funcion causa que el jugador no se pueda salir de los bordes
@@ -209,6 +209,12 @@ def bullet_regen(player):
 
 def bullet_cd(player):
     global last_shot_time
+
+    pygame.mixer.init()
+    water_bullet_sound = pygame.mixer.Sound('sounds/water splashing small 4.wav')
+    fire_bullet_sound = pygame.mixer.Sound('sounds/fire_sound.mp3')
+
+
     current_time = pygame.time.get_ticks()
     new_bullet = None
 
@@ -217,16 +223,19 @@ def bullet_cd(player):
 
     if player.selected_bullet_type == "bomba":
         if player.attacker_inventory.use_bullet("bomba"):
+            fire_bullet_sound.play()
             new_bullet = BombBullet(player.rect.centerx - 32, player.rect.centery + 15)
         else:
             player.message_timer_balas = 100  # Mostrar mensaje de falta de balas durante 1 segundo
     elif player.selected_bullet_type == "fuego":
         if player.attacker_inventory.use_bullet("fuego"):
+            fire_bullet_sound.play()
             new_bullet = FireBullet(player.rect.centerx - 32, player.rect.centery + 15)
         else:
             player.message_timer_balas = 100  # Mostrar mensaje de falta de balas durante 1 segundo
     elif player.selected_bullet_type == "agua":
         if player.attacker_inventory.use_bullet("agua"):
+            water_bullet_sound.play()
             new_bullet = WaterBullet(player.rect.centerx - 32, player.rect.centery + 15)
         else:
             player.message_timer_balas = 100  # Mostrar mensaje de falta de balas durante 1 segundo
@@ -570,11 +579,11 @@ class BlockScreen:
                     if is_paused:
                         continue
                     else:
-                        if event.key == pygame.K_1:
+                        if event.key == pygame.K_z:
                             selected_block = "concreto"
-                        elif event.key == pygame.K_2:
+                        elif event.key == pygame.K_x:
                             selected_block = "madera"
-                        elif event.key == pygame.K_3:
+                        elif event.key == pygame.K_c:
                             selected_block = "acero"
                         elif event.type == pygame.KEYDOWN:
                             new_row = eagle_row
