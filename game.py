@@ -740,16 +740,17 @@ class BlockScreen:
                         self.is_paused = False
                         self.timer_start += pygame.time.get_ticks() - pause_start_time
 
-                    elif remaining_time == 0 and self.eagle_alive == True:
+                    if remaining_time == 0 and self.eagle_alive == True:
                         self.state = "defender_winner"
                         self.init_music("Songs/Especial")
+
+                    #if gana el tanque
+                        #self.state = "attacker_winner"
 
                 if remaining_time == 0 and self.turn_timer_expired == False:
                     self.show_confirmation_screen()
                     self.turn_timer_expired = True
 
-                #if self.turn_timer_expired == True: and gana el tanque
-                #    self.state = "attacker_winner"
 
                 # Dibuja el águila en la posición deseada basada en las coordenadas de la cuadrícula
                 eagle_x = self.POS_X_MARCO + eagle_col * self.CELDA
